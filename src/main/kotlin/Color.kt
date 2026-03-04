@@ -20,6 +20,9 @@ public data class Color(val r: Float = 0.0f, val g: Float = 0.0f, val b: Float =
     operator fun times(scalar: Float) : Color
     = Color(r * scalar, g * scalar, b * scalar)
 
+    operator fun times(other: Color) : Color
+    = Color(r * other.r, g * other.g, b * other.b)
+
     fun are_colors_close(other: Color)
     = are_close (r,other.r) && are_close (g,other.g) && are_close (b,other.b)
 
