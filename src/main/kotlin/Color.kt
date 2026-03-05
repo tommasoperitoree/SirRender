@@ -26,4 +26,6 @@ data class Color(val r: Float = 0.0f, val g: Float = 0.0f, val b: Float = 0.0f) 
     fun areColorsClose(other: Color) =
         areClose (r,other.r) && areClose (g,other.g) && areClose (b,other.b)
 
+
 }
+
