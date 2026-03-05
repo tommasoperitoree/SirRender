@@ -44,5 +44,10 @@ data class HdrImage(
         return pixels[pixelOffset(x,y)]
     }
 
+    fun setPixel(x: Int, y: Int, newColor: Color) {
+        assert(validCoordinates(x, y))
+        pixels[pixelOffset(x,y)] = newColor
+    }
+
 
 }
