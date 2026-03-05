@@ -26,4 +26,6 @@ public data class Color(val r: Float = 0.0f, val g: Float = 0.0f, val b: Float =
     fun are_colors_close(other: Color)
     = are_close (r,other.r) && are_close (g,other.g) && are_close (b,other.b)
 
+
 }
+
