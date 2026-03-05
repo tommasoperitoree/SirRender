@@ -6,7 +6,7 @@ import Color
  * @param height
  * @param pixels
  */
-data class HdrImage(
+data class HDRImage(
     val width: Int = 0,
     val height: Int = 0,
     var pixels: Array<Color> = Array(width * height) {Color(0.0f, 0.0f, 0.0f) }
@@ -17,7 +17,7 @@ data class HdrImage(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as HdrImage
+        other as HDRImage
 
         if (width != other.width) return false
         if (height != other.height) return false
