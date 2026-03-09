@@ -1,5 +1,3 @@
-import Color
-
 /** The High Dynamic Range Image class
  *
  * @param width
