@@ -46,4 +46,4 @@ data class Color(val r: Float = 0.0f, val g: Float = 0.0f, val b: Float = 0.0f) 
 	
 }
 
->>>>>>> a19fcc39ac7aa390df365d4f609acb6b873287e4
+
