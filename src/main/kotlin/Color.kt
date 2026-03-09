@@ -10,7 +10,11 @@ fun areClose(x: Float, y: Float, epsilon: Float = 1e-5f) =
  * @param g The level of green
  * @param b The level of blue
  */
-data class Color(val r: Float = 0.0f, val g: Float = 0.0f, val b: Float = 0.0f) {
+data class Color(
+	val r: Float = 0.0f,
+	val g: Float = 0.0f,
+	val b: Float = 0.0f
+) {
 	
 	operator fun plus(other: Color): Color =
 		Color(r + other.r, g + other.g, b + other.b)
@@ -45,5 +49,3 @@ data class Color(val r: Float = 0.0f, val g: Float = 0.0f, val b: Float = 0.0f) 
 	}
 	
 }
-
-
