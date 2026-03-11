@@ -60,6 +60,19 @@ data class HDRImage(
 		}
 	}
 	
+	// fun parseEndianness(line: String) {
+	// 	val value: Float
+	// 	try {
+	// 		value = line.toFloat()
+	// 	} catch (e: IllegalArgumentException) {
+	// 		throw IllegalArgumentException("invalid endianness specification")
+	// 	}
+	//
+	// 	if (value > 0) {
+	// 		return Endianness.BIG_ENDIAN
+	// 	}
+	// }
+	
 	override fun equals(other: Any?): Boolean {
 		if (this === other) return true
 		if (javaClass != other?.javaClass) return false

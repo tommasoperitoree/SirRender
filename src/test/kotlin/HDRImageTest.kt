@@ -9,8 +9,8 @@ class HDRImageTest {
 	val img = HDRImage(width, height)
 	
 	// generic Height and Width for testing
-	var x: Int = 2
-	var y: Int = 6
+	val x: Int = 2
+	val y: Int = 6
 	
 	@Test
 	fun `test overwritten equals function`() {
@@ -26,7 +26,7 @@ class HDRImageTest {
 	
 	@Test
 	fun `test pixelOffset function`() {
-		assertTrue { img.pixelOffset(x, y) == y * width + x }
+		assertEquals(y * width + x, img.pixelOffset(x, y))
 	}
 	
 	@Test
@@ -35,13 +35,13 @@ class HDRImageTest {
 		assertEquals(listOf(3, 2), img.parseImgSize("3 2"))
 		// check correct Exception for different types of wrong arguments
 		assertThrows(InvalidPFMImageFormat::class.java) {
-			img.parseImgSize("1 2 3")
+			img.parseImgSize("1 2 3") // too many arguments
 		}
 		assertThrows(IllegalArgumentException::class.java) {
-			img.parseImgSize("-1 2")
+			img.parseImgSize("-1 2") // negative dimension
 		}
 		assertThrows(IllegalArgumentException::class.java) {
-			img.parseImgSize("width height")
+			img.parseImgSize("width height") // not Int
 		}
 	}
 	
