@@ -8,26 +8,26 @@ class ColorTest {
 	val scalar = 3.0f
 	
 	@Test
-	fun plus() {
+	fun `test sum of two Colors`() {
 		val sum = colorA + colorB
-		assertTrue { sum.areColorsClose(Color(6.0f, 8.0f, 10.0f)) }
+		assertTrue { sum.isCloseColor(Color(6.0f, 8.0f, 10.0f)) }
 	}
 	
 	@Test
-	fun times() {
+	fun `test multiplication of Color by scalar`() {
 		val colorC = colorA * scalar
-		assertTrue { colorC.areColorsClose(Color(3.0f, 6.0f, 9.0f)) }
+		assertTrue { colorC.isCloseColor(Color(3.0f, 6.0f, 9.0f)) }
 	}
 	
 	@Test
-	fun testTimes() {
+	fun `test multiplication of Color by Color`() {
 		val colorC = colorA * colorB
-		assertTrue { colorC.areColorsClose(Color(5.0f, 12.0f, 21.0f)) }
+		assertTrue { colorC.isCloseColor(Color(5.0f, 12.0f, 21.0f)) }
 	}
 	
 	@Test
-	fun areClose() {
-		assertFalse { colorA.areColorsClose(Color(11.0f, 2.0f, 3.0f)) }
+	fun `test isColorClose function`() {
+		assertFalse { colorA.isCloseColor(Color(11.0f, 2.0f, 3.0f)) }
 	}
 	
 	
