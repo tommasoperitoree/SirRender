@@ -7,9 +7,9 @@ class HDRImageTest {
 	val height: Int = 10
 	val img = HDRImage(width, height)
 	
-	/*scrivo delle coordinate generiche di altezza e larghezza per utilizzarle nel test della validCoordinates*/
-	var w1: Int = 2
-	var h1: Int = 6
+	// generic Height and Width for testing
+	var x: Int = 2
+	var y: Int = 6
 	
 	@Test
 	fun equals() {
@@ -17,18 +17,15 @@ class HDRImageTest {
 		assertTrue { img.height == height }
 	}
 	
-	
 	@Test
-	fun validCoordinates(): Unit {
-		assertTrue {w1>=0 && h1>=0}
-		assertTrue{w1<= img.width && h1<= img.height}
+	fun validCoordinates() {
+		assertTrue { x >= 0 && y >= 0 }
+		assertTrue { x <= img.width && y <= img.height }
 	}
 	
 	@Test
-	fun pixelOffset(): Unit{
-		assertTrue { img.pixelOffset(w1, h1) == h1 * width + w1 }
-		println(img.pixelOffset(w1, h1))
+	fun pixelOffset() {
+		assertTrue { img.pixelOffset(x, y) == y * width + x }
 	}
-	
 	
 }
