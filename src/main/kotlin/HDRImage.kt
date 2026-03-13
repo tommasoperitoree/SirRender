@@ -1,3 +1,6 @@
+import java.io.InputStream
+import java.util.stream.Stream
+
 /** The High Dynamic Range Image class
  *
  * @param width
@@ -46,6 +49,4 @@ data class HDRImage(
 		assert(validCoordinates(x, y))
 		pixels[pixelOffset(x, y)] = newColor
 	}
-	
-	
 }
