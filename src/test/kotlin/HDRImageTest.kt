@@ -7,7 +7,7 @@ class HDRImageTest {
 	val height: Int = 10
 	val img = HDRImage(width, height)
 	
-	/*scrivo delle coordinate generiche di altezza e larghezza per utilizzarle nel test della validCoordinates*/
+	/*scrivo delle coordinate generiche di altezza e larghezza per utilizzarle nel test */
 	var w1: Int = 2
 	var h1: Int = 6
 	
