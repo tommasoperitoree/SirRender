@@ -5,6 +5,8 @@ class InvalidPFMImageFormat(
 	message: String = "Invalid PFM format"
 ) : Exception(message)
 
+
+class
 /** The High Dynamic Range Image HDRImage class
  *
  * @param width
@@ -38,6 +40,13 @@ data class HDRImage(
 		assert(validCoordinates(x, y))
 		pixels[pixelOffset(x, y)] = newColor
 	}
+	
+	fun readFloat(stream,endianess){
+		//devi scrivere una funzione che prenderà una riga di byte e deve trasformarla in float
+		//in base all'endianess che gli dai in pasto avrai due risultati diversi
+		//fai entrambi i casi
+	}
+	
 	
 	fun readPFMFile(stream: InputStream): InputStream {
 		return stream
