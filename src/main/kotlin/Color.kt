@@ -25,7 +25,7 @@ data class Color(
 	operator fun times(other: Color): Color =
 		Color(r * other.r, g * other.g, b * other.b)
 	
-	fun areColorsClose(other: Color) =
+	fun isCloseColor(other: Color) =
 		areClose(r, other.r) && areClose(g, other.g) && areClose(b, other.b)
 	
 	override fun equals(other: Any?): Boolean {
