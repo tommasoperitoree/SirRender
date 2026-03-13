@@ -5,6 +5,12 @@ class InvalidPFMImageFormat(
 	message: String = "Invalid PFM format"
 ) : Exception(message)
 
+// Helper function for hexadecimal array initialization
+fun byteArrayOfInts(vararg ints: Int) =
+	ByteArray(ints.size) { pos ->
+		ints[pos].toByte()
+	}
+
 /** The High Dynamic Range Image HDRImage class
  *
  * @param width
@@ -15,13 +21,11 @@ data class HDRImage(
 	val width: Int = 1,
 	val height: Int = 1,
 	var pixels: Array<Color> = Array(width * height) { Color(0.0f, 0.0f, 0.0f) }
-
 ) {
 	
 	constructor (stream: InputStream) : this()
 	
 	constructor (fileName: String) : this()
-	
 	
 	fun validCoordinates(x: Int, y: Int): Boolean =
 		x in 0 until width && y in 0 until height
@@ -39,8 +43,11 @@ data class HDRImage(
 		pixels[pixelOffset(x, y)] = newColor
 	}
 	
-	fun readPFMFile(stream: InputStream): InputStream {
-		return stream
+	fun readPFMImage(stream: InputStream): HDRImage {
+		// magic = readln(stream)
+		
+		val result = HDRImage(width, height)
+		return result
 	}
 	
 	fun parseImgSize(line: String): List<Int> {
@@ -59,6 +66,7 @@ data class HDRImage(
 			throw IllegalArgumentException("invalid width or height specification")
 		}
 	}
+	
 	
 	// fun parseEndianness(line: String) {
 	// 	val value: Float
