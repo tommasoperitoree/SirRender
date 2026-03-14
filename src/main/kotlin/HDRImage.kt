@@ -1,15 +1,18 @@
 import java.io.InputStream
+import java.nio.ByteOrder
 
 // Specific exception for HDRImage class
 class InvalidPFMImageFormat(
 	message: String = "Invalid PFM format"
 ) : Exception(message)
 
+
 // Helper function for hexadecimal array initialization
 fun byteArrayOfInts(vararg ints: Int) =
 	ByteArray(ints.size) { pos ->
 		ints[pos].toByte()
 	}
+
 
 /** The High Dynamic Range Image HDRImage class
  *
@@ -55,6 +58,24 @@ data class HDRImage(
 		}
 	}
 	
+	//ho scritto una funzione che riceve in pasto l'array ottenuto dalla stream
+	//prima bisognarebbe trasformare la stream in un array
+	// questa funzione è scritta in stile c++ quando prendi la mano sistemala
+	fun writeFloat(ByteArrayOfInts, endianess){
+		var: Int j=byteArrayOfInts.size
+		if (endianess == ByteOrder.BIG_ENDIAN){
+			for (i in 0 until ByteArrayOfInts.size) {
+				var: Float fB += byteArrayOfInts(i) * 2.pow(j)
+				j --
+			}
+			return fB}
+		if (endianess == ByteOrder.LITTLE_ENDIAN){
+			for (i in 0 until ByteArrayOfInts.size) {
+				var: Float fL += byteArrayOfInts(i) * 2.pow(i)
+			}
+			return fL
+		}
+	}
 	
 	// --- Class modifier functions ---
 	
