@@ -69,11 +69,9 @@ data class HDRImage(
 			throw InvalidPFMImageFormat("invalid image size specification")
 		
 		try {
-			val (width, height) = listOf(elements[0], elements[1]).toInt()
-			val width = elements[0].toInt()
-			val height = elements[1].toInt()
+			val (width, height) = elements.map { it.toInt() }
 			require(width >= 0 && height >= 0) { "width or height cannot be negative" }
-		} catch (e: Exception) {
+		} catch (e: NumberFormatException) {
 			throw IllegalArgumentException("invalid width or height specification")
 		}
 	}
