@@ -23,32 +23,20 @@ data class HDRImage(
 	var pixels: Array<Color> = Array(width * height) { Color(0.0f, 0.0f, 0.0f) }
 ) {
 	
+	// --- Constructors ---
+	
 	constructor (stream: InputStream) : this()
 	
 	constructor (fileName: String) : this()
+	
+	
+	// --- Helper functions for validity of class ---
 	
 	fun validCoordinates(x: Int, y: Int): Boolean =
 		x in 0 until width && y in 0 until height
 	
 	fun pixelOffset(x: Int, y: Int): Int =
 		y * width + x
-	
-	fun getPixel(x: Int, y: Int): Color {
-		assert(validCoordinates(x, y))
-		return pixels[pixelOffset(x, y)]
-	}
-	
-	fun setPixel(x: Int, y: Int, newColor: Color) {
-		assert(validCoordinates(x, y))
-		pixels[pixelOffset(x, y)] = newColor
-	}
-	
-	fun readPFMImage(stream: InputStream): HDRImage {
-		// magic = readln(stream)
-		
-		val result = HDRImage(width, height)
-		return result
-	}
 	
 	fun parseImgSize(line: String): List<Int> {
 		val elements = line.split(" ")
@@ -68,6 +56,25 @@ data class HDRImage(
 	}
 	
 	
+	// --- Class modifier functions ---
+	
+	fun getPixel(x: Int, y: Int): Color {
+		assert(validCoordinates(x, y))
+		return pixels[pixelOffset(x, y)]
+	}
+	
+	fun setPixel(x: Int, y: Int, newColor: Color) {
+		assert(validCoordinates(x, y))
+		pixels[pixelOffset(x, y)] = newColor
+	}
+	
+	fun readPFMImage(stream: InputStream): HDRImage {
+		// magic = readln(stream)
+		
+		val result = HDRImage(width, height)
+		return result
+	}
+	
 	// fun parseEndianness(line: String) {
 	// 	val value: Float
 	// 	try {
@@ -80,6 +87,9 @@ data class HDRImage(
 	// 		return Endianness.BIG_ENDIAN
 	// 	}
 	// }
+	
+	
+	// --- Default data class function overriding ---
 	
 	override fun equals(other: Any?): Boolean {
 		if (this === other) return true

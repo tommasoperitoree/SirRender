@@ -16,6 +16,8 @@ data class Color(
 	val b: Float = 0.0f
 ) {
 	
+	// --- Operator overloading ---
+	
 	operator fun plus(other: Color): Color =
 		Color(r + other.r, g + other.g, b + other.b)
 	
@@ -25,8 +27,14 @@ data class Color(
 	operator fun times(other: Color): Color =
 		Color(r * other.r, g * other.g, b * other.b)
 	
+	
+	// --- Utility functions ---
+	
 	fun isCloseColor(other: Color) =
 		areClose(r, other.r) && areClose(g, other.g) && areClose(b, other.b)
+	
+	
+	// --- Default data class function overriding ---
 	
 	override fun equals(other: Any?): Boolean {
 		if (this === other) return true
