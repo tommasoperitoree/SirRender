@@ -24,7 +24,7 @@ example of a `PFM` file we had from the reference file used for testing (encoded
 - lastly, the next 4 bytes, `0x2d, 0x31, 0x2e, 0x30` give the `-1.0`, i.e. the _little endian_ flag
 - here the 4 Byte to 32-bit floating-point content begins, now we can get the content of our $3\times2=6$ pixels. Since
   we're using `r g b` colors, we need $3$ numbers each, thus $18$ total Floats, e.g. the first 4 Bytes are
-  `0x00, 0x00, 0xc8, 0x42` $ = 100.0$, the `red` of the first pixel.
+  `0x00, 0x00, 0xc8, 0x42` $= 100.0$, the `red` of the first pixel.
 
 #### Functions
 
