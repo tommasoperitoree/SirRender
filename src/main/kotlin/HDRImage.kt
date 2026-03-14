@@ -69,7 +69,7 @@ data class HDRImage(
 	 * * Throws [InvalidPFMImageFormat] if the line does not contain exactly two elements.
 	 * * Throws [IllegalArgumentException] if the dimensions are negative or not numbers.
 	 */
-	fun parseImgSize(line: String): List<Int> {
+	private fun parseImgSize(line: String): List<Int> {
 		val elements = line.split(" ")
 		if (elements.size != 2) throw InvalidPFMImageFormat("invalid image size specification")
 		
@@ -86,14 +86,14 @@ data class HDRImage(
 	 * Reads from a [stream] a single line
 	 *
 	 */
-	fun readLine(stream: InputStream): String {
+	private fun readLine(stream: InputStream): String {
 		TODO()
 	}
 	
 	/**
 	 * Reads from [stream] a 4-Byte using ByteBuffer to turn into Float depending on [endianness]
 	 */
-	fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
+	private fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
 		TODO("Use ByteBuffer to decode stream in binary to Float")
 	}
 	
@@ -121,6 +121,10 @@ data class HDRImage(
 	 */
 	fun writeFloatToStream(stream: OutputStream, value: Float, order: ByteOrder) {
 		TODO("complete from suggestions")
+		
+		// val buffer = ByteBuffer.allocate(4).order(order).putFloat(value)
+		// stream.write(buffer.array())
+		
 		// part suggested from notes
 		// val bytes = ByteBuffer.allocate(4).putFloat(value).array() // Big endian
 		//
@@ -153,12 +157,13 @@ data class HDRImage(
 	}
 	
 	/**
-	 * Writes onto a file [fileName] using a PFM formatted image, taking from [HDRImage] the pixel values
-	 * and from [stream] the PFM header.
+	 * Saves the current [HDRImage] to a file.
+	 * TODO: Use FileOutputStream and call the stream-based writer.
 	 */
-	fun writePFMImage(stream: ByteArrayOutputStream, fileName: String) {
-		TODO("complete from suggestions")
-		// FileOutputStream(fileName).use {}
+	fun writePFMImage(fileName: String, order: ByteOrder = LITTLE_ENDIAN) {
+		File(fileName).outputStream().use { out ->
+			// TODO: Write header, then loop pixels bottom-up
+		}
 	}
 	
 	// --- Class modifier functions ---
@@ -186,6 +191,15 @@ data class HDRImage(
 	fun readPFMImage(stream: InputStream): HDRImage {
 		// This allows the code to compile, but warns the user it's not ready
 		TODO("Follow the integration steps in the ReadMe to complete this function")
+	}
+	
+	//
+	
+	companion object {
+		fun fromStream(stream: InputStream): HDRImage {
+			// call the 'readPFMImage' logic and return a fully formed HDRImage
+			return HDRImage().readPFMImage(stream)
+		}
 	}
 	
 	
