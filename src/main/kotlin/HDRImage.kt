@@ -1,5 +1,12 @@
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.nio.ByteOrder
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import java.nio.ByteOrder.LITTLE_ENDIAN
+import java.nio.ByteOrder.BIG_ENDIAN
+
 
 /**
  * Exception thrown when a file or stream does not perfectly match
@@ -13,10 +20,9 @@ class InvalidPFMImageFormat(
  * Helper function that creates a [ByteArray] from a variable number of integer arguments.
  * Useful for inline hexadecimal array initialization.
  */
-fun byteArrayOfInts(vararg ints: Int) =
-	ByteArray(ints.size) { pos ->
-		ints[pos].toByte()
-	}
+fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos ->
+	ints[pos].toByte()
+}
 
 
 /**
@@ -37,10 +43,9 @@ data class HDRImage(
 	constructor (stream: InputStream) : this()
 	
 	/** Secondary constructor to read an image from a given [fileName] path. */
-	constructor (fileName: String) : this()
+	constructor(fileName: String) : this(File(fileName).inputStream())
 	
-	
-	// --- Helper functions for validity of class ---
+	// --- Helper functions ---
 	
 	/**
 	 * Checks if the provided horizontal coordinate [x] and vertical coordinate [y]
@@ -58,42 +63,102 @@ data class HDRImage(
 		y * width + x
 	
 	/**
-	 * Parses the width and height of an image from the PFM header [line].
+	 * Parses the [width] and [height] of an image from the PFM header [line].
 	 * * Expects a space-separated string containing exactly two positive integers.
+	 * * Returns a [List] containing [width, height].
 	 * * Throws [InvalidPFMImageFormat] if the line does not contain exactly two elements.
 	 * * Throws [IllegalArgumentException] if the dimensions are negative or not numbers.
 	 */
 	fun parseImgSize(line: String): List<Int> {
 		val elements = line.split(" ")
-		if (elements.size != 2)
-			throw InvalidPFMImageFormat("invalid image size specification")
+		if (elements.size != 2) throw InvalidPFMImageFormat("invalid image size specification")
 		
-		try {
-			val (width, height) = elements.map { it.toInt() }
-			require(width >= 0 && height >= 0) { "width or height cannot be negative" }
+		return try {
+			val (w, h) = elements.map { it.toInt() }
+			require(w >= 0 && h >= 0) { "width or height cannot be negative" }
+			listOf(w, h) // This is what the 'try' block evaluates to
 		} catch (e: NumberFormatException) {
 			throw IllegalArgumentException("invalid width or height specification")
 		}
 	}
 	
-	//ho scritto una funzione che riceve in pasto l'array ottenuto dalla stream
-	//prima bisognarebbe trasformare la stream in un array
-	// questa funzione è scritta in stile c++ quando prendi la mano sistemala
-	fun writeFloat(ByteArrayOfInts, endianess) {
-		var : Int j = byteArrayOfInts.size
-		if (endianess == ByteOrder.BIG_ENDIAN) {
-			for (i in 0 until ByteArrayOfInts.size) {
-				var : Float fB += byteArrayOfInts(i) * 2.pow(j)
-				j--
-			}
-			return fB
+	/**
+	 * Reads from a [stream] a single line
+	 *
+	 */
+	fun readLine(stream: InputStream): String {
+		TODO()
+	}
+	
+	/**
+	 * Reads from [stream] a 4-Byte using ByteBuffer to turn into Float depending on [endianness]
+	 */
+	fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
+		TODO("Use ByteBuffer to decode stream in binary to Float")
+	}
+	
+	/**
+	 * Determines the [ByteOrder] from the PFM scale factor [line].
+	 * * Returns [ByteOrder.BIG_ENDIAN] for positive values.
+	 * * Returns [ByteOrder.LITTLE_ENDIAN] for negative values.
+	 * * Throws [InvalidPFMImageFormat] if the value is zero or not a valid number.
+	 */
+	fun parseEndianness(line: String): ByteOrder {
+		// Try to parse, if it fails to be a float, throw the exception immediately
+		val value =
+			line.trim().toFloatOrNull() ?: throw InvalidPFMImageFormat("invalid endianness specification: not a number")
+		
+		return when {
+			value > 0 -> BIG_ENDIAN
+			value < 0 -> LITTLE_ENDIAN
+			else -> throw InvalidPFMImageFormat("invalid endianness specification: cannot be zero")
 		}
-		if (endianess == ByteOrder.LITTLE_ENDIAN) {
-			for (i in 0 until ByteArrayOfInts.size) {
-				var : Float fL += byteArrayOfInts(i) * 2.pow(i)
-			}
-			return fL
-		}
+	}
+	
+	/**
+	 * Writes to byte [stream] the [value] of a float, depending on [order]
+	 * It is effectively the inverse of [readFloat].
+	 */
+	fun writeFloatToStream(stream: OutputStream, value: Float, order: ByteOrder) {
+		TODO("complete from suggestions")
+		// part suggested from notes
+		// val bytes = ByteBuffer.allocate(4).putFloat(value).array() // Big endian
+		//
+		// if (order == ByteOrder.LITTLE_ENDIAN) {
+		// 	bytes.reverse()
+		// }
+		//
+		// stream.write(bytes)
+		
+		
+		//ho scritto una funzione che riceve in pasto l'array ottenuto dalla stream
+		//prima bisognarebbe trasformare la stream in un array
+		// questa funzione è scritta in stile c++ quando prendi la mano sistemala
+		
+		// var : Int j = byteArrayOfInts.size
+		// if (endianess == ByteOrder.BIG_ENDIAN) {
+		// 	for (i in 0 until ByteArrayOfInts.size) {
+		// 		var : Float fB += byteArrayOfInts(i) * 2.pow(j)
+		// 		j--
+		// 	}
+		// 	return fB
+		// }
+		// if (endianess == ByteOrder.LITTLE_ENDIAN) {
+		// 	for (i in 0 until ByteArrayOfInts.size) {
+		// 		var : Float fL += byteArrayOfInts(i) * 2.pow(i)
+		// 	}
+		// 	return fL
+		// }
+		
+	}
+	
+	/**
+	 * Writes onto a file [fileName] using a PFM formatted image, taking from [HDRImage] the pixel values
+	 * and from [stream] the PFM header.
+	 */
+	fun writePFMImage(stream: ByteArrayOutputStream, fileName: String) {
+		TODO("complete from suggestions")
+		// FileOutputStream(fileName).use {}
 	}
 	
 	// --- Class modifier functions ---
@@ -115,27 +180,13 @@ data class HDRImage(
 	}
 	
 	/**
-	 * Parses a complete PFM image from the provided [stream] and returns a new [HDRImage].
+	 * Parses a complete PFM image from the provided [stream].
+	 * TODO: Implement the orchestrator logic including the Bottom-Up pixel loop.
 	 */
 	fun readPFMImage(stream: InputStream): HDRImage {
-		// magic = readln(stream)
-		
-		val result = HDRImage(width, height)
-		return result
+		// This allows the code to compile, but warns the user it's not ready
+		TODO("Follow the integration steps in the ReadMe to complete this function")
 	}
-	
-	// fun parseEndianness(line: String) {
-	//     val value: Float
-	//     try {
-	//        value = line.toFloat()
-	//     } catch (e: IllegalArgumentException) {
-	//        throw IllegalArgumentException("invalid endianness specification")
-	//     }
-	//
-	//     if (value > 0) {
-	//        return Endianness.BIG_ENDIAN
-	//     }
-	// }
 	
 	
 	// --- Default data class function overriding ---

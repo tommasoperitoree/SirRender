@@ -36,7 +36,7 @@ codebase and extracting all `KDoc` comments.
 
 1. Open your terminal in the project root and run:
    ```bash
-   ./gradlew dokkaGenerateHtml
+   ./gradlew :dokkaGenerateHtml
 2. Once the build finishes, navigate to the generated output at:
    `build/dokka/html/index.html`
 3. Right-click the file and open it in your web browser to view the live site.

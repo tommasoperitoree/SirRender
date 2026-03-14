@@ -25,11 +25,33 @@ example of a `PFM` file we had from the reference file used for testing (encoded
 - here the 4 Byte to 32-bit floating-point content begins, now we can get the content of our $3\times2=6$ pixels. Since
   we're using `r g b` colors, we need $3$ numbers each, thus $18$ total Floats, e.g. the first 4 Bytes are
   `0x00, 0x00, 0xc8, 0x42` $= 100.0$, the `red` of the first pixel.
+- **Important** `PFM` files store their pixel data bottom-to-top, thus the above first pixel is actually the one at the
+  bottom left of the image.
 
-#### Functions
+### 🛠️ Implementation Checklist
 
-Now we need to handle writing and reading these files:
+The following functions must be implemented to achieve a fully functional PFM parser.
 
-- READ: take a `.pfm` file and extract from it the info needed to make an element `img` of the `HDRImage`
-  class
-- WRITE: it is the reverse
+#### 1. Reading Utilities (Building Blocks)
+
+* **`readLine(stream: InputStream): String`**
+    * **Requirement:** Reads exactly one byte at a time until it hits `0x0a` (`\n`).
+    * **Constraint:** Do not use `Scanner` or `readln()`, as they may over-read into the binary pixel data.
+* **`readFloat(stream: InputStream, endianness: ByteOrder): Float`**
+    * **Requirement:** Uses a 4-byte `ByteBuffer` to decode the binary data into a Kotlin `Float` based on the detected
+      endianness.
+
+#### 2. Writing Utilities
+
+* **`writeFloat(stream: OutputStream, value: Float, endianness: ByteOrder)`**
+    * **Requirement:** The inverse of `readFloat`. Converts a `Float` to 4 bytes and writes to the stream.
+* **`writePFMImage(stream: OutputStream)`**
+    * **Requirement:** Writes the PFM header (`PF`, dimensions, scale factor) followed by the binary pixel payload.
+
+#### 3. Orchestrator Functions (Integration)
+
+* **`readPFMImage(stream: InputStream): HDRImage`**
+    * **Requirement:** The main factory function. It must call the reading utilities in order to verify the header, set
+      the image dimensions, and populate the pixel array.
+    * **The "PFM Trap":** You must implement a **Bottom-Up** loop. PFM stores the bottom-left pixel first; if you read
+      top-down, the image will be inverted.
