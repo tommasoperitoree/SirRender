@@ -1,12 +1,11 @@
-import java.io.ByteArrayOutputStream
 import java.io.EOFException
-import java.io.InputStream
-import java.nio.ByteOrder
 import java.io.File
-import java.io.FileOutputStream
+import java.io.InputStream
 import java.io.OutputStream
-import java.nio.ByteOrder.LITTLE_ENDIAN
+import java.nio.ByteOrder
+import java.nio.ByteBuffer
 import java.nio.ByteOrder.BIG_ENDIAN
+import java.nio.ByteOrder.LITTLE_ENDIAN
 
 
 /**
@@ -84,85 +83,55 @@ data class HDRImage(
 	}
 	
 	/**
-	 * Reads from a [stream] a single line
+	 * Reads a single line from the [stream] by processing bytes individually.
+	 * Stops at the newline character (0x0a) without over-reading into binary data.
+	 *
+	 * @throws InvalidPFMImageFormat if the End of File (EOF) is reached unexpectedly.
 	 */
-	private fun readLine(stream: InputStream): String {
+	fun readLine(stream: InputStream): String {
 		val stringBuilder = StringBuilder()
 		
-		while (true) val byteRead=stream.read() { //stream.read() legge singolarmente ogni byte
-			//controllo 1: quando arrivo a 0x0a finisce la stringa
-			if (byteRead == 0x0a)
-				break
-			//controllo 2: il file contiene un errore, qui bisognerebbe mettere un exeption
-			if(byteRead==-1){
-				if(stringBuilder.isEmpty()){throw EOFException("File is finished before 0x0a")
+		while (true) {
+			val byteRead = stream.read() // stream.read() reads a single Byte
+			
+			// Control 1: Check for the PFM newline (0x0a)
+			if (byteRead == 0x0a) break
+			// Control 2: Handle End of File
+			if (byteRead == -1) {
+				// If the stream ends before we hit a newline, it's a malformed PFM
+				if (stringBuilder.isEmpty()) {
+					throw InvalidPFMImageFormat("Unexpected end of stream")
 				}
 				break
 			}
+			// Append the byte as a character
+			stringBuilder.append(byteRead.toChar())
 		}
-		return stringBuilder.toString()
-		
+		// Trim to handle potential \r (0x0d) characters in Windows-encoded files
+		return stringBuilder.toString().trim()
+	}
 	
 	/**
-	 * Reads from [stream] a 4-Byte using ByteBuffer to turn into Float depending on [endianness].
-	 * [ByteBuffer] create an array of 4 elements(bytes), the method [wrap] reorganize the array in order to convert it
-	 * in to a float (.float) dipending by the endianess
+	 * Reads 4 bytes from the [stream] and converts them into a [Float] based on the [endianness].
+	 * * Uses [ByteBuffer] to wrap the [ByteArray] and decode the bits according to the
+	 * IEEE 754 floating-point standard.
 	 */
 	fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
-		val byteChuck= ByteArray(4) //ho bisogno di un blocco di 4 byte
-		val readBytes = stream.read(byteChuck)
+		// Read exactly 4 bytes
+		val byteChunk = stream.readNBytes(4)
 		
-			if (readBytes == -1) throw EOFException("End of file unexpected")
-			if (readBytes<4) throw EOFException("Byte buffer is not made by 4 bytes, file incomplete")
-		
-		return ByteBuffer.wrap(byteChuck).order(endianness).float
+		// Check if we actually got 4 bytes
+		if (byteChunk.size < 4) {
+			throw InvalidPFMImageFormat("Insufficient data: expected 4 bytes for float, but found ${byteChunk.size}")
+		}
+		// Wrap, set order, and decode
+		return ByteBuffer.wrap(byteChunk)
+			.order(endianness)
+			.getFloat()
 	}
 	
 	/**
 	 * Determines the [ByteOrder] from the PFM scale factor# SirRender Documentation
-
-## 📚 Documentation Guidelines
-
-We use **KDoc** for inline code documentation and **Dokka** to generate our searchable static website. To keep our
-codebase clean, modern, and idiomatic, please adhere to the official Kotlin documentation conventions.
-
-### Writing KDoc (The Kotlin Way)
-
-Unlike Java, Kotlin strongly prefers weaving parameters and return values naturally into descriptive sentences rather
-than relying on heavy, structured tags at the bottom of the comment block.
-
-* **Use the `[bracket]` syntax:** Link parameters and properties directly in your text.
-* **Avoid `@param` and `@return` for simple functions:** Only use these explicit tags if a function has highly complex
-  logic, numerous arguments, or strict validation rules that require dedicated paragraphs to explain.
-* **Document Exceptions:** Always use the `@throws` tag if your function includes a `require()`, `check()`, or
-  explicitly throws an exception.
-
-**✅ Good Example (Idiomatic Kotlin):**
-
-```kotlin
-/**
- * Checks if the provided horizontal coordinate [x] and vertical coordinate [y]
- * fall within the valid bounds of the image.
- * * Returns `true` if they are inside the boundaries, or `false` otherwise.
- */
-fun validCoordinates(x: Int, y: Int): Boolean
-```
-
-### Dokka (Documentation Generator)
-
-Dokka is the native API documentation engine for Kotlin. It automatically generates a searchable website by parsing the
-codebase and extracting all `KDoc` comments.
-
-**To generate the `.html` documentation locally:**
-
-1. Open your terminal in the project root and run:
-   ```bash
-   ./gradlew :dokkaGenerateHtml
-2. Once the build finishes, navigate to the generated output at:
-   `build/dokka/html/index.html`
-3. Right-click the file and open it in your web browser to view the live site.
-
- [line].
 	 * * Returns [ByteOrder.BIG_ENDIAN] for positive values.
 	 * * Returns [ByteOrder.LITTLE_ENDIAN] for negative values.
 	 * * Throws [InvalidPFMImageFormat] if the value is zero or not a valid number.
@@ -170,7 +139,8 @@ codebase and extracting all `KDoc` comments.
 	fun parseEndianness(line: String): ByteOrder {
 		// Try to parse, if it fails to be a float, throw the exception immediately
 		val value =
-			line.trim().toFloatOrNull() ?: throw InvalidPFMImageFormat("invalid endianness specification: not a number")
+			line.trim().toFloatOrNull()
+				?: throw InvalidPFMImageFormat("invalid endianness specification: not a number")
 		
 		return when {
 			value > 0 -> BIG_ENDIAN
