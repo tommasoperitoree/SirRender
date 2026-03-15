@@ -1,0 +1,46 @@
+name: Deploy Dokka Documentation
+on:
+  push:
+    branches: [ main ] # Runs every time you push to main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          # This caches your .gradle folder to speed up builds
+          cache: 'gradle'
+
+      - name: Grant Execute Permission
+        run: chmod +x gradlew
+
+      - name: Build Dokka
+        # We use the specific task for Dokka v2
+        run: ./gradlew :dokkaGenerateHtml --configuration-cache
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'build/dokka/html'
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
