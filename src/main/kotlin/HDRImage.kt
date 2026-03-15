@@ -57,7 +57,7 @@ data class HDRImage(
 	/**
 	 * Converts 2D pixel coordinates [x] and [y] into a flat 1D array index.
 	 * * This function assumes the image pixel data is stored in memory using
-	 * row-major order (reading the image left-to-right, top-to-bottom).
+	 * * row-major order (reading the image left-to-right, top-to-bottom).
 	 */
 	fun pixelOffset(x: Int, y: Int): Int =
 		y * width + x
@@ -69,7 +69,7 @@ data class HDRImage(
 	 * * Throws [InvalidPFMImageFormat] if the line does not contain exactly two elements.
 	 * * Throws [IllegalArgumentException] if the dimensions are negative or not numbers.
 	 */
-	private fun parseImgSize(line: String): List<Int> {
+	fun parseImgSize(line: String): List<Int> {
 		val elements = line.split(" ")
 		if (elements.size != 2) throw InvalidPFMImageFormat("invalid image size specification")
 		
@@ -84,16 +84,15 @@ data class HDRImage(
 	
 	/**
 	 * Reads from a [stream] a single line
-	 *
 	 */
-	private fun readLine(stream: InputStream): String {
+	fun readLine(stream: InputStream): String {
 		TODO()
 	}
 	
 	/**
-	 * Reads from [stream] a 4-Byte using ByteBuffer to turn into Float depending on [endianness]
+	 * Reads from [stream] a 4-Byte using ByteBuffer to turn into Float depending on [endianness].
 	 */
-	private fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
+	fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
 		TODO("Use ByteBuffer to decode stream in binary to Float")
 	}
 	
@@ -153,7 +152,6 @@ data class HDRImage(
 		// 	}
 		// 	return fL
 		// }
-		
 	}
 	
 	/**
@@ -165,6 +163,7 @@ data class HDRImage(
 			// TODO: Write header, then loop pixels bottom-up
 		}
 	}
+	
 	
 	// --- Class modifier functions ---
 	
@@ -192,8 +191,6 @@ data class HDRImage(
 		// This allows the code to compile, but warns the user it's not ready
 		TODO("Follow the integration steps in the ReadMe to complete this function")
 	}
-	
-	//
 	
 	companion object {
 		fun fromStream(stream: InputStream): HDRImage {
