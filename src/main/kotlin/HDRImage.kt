@@ -58,7 +58,7 @@ data class HDRImage(
 	/**
 	 * Converts 2D pixel coordinates [x] and [y] into a flat 1D array index.
 	 * * This function assumes the image pixel data is stored in memory using
-	 * row-major order (reading the image left-to-right, top-to-bottom).
+	 * * row-major order (reading the image left-to-right, top-to-bottom).
 	 */
 	fun pixelOffset(x: Int, y: Int): Int =
 		y * width + x
@@ -70,7 +70,7 @@ data class HDRImage(
 	 * * Throws [InvalidPFMImageFormat] if the line does not contain exactly two elements.
 	 * * Throws [IllegalArgumentException] if the dimensions are negative or not numbers.
 	 */
-	private fun parseImgSize(line: String): List<Int> {
+	fun parseImgSize(line: String): List<Int> {
 		val elements = line.split(" ")
 		if (elements.size != 2) throw InvalidPFMImageFormat("invalid image size specification")
 		
@@ -85,6 +85,7 @@ data class HDRImage(
 	
 	/**
 	 * Reads from a [stream] a single line
+<<<<<<< HEAD
 	 * La variabile fourB mi permette di non leggere un byte alla volta ma di leggerli a blocchi di quattro
 	 * come serve a noi per il PFM, per fare singola basta non dare in pasto alla funzione stream read fourB
 	 */
@@ -104,12 +105,17 @@ data class HDRImage(
 			}
 		}
 		return stringBuilder.toString()
+=======
+	 */
+	fun readLine(stream: InputStream): String {
+		TODO()
+>>>>>>> 7ce6d0aa3bf28b36a738ca1e42af22cabe56b30b
 	}
 	
 	/**
-	 * Reads from [stream] a 4-Byte using ByteBuffer to turn into Float depending on [endianness]
+	 * Reads from [stream] a 4-Byte using ByteBuffer to turn into Float depending on [endianness].
 	 */
-	private fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
+	fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
 		TODO("Use ByteBuffer to decode stream in binary to Float")
 	}
 	
@@ -212,7 +218,6 @@ codebase and extracting all `KDoc` comments.
 		// 	}
 		// 	return fL
 		// }
-		
 	}
 	
 	/**
@@ -224,6 +229,7 @@ codebase and extracting all `KDoc` comments.
 			// TODO: Write header, then loop pixels bottom-up
 		}
 	}
+	
 	
 	// --- Class modifier functions ---
 	
@@ -251,8 +257,6 @@ codebase and extracting all `KDoc` comments.
 		// This allows the code to compile, but warns the user it's not ready
 		TODO("Follow the integration steps in the ReadMe to complete this function")
 	}
-	
-	//
 	
 	companion object {
 		fun fromStream(stream: InputStream): HDRImage {
