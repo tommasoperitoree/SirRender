@@ -85,38 +85,37 @@ data class HDRImage(
 	
 	/**
 	 * Reads from a [stream] a single line
-<<<<<<< HEAD
-	 * La variabile fourB mi permette di non leggere un byte alla volta ma di leggerli a blocchi di quattro
-	 * come serve a noi per il PFM, per fare singola basta non dare in pasto alla funzione stream read fourB
 	 */
 	private fun readLine(stream: InputStream): String {
 		val stringBuilder = StringBuilder()
-		val fourB= ByteArray(4)
 		
-		while (true) val byteRead=stream.read(fourB) { //stream.read() legge singolarmente ogni byte
+		while (true) val byteRead=stream.read() { //stream.read() legge singolarmente ogni byte
 			//controllo 1: quando arrivo a 0x0a finisce la stringa
 			if (byteRead == 0x0a)
 				break
 			//controllo 2: il file contiene un errore, qui bisognerebbe mettere un exeption
 			if(byteRead==-1){
-				if(stringBuilder.isEmpty()){throw EOFException("Il file è terminato prima di riscontrare un accapo")
+				if(stringBuilder.isEmpty()){throw EOFException("File is finished before 0x0a")
 				}
 				break
 			}
 		}
 		return stringBuilder.toString()
-=======
-	 */
-	fun readLine(stream: InputStream): String {
-		TODO()
->>>>>>> 7ce6d0aa3bf28b36a738ca1e42af22cabe56b30b
-	}
+		
 	
 	/**
 	 * Reads from [stream] a 4-Byte using ByteBuffer to turn into Float depending on [endianness].
+	 * [ByteBuffer] create an array of 4 elements(bytes), the method [wrap] reorganize the array in order to convert it
+	 * in to a float (.float) dipending by the endianess
 	 */
 	fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
-		TODO("Use ByteBuffer to decode stream in binary to Float")
+		val byteChuck= ByteArray(4) //ho bisogno di un blocco di 4 byte
+		val readBytes = stream.read(byteChuck)
+		
+			if (readBytes == -1) throw EOFException("End of file unexpected")
+			if (readBytes<4) throw EOFException("Byte buffer is not made by 4 bytes, file incomplete")
+		
+		return ByteBuffer.wrap(byteChuck).order(endianness).float
 	}
 	
 	/**
