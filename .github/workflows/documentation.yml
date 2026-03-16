@@ -3,14 +3,14 @@ name: Deploy Dokka Documentation
 on:
   push:
     branches: [ main ]
-    paths: # Only run if relevant files changed
+    paths:
       - 'src/**'
       - '*.gradle.kts'
       - 'gradle/**'
       - '.github/workflows/docs.yml'
-  workflow_dispatch:                # Allow manual trigger from GitHub UI
+  workflow_dispatch:
 
-concurrency: # Cancel in-flight runs if you push again quickly
+concurrency:
   group: pages
   cancel-in-progress: true
 
@@ -28,10 +28,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4   # v5 doesn't exist yet, v4 is current stable
+        uses: actions/checkout@v4        # v4 is still current stable for checkout
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4 # same here
+        uses: actions/setup-java@v4      # Java action, not affected by Node.js runtime
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -44,13 +44,17 @@ jobs:
         run: ./gradlew :dokkaGenerateHtml --configuration-cache
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v5  # no Node 24 version available yet
 
       - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v3  # no Node 24 version available yet
+
         with:
           path: 'build/dokka/html'
 
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4    # no Node 24 version available yet
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # ← opt in now, silences the warning
