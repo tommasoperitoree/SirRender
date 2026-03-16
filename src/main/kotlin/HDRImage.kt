@@ -89,7 +89,7 @@ data class HDRImage(
 	 * @throws InvalidPFMImageFormat if the End of File (EOF) is reached unexpectedly.
 	 */
 	fun readLine(stream: InputStream): String {
-		val stringBuilder = StringBuilder()
+		val stringBuilder: StringBuilder = StringBuilder()
 		
 		while (true) {
 			val byteRead = stream.read() // stream.read() reads a single Byte
@@ -154,48 +154,31 @@ data class HDRImage(
 	 * It is effectively the inverse of [readFloat].
 	 */
 	fun writeFloatToStream(stream: OutputStream, value: Float, order: ByteOrder) {
-		TODO("complete from suggestions")
 		
-		// val buffer = ByteBuffer.allocate(4).order(order).putFloat(value)
-		// stream.write(buffer.array())
+		 val buffer = ByteBuffer.allocate(4).order(order).putFloat(value)
+		 stream.write(buffer.array())
+		/* part suggested from notes
+		 val bytes = ByteBuffer.allocate(4).putFloat(value).array() // Big endian
 		
-		// part suggested from notes
-		// val bytes = ByteBuffer.allocate(4).putFloat(value).array() // Big endian
-		//
-		// if (order == ByteOrder.LITTLE_ENDIAN) {
-		// 	bytes.reverse()
-		// }
-		//
-		// stream.write(bytes)
+		 if (order == LITTLE_ENDIAN) {
+		 	bytes.reverse()
+		 }
 		
-		
-		//ho scritto una funzione che riceve in pasto l'array ottenuto dalla stream
-		//prima bisognarebbe trasformare la stream in un array
-		// questa funzione è scritta in stile c++ quando prendi la mano sistemala
-		
-		// var : Int j = byteArrayOfInts.size
-		// if (endianess == ByteOrder.BIG_ENDIAN) {
-		// 	for (i in 0 until ByteArrayOfInts.size) {
-		// 		var : Float fB += byteArrayOfInts(i) * 2.pow(j)
-		// 		j--
-		// 	}
-		// 	return fB
-		// }
-		// if (endianess == ByteOrder.LITTLE_ENDIAN) {
-		// 	for (i in 0 until ByteArrayOfInts.size) {
-		// 		var : Float fL += byteArrayOfInts(i) * 2.pow(i)
-		// 	}
-		// 	return fL
-		// }
+		 stream.write(bytes)*/
 	}
 	
 	/**
-	 * Saves the current [HDRImage] to a file.
+	 * Saves the current [HDRImage]n to a file.
 	 * TODO: Use FileOutputStream and call the stream-based writer.
 	 */
+	
 	fun writePFMImage(fileName: String, order: ByteOrder = LITTLE_ENDIAN) {
-		File(fileName).outputStream().use { out ->
-			// TODO: Write header, then loop pixels bottom-up
+		File(fileName).outputStream().use {
+			val header= "PF\n "width" "height"\n "endianness"\n
+					stream.write(header.toByteArray())
+			val FTS= writeFloatToStream(OutputStream, Float, LITTLE_ENDIAN)
+			
+			outStream-> outStream.write(header,FTS)
 		}
 	}
 	
