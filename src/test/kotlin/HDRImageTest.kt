@@ -7,7 +7,6 @@ class HDRImageTest {
 	val width: Int = 10
 	val height: Int = 10
 	val img = HDRImage(width, height)
-	
 	// generic Height and Width for testing
 	val x: Int = 2
 	val y: Int = 6
@@ -34,15 +33,16 @@ class HDRImageTest {
 	)
 	
 	@Test
-	fun `test overwritten equals function`() {
+	fun `test overwritten equals operator`() {
 		assertEquals(width, img.width)
 		assertEquals(height, img.height)
 	}
 	
 	@Test
 	fun `test validCoordinates function`() {
-		assertTrue { x >= 0 && y >= 0 }
-		assertTrue { x <= img.width && y <= img.height }
+		assertTrue(img.validCoordinates(x, y))
+		assertFalse(img.validCoordinates(-1, 0))
+		assertFalse(img.validCoordinates(width, height)) // out of bounds (exclusive)
 	}
 	
 	@Test
@@ -51,20 +51,32 @@ class HDRImageTest {
 	}
 	
 	@Test
-	fun `test PFM parseImgSize function`() {
-		// check correct conversion of width, height from string
-		assertEquals(listOf(3, 2), img.parseImgSize("3 2"))
-		// check correct Exception for different types of wrong arguments
+	fun `test parseImgSize`() {
+		assertEquals(Pair(3, 2), HDRImage.parseImgSize("3 2"))
 		assertThrows(InvalidPFMImageFormat::class.java) {
-			img.parseImgSize("1 2 3") // too many arguments
+			HDRImage.parseImgSize("1 2 3")         // too many args
 		}
 		assertThrows(IllegalArgumentException::class.java) {
-			img.parseImgSize("-1 2") // negative dimension
+			HDRImage.parseImgSize("-1 2")           // negative dimension
 		}
-		assertThrows(IllegalArgumentException::class.java) {
-			img.parseImgSize("width height") // not Int
+		assertThrows(InvalidPFMImageFormat::class.java) {
+			HDRImage.parseImgSize("width height")   // not integers
 		}
 	}
 	
+	@Test
+	fun `test readPFM little endian`() {
+		TODO()
+	}
+	
+	@Test
+	fun `test readPFM big endian`() {
+		TODO()
+	}
+	
+	@Test
+	fun `test readPFM both endiannesses produce equal images`() {
+		TODO()
+	}
 	
 }

@@ -1,4 +1,3 @@
-import java.io.EOFException
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -37,14 +36,6 @@ data class HDRImage(
 	var pixels: Array<Color> = Array(width * height) { Color(0.0f, 0.0f, 0.0f) }
 ) {
 	
-	// --- Constructors ---
-	
-	/** Secondary constructor to read an image directly from an [InputStream]. */
-	constructor (stream: InputStream) : this()
-	
-	/** Secondary constructor to read an image from a given [fileName] path. */
-	constructor(fileName: String) : this(File(fileName).inputStream())
-	
 	// --- Helper functions ---
 	
 	/**
@@ -62,131 +53,16 @@ data class HDRImage(
 	fun pixelOffset(x: Int, y: Int): Int =
 		y * width + x
 	
-	/**
-	 * Parses the [width] and [height] of an image from the PFM header [line].
-	 * * Expects a space-separated string containing exactly two positive integers.
-	 * * Returns a [List] containing [width, height].
-	 * * Throws [InvalidPFMImageFormat] if the line does not contain exactly two elements.
-	 * * Throws [IllegalArgumentException] if the dimensions are negative or not numbers.
-	 */
-	fun parseImgSize(line: String): List<Int> {
-		val elements = line.split(" ")
-		if (elements.size != 2) throw InvalidPFMImageFormat("invalid image size specification")
-		
-		return try {
-			val (w, h) = elements.map { it.toInt() }
-			require(w >= 0 && h >= 0) { "width or height cannot be negative" }
-			listOf(w, h) // This is what the 'try' block evaluates to
-		} catch (e: NumberFormatException) {
-			throw IllegalArgumentException("invalid width or height specification")
-		}
+	/** Retrieves the [Color] of the pixel at the specified [x] and [y] coordinates. */
+	fun getPixel(x: Int, y: Int): Color {
+		assert(validCoordinates(x, y))
+		return pixels[pixelOffset(x, y)]
 	}
 	
-	/**
-	 * Reads a single line from the [stream] by processing bytes individually.
-	 * Stops at the newline character (0x0a) without over-reading into binary data.
-	 *
-	 * @throws InvalidPFMImageFormat if the End of File (EOF) is reached unexpectedly.
-	 */
-	fun readLine(stream: InputStream): String {
-		val stringBuilder = StringBuilder()
-		
-		while (true) {
-			val byteRead = stream.read() // stream.read() reads a single Byte
-			
-			// Control 1: Check for the PFM newline (0x0a)
-			if (byteRead == 0x0a) break
-			// Control 2: Handle End of File
-			if (byteRead == -1) {
-				// If the stream ends before we hit a newline, it's a malformed PFM
-				if (stringBuilder.isEmpty()) {
-					throw InvalidPFMImageFormat("Unexpected end of stream")
-				}
-				break
-			}
-			// Append the byte as a character
-			stringBuilder.append(byteRead.toChar())
-		}
-		// Trim to handle potential \r (0x0d) characters in Windows-encoded files
-		return stringBuilder.toString().trim()
-	}
-	
-	/**
-	 * Reads 4 bytes from the [stream] and converts them into a [Float] based on the [endianness].
-	 * * Uses [ByteBuffer] to wrap the [ByteArray] and decode the bits according to the
-	 * IEEE 754 floating-point standard.
-	 */
-	fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
-		// Read exactly 4 bytes
-		val byteChunk = stream.readNBytes(4)
-		
-		// Check if we actually got 4 bytes
-		if (byteChunk.size < 4) {
-			throw InvalidPFMImageFormat("Insufficient data: expected 4 bytes for float, but found ${byteChunk.size}")
-		}
-		// Wrap, set order, and decode
-		return ByteBuffer.wrap(byteChunk)
-			.order(endianness)
-			.getFloat()
-	}
-	
-	/**
-	 * Determines the [ByteOrder] from the PFM scale factor# SirRender Documentation
-	 * * Returns [ByteOrder.BIG_ENDIAN] for positive values.
-	 * * Returns [ByteOrder.LITTLE_ENDIAN] for negative values.
-	 * * Throws [InvalidPFMImageFormat] if the value is zero or not a valid number.
-	 */
-	fun parseEndianness(line: String): ByteOrder {
-		// Try to parse, if it fails to be a float, throw the exception immediately
-		val value =
-			line.trim().toFloatOrNull()
-				?: throw InvalidPFMImageFormat("invalid endianness specification: not a number")
-		
-		return when {
-			value > 0 -> BIG_ENDIAN
-			value < 0 -> LITTLE_ENDIAN
-			else -> throw InvalidPFMImageFormat("invalid endianness specification: cannot be zero")
-		}
-	}
-	
-	/**
-	 * Writes to byte [stream] the [value] of a float, depending on [order]
-	 * It is effectively the inverse of [readFloat].
-	 */
-	fun writeFloatToStream(stream: OutputStream, value: Float, order: ByteOrder) {
-		TODO("complete from suggestions")
-		
-		// val buffer = ByteBuffer.allocate(4).order(order).putFloat(value)
-		// stream.write(buffer.array())
-		
-		// part suggested from notes
-		// val bytes = ByteBuffer.allocate(4).putFloat(value).array() // Big endian
-		//
-		// if (order == ByteOrder.LITTLE_ENDIAN) {
-		// 	bytes.reverse()
-		// }
-		//
-		// stream.write(bytes)
-		
-		
-		//ho scritto una funzione che riceve in pasto l'array ottenuto dalla stream
-		//prima bisognarebbe trasformare la stream in un array
-		// questa funzione è scritta in stile c++ quando prendi la mano sistemala
-		
-		// var : Int j = byteArrayOfInts.size
-		// if (endianess == ByteOrder.BIG_ENDIAN) {
-		// 	for (i in 0 until ByteArrayOfInts.size) {
-		// 		var : Float fB += byteArrayOfInts(i) * 2.pow(j)
-		// 		j--
-		// 	}
-		// 	return fB
-		// }
-		// if (endianess == ByteOrder.LITTLE_ENDIAN) {
-		// 	for (i in 0 until ByteArrayOfInts.size) {
-		// 		var : Float fL += byteArrayOfInts(i) * 2.pow(i)
-		// 	}
-		// 	return fL
-		// }
+	/** Updates the [newColor] of the pixel at the specified [x] and [y] coordinates. */
+	fun setPixel(x: Int, y: Int, newColor: Color) {
+		assert(validCoordinates(x, y))
+		pixels[pixelOffset(x, y)] = newColor
 	}
 	
 	/**
@@ -195,45 +71,116 @@ data class HDRImage(
 	 */
 	fun writePFMImage(fileName: String, order: ByteOrder = LITTLE_ENDIAN) {
 		File(fileName).outputStream().use { out ->
-			// TODO: Write header, then loop pixels bottom-up
 		}
 	}
 	
-	
-	// --- Class modifier functions ---
-	
-	/**
-	 * Retrieves the [Color] of the pixel at the specified [x] and [y] coordinates.
-	 */
-	fun getPixel(x: Int, y: Int): Color {
-		assert(validCoordinates(x, y))
-		return pixels[pixelOffset(x, y)]
-	}
-	
-	/**
-	 * Updates the [newColor] of the pixel at the specified [x] and [y] coordinates.
-	 */
-	fun setPixel(x: Int, y: Int, newColor: Color) {
-		assert(validCoordinates(x, y))
-		pixels[pixelOffset(x, y)] = newColor
-	}
-	
-	/**
-	 * Parses a complete PFM image from the provided [stream].
-	 * TODO: Implement the orchestrator logic including the Bottom-Up pixel loop.
-	 */
-	fun readPFMImage(stream: InputStream): HDRImage {
-		// This allows the code to compile, but warns the user it's not ready
-		TODO("Follow the integration steps in the ReadMe to complete this function")
-	}
 	
 	companion object {
-		fun fromStream(stream: InputStream): HDRImage {
-			// call the 'readPFMImage' logic and return a fully formed HDRImage
-			return HDRImage().readPFMImage(stream)
+		
+		// --- parsing utilities ---
+		
+		/**
+		 * Reads a single line from the [stream] by processing bytes individually.
+		 * Stops at the newline character (0x0a) without over-reading into binary data.
+		 * @throws InvalidPFMImageFormat if the End of File (EOF) is reached unexpectedly.
+		 */
+		internal fun readLine(stream: InputStream): String {
+			val sb = StringBuilder()
+			while (true) {
+				val byte = stream.read() // stream.read() reads a single Byte
+				if (byte == 0x0a || byte == -1) {
+					if (byte == -1 && sb.isEmpty()) throw InvalidPFMImageFormat("Unexpected EOF")
+					break
+				}
+				sb.append(byte.toChar()) // Append the byte as a character
+			}
+			// Trim to handle potential \r (0x0d) characters in Windows-encoded files
+			return sb.toString().trim()
 		}
+		
+		/**
+		 * Reads 4 bytes from the [stream] and converts them into a [Float] based on the [endianness].
+		 * * Uses [ByteBuffer] to wrap the [ByteArray] and decode the bits.
+		 */
+		internal fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
+			// Read exactly 4 bytes
+			val bytes = stream.readNBytes(4)
+			// Check if we actually got 4 bytes
+			if (bytes.size < 4) throw InvalidPFMImageFormat("Insufficient data: expected 4 bytes for float, but found ${bytes.size}")
+			
+			// Wrap, set order, and decode
+			return ByteBuffer.wrap(bytes).order(endianness).float
+		}
+		
+		/**
+		 * Writes to byte [stream] the [value] of a float, depending on [order]
+		 * It is effectively the inverse of [readFloat].
+		 */
+		internal fun writeFloat(stream: OutputStream, value: Float, order: ByteOrder) {
+			val bytes = ByteBuffer.allocate(4).order(order).putFloat(value).array()
+			stream.write(bytes)
+		}
+		
+		/**
+		 * Parses the [width] and [height] of an image from the PFM header [line].
+		 * * Expects a space-separated string containing exactly two positive integers.
+		 * * Returns a [List] containing [width, height].
+		 * * Throws [InvalidPFMImageFormat] if the line does not contain exactly two elements.
+		 * * Throws [IllegalArgumentException] if the dimensions are negative or not numbers.
+		 */
+		internal fun parseImgSize(line: String): Pair<Int, Int> {
+			val parts = line.trim().split(" ").filter { it.isNotBlank() }
+			if (parts.size != 2) throw InvalidPFMImageFormat("Invalid size line: '$line'")
+			
+			val w = parts[0].toIntOrNull() ?: throw InvalidPFMImageFormat("Invalid width")
+			val h = parts[1].toIntOrNull() ?: throw InvalidPFMImageFormat("Invalid height")
+			
+			require(w > 0 && h > 0) { "Width and height must be positive" }
+			return Pair(w, h)
+		}
+		
+		/**
+		 * Determines the [ByteOrder] from the PFM scale factor# SirRender Documentation
+		 * * Returns [ByteOrder.BIG_ENDIAN] for positive values.
+		 * * Returns [ByteOrder.LITTLE_ENDIAN] for negative values.
+		 * * Throws [InvalidPFMImageFormat] if the value is zero or not a valid number.
+		 */
+		internal fun parseEndianness(line: String): ByteOrder {
+			// Try to parse, if it fails to be a float, throw the exception immediately
+			val value = line.trim().toFloatOrNull()
+				?: throw InvalidPFMImageFormat("invalid endianness specification: '$line'")
+			
+			return when {
+				value > 0 -> BIG_ENDIAN
+				value < 0 -> LITTLE_ENDIAN
+				else -> throw InvalidPFMImageFormat("invalid endianness specification: cannot be zero")
+			}
+		}
+		
+		// --- Public factory functions ---
+		
+		/** Creates [HDRImage] reading from a PFM formatted [stream] */
+		fun readPFM(stream: InputStream): HDRImage {
+			if (readLine(stream) != "PF") throw InvalidPFMImageFormat("Invalid magic number")
+			
+			val (w, h) = parseImgSize(readLine(stream))
+			val order = parseEndianness(readLine(stream))
+			
+			val img = HDRImage(w, h)
+			
+			for (y in (h - 1) downTo 0) {
+				for (x in 0 until w) {
+					val (r, g, b) = List(3) { readFloat(stream, order) }
+					img.setPixel(x, y, Color(r, g, b))
+				}
+			}
+			return img
+		}
+		
+		/** Creates [HDRImage] reading directly from a PFM formatted file [fileName] */
+		fun fromFile(fileName: String): HDRImage =
+			File(fileName).inputStream().use { readPFM(it) }
 	}
-	
 	
 	// --- Default data class function overriding ---
 	
