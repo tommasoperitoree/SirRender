@@ -65,15 +65,17 @@ data class HDRImage(
 		pixels[pixelOffset(x, y)] = newColor
 	}
 	
-	/**
-	 * Saves the current [HDRImage] to a file.
-	 * TODO: Use FileOutputStream and call the stream-based writer.
-	 */
+	/** Saves the current [HDRImage] to a file. */
+	
 	fun writePFMImage(fileName: String, order: ByteOrder = LITTLE_ENDIAN) {
-		File(fileName).outputStream().use { out ->
+		File(fileName).outputStream().use {
+			val header= "PF\n "width" "height"\n "endianness"\n
+			stream.write(header.toByteArray())
+			val FTS= writeFloatToStream(OutputStream, Float, LITTLE_ENDIAN)
+			
+			outStream-> outStream.write(header,FTS)
 		}
 	}
-	
 	
 	companion object {
 		
@@ -203,5 +205,4 @@ data class HDRImage(
 		result = 31 * result + pixels.contentHashCode()
 		return result
 	}
-	
 }
