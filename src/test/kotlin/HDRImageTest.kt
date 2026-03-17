@@ -64,19 +64,4 @@ class HDRImageTest {
 		}
 	}
 	
-	@Test
-	fun `test readPFM little endian`() {
-		TODO()
-	}
-	
-	@Test
-	fun `test readPFM big endian`() {
-		TODO()
-	}
-	
-	@Test
-	fun `test readPFM both endiannesses produce equal images`() {
-		TODO()
-	}
-	
 }
