@@ -174,7 +174,7 @@ data class HDRImage(
 		 * @return the decoded [HDRImage]
 		 * @throws InvalidPFMImageFormat if the stream does not conform to the PFM specification
 		 */
-		fun readPFM(stream: InputStream): HDRImage {
+		fun fromPFMStream(stream: InputStream): HDRImage {
 			if (readLine(stream) != "PF") throw InvalidPFMImageFormat("Invalid magic number")
 			
 			val (w, h) = parseImgSize(readLine(stream))
@@ -196,8 +196,8 @@ data class HDRImage(
 		 *
 		 * @throws InvalidPFMImageFormat if the file does not conform to the PFM specification
 		 */
-		fun fromFile(fileName: String): HDRImage =
-			File(fileName).inputStream().use { readPFM(it) }
+		fun fromPFMFile(fileName: String): HDRImage =
+			File(fileName).inputStream().use { fromPFMStream(it) }
 	}
 	
 	// --- Default data class function overriding ---
