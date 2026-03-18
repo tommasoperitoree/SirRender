@@ -143,8 +143,7 @@ data class HDRImage(
 		/**
 		 * Parses a PFM size header [line] into a ([width], [height]) [Pair].
 		 *
-		 * @throws InvalidPFMImageFormat if the line does not contain exactly two integers
-		 * @throws IllegalArgumentException if either dimension is zero or negative
+		 * @throws InvalidPFMImageFormat if the line does not contain exactly two strictly positive integers
 		 */
 		internal fun parseImgSize(line: String): Pair<Int, Int> {
 			val parts = line.trim().split(" ").filter { it.isNotBlank() }
