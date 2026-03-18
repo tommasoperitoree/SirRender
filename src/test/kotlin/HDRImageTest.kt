@@ -76,7 +76,7 @@ class HDRImageTest {
 		val line: InputStream = sb.byteInputStream()
 		assertEquals("Hello", HDRImage.readLine(line))
 		assertEquals("World", HDRImage.readLine(line))
-		// assertEquals("", HDRImage.readLine(line))  It gives error
+		// assertEquals("", HDRImage.readLine(line))  // gives error, should we allow reading EOF
 	}
 	
 	@Test
@@ -103,7 +103,6 @@ class HDRImageTest {
 			assertTrue(img.getPixel(1, 1).isCloseColor(Color(4.0e2f, 5.0e2f, 6.0e2f)))
 			assertTrue(img.getPixel(2, 1).isCloseColor(Color(7.0e2f, 8.0e2f, 9.0e2f)))
 		}
-		
 		val p = "PA"
 		assertThrows(InvalidPFMImageFormat::class.java) {HDRImage.fromPFMStream(p.byteInputStream())}
 	}
