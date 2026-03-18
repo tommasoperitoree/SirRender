@@ -107,4 +107,6 @@ class HDRImageTest {
 		assertThrows(InvalidPFMImageFormat::class.java) {HDRImage.fromPFMStream(p.byteInputStream())}
 	}
 	
+	// missing tests of writePFMImage and/or writePFMFile
+	
 }

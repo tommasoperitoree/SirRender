@@ -177,7 +177,7 @@ data class HDRImage(
 		// --- Public factory functions ---
 		
 		/**
-		 * Creates an [HDRImage] by reading a PFM-formatted [stream].
+		 * Constructs an [HDRImage] by reading a PFM-formatted [stream].
 		 *
 		 * @param stream the input stream containing PFM data
 		 * @return the decoded [HDRImage]
@@ -201,7 +201,7 @@ data class HDRImage(
 		}
 		
 		/**
-		 * Creates an [HDRImage] by reading a PFM-formatted file at [fileName].
+		 * Constructs an [HDRImage] by reading a PFM-formatted file at [fileName].
 		 *
 		 * @throws InvalidPFMImageFormat if the file does not conform to the PFM specification
 		 */

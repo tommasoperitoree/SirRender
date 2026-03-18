@@ -31,4 +31,6 @@ class ColorTest {
 		assertFalse { colorA.isCloseColor(Color(11.0f, 2.0f, 3.0f)) }
 	}
 	
+	// missing tests to writePFMImage
+	
 }
