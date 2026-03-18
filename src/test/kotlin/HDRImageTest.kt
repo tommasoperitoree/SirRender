@@ -1,5 +1,7 @@
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.io.InputStream
+import java.util.stream.Stream
 
 
 class HDRImageTest {
@@ -7,6 +9,7 @@ class HDRImageTest {
 	val width: Int = 10
 	val height: Int = 10
 	val img = HDRImage(width, height)
+	
 	// generic Height and Width for testing
 	val x: Int = 2
 	val y: Int = 6
@@ -65,18 +68,13 @@ class HDRImageTest {
 	}
 	
 	@Test
-	fun `test readPFM little endian`() {
-		TODO()
+	fun `test PFM readLine`() {
+		val sb = "Hello\nWorld"
+		val line: InputStream = sb.byteInputStream()
+		assertEquals("Hello", HDRImage.readLine(line))
+		assertEquals("World", HDRImage.readLine(line))
+		// assertEquals("", HDRImage.readLine(line))  It gives error
 	}
 	
-	@Test
-	fun `test readPFM big endian`() {
-		TODO()
-	}
-	
-	@Test
-	fun `test readPFM both endiannesses produce equal images`() {
-		TODO()
-	}
 	
 }

@@ -23,7 +23,6 @@ fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos ->
 	ints[pos].toByte()
 }
 
-
 /**
  * Represents a High Dynamic Range (HDR) image stored in row-major order.
  *
@@ -34,7 +33,7 @@ fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos ->
 data class HDRImage(
 	val width: Int = 1,
 	val height: Int = 1,
-	var pixels: Array<Color> = Array(width * height) { Color(0.0f, 0.0f, 0.0f) }
+	var pixels: Array<Color> = Array(width * height) { Color() }
 ) {
 	
 	// --- Helper functions ---
@@ -45,13 +44,17 @@ data class HDRImage(
 	
 	/** Converts 2D coordinates ([x], [y]) into a flat 1D array index. */
 	fun pixelOffset(x: Int, y: Int): Int =
-		y * width + x
+		y * width + x // It gives me the position in the array
 	
 	/** Returns the [Color] of the pixel at ([x], [y]). */
 	fun getPixel(x: Int, y: Int): Color {
 		assert(validCoordinates(x, y))
-		return pixels[pixelOffset(x, y)]
+		return pixels[pixelOffset(x, y)] // e.g. pixels[3]
 	}
+//	e.g.
+//	val img = HDRImage()
+//	val color = img.getPixel(1, 2)
+//	val r: Float = color.r
 	
 	/** Sets the pixel at ([x], [y]) to [newColor]. */
 	fun setPixel(x: Int, y: Int, newColor: Color) {
@@ -198,6 +201,7 @@ data class HDRImage(
 		 */
 		fun fromPFMFile(fileName: String): HDRImage =
 			File(fileName).inputStream().use { fromPFMStream(it) }
+		// usage: val img = HDRImage.fromPFMFile("img.pfm")
 	}
 	
 	// --- Default data class function overriding ---
