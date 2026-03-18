@@ -1,21 +1,24 @@
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.io.ByteArrayInputStream
 import java.io.InputStream
-import java.util.stream.Stream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder.BIG_ENDIAN
+import java.nio.ByteOrder.LITTLE_ENDIAN
 
 
 class HDRImageTest {
 	
 	val width: Int = 10
 	val height: Int = 10
-	val img = HDRImage(width, height)
+	var img = HDRImage(width, height)
 	
 	// generic Height and Width for testing
 	val x: Int = 2
 	val y: Int = 6
 	
 	// pfm reference files val declaration
-	val reference_be = byteArrayOfInts(
+	val referenceBE = byteArrayOfInts(
 		0x50, 0x46, 0x0a, 0x33, 0x20, 0x32, 0x0a, 0x31, 0x2e, 0x30, 0x0a, 0x42,
 		0xc8, 0x00, 0x00, 0x43, 0x48, 0x00, 0x00, 0x43, 0x96, 0x00, 0x00, 0x43,
 		0xc8, 0x00, 0x00, 0x43, 0xfa, 0x00, 0x00, 0x44, 0x16, 0x00, 0x00, 0x44,
@@ -25,7 +28,7 @@ class HDRImageTest {
 		0x8c, 0x00, 0x00, 0x42, 0xa0, 0x00, 0x00, 0x42, 0xb4, 0x00, 0x00
 	)
 	
-	val reference_le = byteArrayOfInts(
+	val referenceLE = byteArrayOfInts(
 		0x50, 0x46, 0x0a, 0x33, 0x20, 0x32, 0x0a, 0x2d, 0x31, 0x2e, 0x30, 0x0a,
 		0x00, 0x00, 0xc8, 0x42, 0x00, 0x00, 0x48, 0x43, 0x00, 0x00, 0x96, 0x43,
 		0x00, 0x00, 0xc8, 0x43, 0x00, 0x00, 0xfa, 0x43, 0x00, 0x00, 0x16, 0x44,
@@ -67,7 +70,6 @@ class HDRImageTest {
 		}
 	}
 	
-
 	@Test
 	fun `test PFM readLine`() {
 		val sb = "Hello\nWorld"
@@ -77,5 +79,33 @@ class HDRImageTest {
 		// assertEquals("", HDRImage.readLine(line))  It gives error
 	}
 	
+	@Test
+	fun `test parseEndianness`() {
+		assertEquals(BIG_ENDIAN, HDRImage.parseEndianness("1.0"))
+		assertEquals(LITTLE_ENDIAN, HDRImage.parseEndianness("-3.0"))
+		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.parseEndianness("0.0") }
+		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.parseEndianness("ABC") }
+	}
+	
+	@Test
+	fun `test constructor fromPFMStream`() {
+		for (referenceBytes in arrayOf(referenceBE, referenceLE)) {
+			img = HDRImage.fromPFMStream(ByteArrayInputStream(referenceBytes))
+			
+			assertEquals(img.width, 3)
+			assertEquals(img.height, 2)
+			
+			assertTrue(img.getPixel(0, 0).isCloseColor(Color(1.0e1f, 2.0e1f, 3.0e1f)))
+			assertTrue(img.getPixel(1, 0).isCloseColor(Color(4.0e1f, 5.0e1f, 6.0e1f)))
+			assertTrue(img.getPixel(2, 0).isCloseColor(Color(7.0e1f, 8.0e1f, 9.0e1f)))
+			assertTrue(img.getPixel(0, 1).isCloseColor(Color(1.0e2f, 2.0e2f, 3.0e2f)))
+			assertTrue(img.getPixel(0, 0).isCloseColor(Color(1.0e1f, 2.0e1f, 3.0e1f)))
+			assertTrue(img.getPixel(1, 1).isCloseColor(Color(4.0e2f, 5.0e2f, 6.0e2f)))
+			assertTrue(img.getPixel(2, 1).isCloseColor(Color(7.0e2f, 8.0e2f, 9.0e2f)))
+		}
+		
+		val p = "PA"
+		assertThrows(InvalidPFMImageFormat::class.java) {HDRImage.fromPFMStream(p.byteInputStream())}
+	}
 	
 }
