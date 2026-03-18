@@ -67,6 +67,7 @@ class HDRImageTest {
 		}
 	}
 	
+
 	@Test
 	fun `test PFM readLine`() {
 		val sb = "Hello\nWorld"

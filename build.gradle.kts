@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.invoke
-
 plugins {
 	kotlin("jvm") version "2.3.0"
 	id("org.jetbrains.dokka") version "2.1.0"
@@ -13,8 +11,8 @@ repositories {
 }
 
 dependencies {
-	testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
-	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+	testImplementation(kotlin("test"))                              // adds kotlin test helpers
+	testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")   // aggregate: pulls api + engine together
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
