@@ -4,8 +4,8 @@
 
 ## 🌐 Live Documentation
 
-You can find the latest API reference, automatically generated from our codebase, at the following link:
-👉 **[tommasoperitoree.github.io/SirRender/](https://tommasoperitoree.github.io/SirRender/)**
+You can find the latest API reference at the following link 👉
+**[tommasoperitoree.github.io/SirRender/](https://tommasoperitoree.github.io/SirRender/)**
 
 ---
 

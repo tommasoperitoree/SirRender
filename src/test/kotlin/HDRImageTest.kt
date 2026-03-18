@@ -62,7 +62,7 @@ class HDRImageTest {
 		assertThrows(InvalidPFMImageFormat::class.java) {
 			HDRImage.parseImgSize("1 2 3")         // too many args
 		}
-		assertThrows(IllegalArgumentException::class.java) {
+		assertThrows(InvalidPFMImageFormat::class.java) {
 			HDRImage.parseImgSize("-1 2")           // negative dimension
 		}
 		assertThrows(InvalidPFMImageFormat::class.java) {

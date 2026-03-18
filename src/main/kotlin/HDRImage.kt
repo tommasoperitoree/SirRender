@@ -153,7 +153,7 @@ data class HDRImage(
 			val w = parts[0].toIntOrNull() ?: throw InvalidPFMImageFormat("Invalid width")
 			val h = parts[1].toIntOrNull() ?: throw InvalidPFMImageFormat("Invalid height")
 			
-			require(w > 0 && h > 0) { "Width and height must be positive" }
+			if (w <= 0 || h <= 0) throw InvalidPFMImageFormat("Width and height must be positive, got: $w x $h")
 			return Pair(w, h)
 		}
 		
