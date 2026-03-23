@@ -51,10 +51,12 @@ data class HDRImage(
 		assert(validCoordinates(x, y))
 		return pixels[pixelOffset(x, y)] // e.g. pixels[3]
 	}
-//	e.g.
-//	val img = HDRImage()
-//	val color = img.getPixel(1, 2)
-//	val r: Float = color.r
+	
+	/* example usage
+		val img = HDRImage()
+		val color = img.getPixel(1, 2)
+		val r: Float = color.r
+	*/
 	
 	/** Sets the pixel at ([x], [y]) to [newColor]. */
 	fun setPixel(x: Int, y: Int, newColor: Color) {
@@ -76,9 +78,7 @@ data class HDRImage(
 		
 		val writePixel: (Int, Int) -> Unit = { x, y ->
 			val c = getPixel(x, y)
-			writeFloat(stream, c.r, order)
-			writeFloat(stream, c.g, order)
-			writeFloat(stream, c.b, order)
+			listOf(c.r, c.g, c.b).forEach { writeFloat(stream, it, order) }
 		}
 		
 		(height - 1 downTo 0).forEach { y ->
@@ -88,7 +88,8 @@ data class HDRImage(
 		}
 		
 	}
-	/*fun writePFMImage(stream: OutputStream, order: ByteOrder = LITTLE_ENDIAN) {
+	/* old version
+	fun writePFMImage(stream: OutputStream, order: ByteOrder = LITTLE_ENDIAN) {
 		stream.write("PF\n".toByteArray())
 		stream.write("$width $height\n".toByteArray())
 		val endiannessMarker = if (order == LITTLE_ENDIAN) "-1.0" else "1.0"
