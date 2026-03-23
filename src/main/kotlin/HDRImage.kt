@@ -68,24 +68,6 @@ data class HDRImage(
 	 * @param stream the output stream to write to
 	 * @param order the byte order to use for float encoding
 	 */
-	
-	/*fun writePFMImage(stream: OutputStream, order: ByteOrder = LITTLE_ENDIAN) {
-		stream.write("PF\n".toByteArray())
-		stream.write("$width $height\n".toByteArray())
-		val endiannessMarker = if (order == LITTLE_ENDIAN) "-1.0" else "1.0"
-		stream.write("$endiannessMarker\n".toByteArray())
-		
-		for (y in (height - 1) downTo 0) {
-			for (x in 0 until width) {
-				val c = getPixel(x, y)
-				writeFloat(stream, c.r, order)
-				writeFloat(stream, c.g, order)
-				writeFloat(stream, c.b, order)
-			}
-		}
-	} // listOf(c.r, c.g, c.b).forEach { writeFloat(stream, it, order) }
-	*/
-	
 	fun writePFMImage(stream: OutputStream, order: ByteOrder) {
 		stream.write("PF\n".toByteArray())
 		stream.write("$width $height\n".toByteArray())
@@ -106,6 +88,22 @@ data class HDRImage(
 		}
 		
 	}
+	/*fun writePFMImage(stream: OutputStream, order: ByteOrder = LITTLE_ENDIAN) {
+		stream.write("PF\n".toByteArray())
+		stream.write("$width $height\n".toByteArray())
+		val endiannessMarker = if (order == LITTLE_ENDIAN) "-1.0" else "1.0"
+		stream.write("$endiannessMarker\n".toByteArray())
+		
+		for (y in (height - 1) downTo 0) {
+			for (x in 0 until width) {
+				val c = getPixel(x, y)
+				writeFloat(stream, c.r, order)
+				writeFloat(stream, c.g, order)
+				writeFloat(stream, c.b, order)
+			}
+		}
+	} // listOf(c.r, c.g, c.b).forEach { writeFloat(stream, it, order) }
+	*/
 	
 	/** Uses the [writePFMImage] fun to save this image to [fileName] in PFM format. */
 	fun writePFMFile(fileName: String, order: ByteOrder = LITTLE_ENDIAN) {
@@ -121,39 +119,17 @@ data class HDRImage(
 		 * Stops at the newline character (0x0a) without over-reading into binary data.
 		 * @throws InvalidPFMImageFormat if the end of file (EOF) is reached unexpectedly.
 		 */
-		
-		/*internal fun readLine(stream: InputStream): String {
-			val sb = StringBuilder()
-			while (true) {
-				val byte = stream.read() // stream.read() reads a single Byte (e.g. 0x50)
-				if (byte == 0x0a || byte == -1) {
-					if (byte == -1 && sb.isEmpty()) throw InvalidPFMImageFormat("Unexpected End of File")
-					break
-				}
-				sb.append(byte.toChar()) // Append the byte as a character (e.g. 0x50->'P')
-			}
-			// Trim to handle potential \r (0x0d) characters in Windows-encoded files
-			// here we have e.g. sb=['P','F'] and toString converts array of char to String
-			return sb.toString().trim()
-		}*/
-		// Tomasi suggested use of ByteArrayOutputStream, but it's probably more verbose than StringBuilder and
-		// adds nothing new. Usage would be :
-		// val baos = ByteArrayOutputStream()
-		// baos.write(byte)
-		// ...
-		// return baos.toString(Charsets.UTF_8).trim()
-		
 		internal fun readLine(stream: InputStream): String =
 			buildString {
 				while (true) {
-					val byte = stream.read()
+					val byte = stream.read() // reads a single Byte (e.g. 0x50)
 					if (byte == 0x0a || byte == -1) {
 						if (isEmpty()) throw InvalidPFMImageFormat("Unexpected End of File")
 						break
 					}
-					append(byte.toChar())
+					append(byte.toChar()) // append the byte as a character (e.g. 0x50->'P')
 				}
-			}.trim()
+			}.trim() // trim to handle potential \r (0x0d) characters in Windows-encoded files
 		
 		/**
 		 * Reads 4 bytes from the [stream] and decodes them as a [Float] with the given [endianness].
@@ -171,16 +147,11 @@ data class HDRImage(
 		}
 		
 		/** Encodes [value] as a 4-byte float with the given [order] and writes it to [stream]. */
-		/* internal fun writeFloat(stream: OutputStream, value: Float, order: ByteOrder) {
-			val bytes = ByteBuffer.allocate(4).order(order).putFloat(value).array()
-			stream.write(bytes)
-		}*/
-		
 		internal fun writeFloat(stream: OutputStream, value: Float, order: ByteOrder) {
-			val bytes = ByteBuffer.allocate(4).clear()
+			val bytes = ByteBuffer.allocate(4).clear() // always reuses the same buffer by calling .clear()
 			bytes.order(order).putFloat(value)
 			stream.write(bytes.array())
-		} //a new function that always reuses the same buffer by calling .clear()
+		}
 		
 		/**
 		 * Parses a PFM size header [line] into a ([width], [height]) [Pair].
