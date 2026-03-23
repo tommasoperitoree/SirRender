@@ -68,7 +68,8 @@ data class HDRImage(
 	 * @param stream the output stream to write to
 	 * @param order the byte order to use for float encoding
 	 */
-	fun writePFMImage(stream: OutputStream, order: ByteOrder = LITTLE_ENDIAN) {
+	
+	/*fun writePFMImage(stream: OutputStream, order: ByteOrder = LITTLE_ENDIAN) {
 		stream.write("PF\n".toByteArray())
 		stream.write("$width $height\n".toByteArray())
 		val endiannessMarker = if (order == LITTLE_ENDIAN) "-1.0" else "1.0"
@@ -83,6 +84,28 @@ data class HDRImage(
 			}
 		}
 	} // listOf(c.r, c.g, c.b).forEach { writeFloat(stream, it, order) }
+	*/
+	
+	fun writePFMImage(stream: OutputStream, order: ByteOrder) {
+		stream.write("PF\n".toByteArray())
+		stream.write("$width $height\n".toByteArray())
+		val endiannessMarker = if (order == LITTLE_ENDIAN) "-1.0" else "1.0"
+		stream.write("$endiannessMarker\n".toByteArray())
+		
+		val writePixel: (Int, Int) -> Unit = { x, y ->
+			val c = getPixel(x, y)
+			writeFloat(stream, c.r, order)
+			writeFloat(stream, c.g, order)
+			writeFloat(stream, c.b, order)
+		}
+		
+		(height - 1 downTo 0).forEach { y ->
+			(0 until width).forEach { x ->
+				writePixel(x, y)
+			}
+		}
+		
+	}
 	
 	/** Uses the [writePFMImage] fun to save this image to [fileName] in PFM format. */
 	fun writePFMFile(fileName: String, order: ByteOrder = LITTLE_ENDIAN) {
@@ -98,7 +121,8 @@ data class HDRImage(
 		 * Stops at the newline character (0x0a) without over-reading into binary data.
 		 * @throws InvalidPFMImageFormat if the end of file (EOF) is reached unexpectedly.
 		 */
-		internal fun readLine(stream: InputStream): String {
+		
+		/*internal fun readLine(stream: InputStream): String {
 			val sb = StringBuilder()
 			while (true) {
 				val byte = stream.read() // stream.read() reads a single Byte (e.g. 0x50)
@@ -111,13 +135,25 @@ data class HDRImage(
 			// Trim to handle potential \r (0x0d) characters in Windows-encoded files
 			// here we have e.g. sb=['P','F'] and toString converts array of char to String
 			return sb.toString().trim()
-		}
+		}*/
 		// Tomasi suggested use of ByteArrayOutputStream, but it's probably more verbose than StringBuilder and
 		// adds nothing new. Usage would be :
 		// val baos = ByteArrayOutputStream()
 		// baos.write(byte)
 		// ...
 		// return baos.toString(Charsets.UTF_8).trim()
+		
+		internal fun readLine(stream: InputStream): String =
+			buildString {
+				while (true) {
+					val byte = stream.read()
+					if (byte == 0x0a || byte == -1) {
+						if (isEmpty()) throw InvalidPFMImageFormat("Unexpected End of File")
+						break
+					}
+					append(byte.toChar())
+				}
+			}.trim()
 		
 		/**
 		 * Reads 4 bytes from the [stream] and decodes them as a [Float] with the given [endianness].
@@ -135,10 +171,16 @@ data class HDRImage(
 		}
 		
 		/** Encodes [value] as a 4-byte float with the given [order] and writes it to [stream]. */
-		internal fun writeFloat(stream: OutputStream, value: Float, order: ByteOrder) {
+		/* internal fun writeFloat(stream: OutputStream, value: Float, order: ByteOrder) {
 			val bytes = ByteBuffer.allocate(4).order(order).putFloat(value).array()
 			stream.write(bytes)
-		}
+		}*/
+		
+		internal fun writeFloat(stream: OutputStream, value: Float, order: ByteOrder) {
+			val bytes = ByteBuffer.allocate(4).clear()
+			bytes.order(order).putFloat(value)
+			stream.write(bytes.array())
+		} //a new function that always reuses the same buffer by calling .clear()
 		
 		/**
 		 * Parses a PFM size header [line] into a ([width], [height]) [Pair].
