@@ -1,8 +1,10 @@
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.InputStream
-import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.ByteOrder.BIG_ENDIAN
 import java.nio.ByteOrder.LITTLE_ENDIAN
 
@@ -77,6 +79,19 @@ class HDRImageTest {
 		assertEquals("Hello", HDRImage.readLine(line))
 		assertEquals("World", HDRImage.readLine(line))
 		// assertEquals("", HDRImage.readLine(line))  // gives error, should we allow reading EOF
+	}
+	
+	@Test
+	fun `test writePFImage`() {
+		val filename = "PFMImage.pfm"
+		FileOutputStream(filename).use { stream -> img.writePFMImage(stream, LITTLE_ENDIAN) }
+		
+		FileInputStream(filename).use { line ->
+			assertEquals("PF", HDRImage.readLine(line))
+			assertEquals("$width $height", HDRImage.readLine(line))
+			assertEquals("-1.0", HDRImage.readLine(line))
+		}
+		
 	}
 	
 	@Test
