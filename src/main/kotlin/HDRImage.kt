@@ -224,6 +224,31 @@ data class HDRImage(
 		// usage: val img = HDRImage.fromPFMFile("img.pfm")
 	}
 	
+	
+	//qui la chiara mi scrive la funzione della luminosità media che dovrò utilizzare, poi per ogni pixel prendo
+	//la luminosità di ogni pixel e dividerla per la luminosità media e molitplicarla per il valore di a
+	//passato da terminale argv[1]
+	
+	/**
+	 * Renormalizes the luminosity of the image pixels.
+	 *
+	 * Each pixel value is multiplied by a scaling factor calculated as [factor] / `lum`.
+	 * If no specific luminosity is provided, the function automatically calculates
+	 * the average luminosity of the current image.
+	 *
+	 * @param factor The target luminosity value to achieve.
+	 * @param luminosity An optional luminosity value to use as a baseline.
+	 * If `null`, it defaults to the result of [averageLuminosity].
+	 * * @sample HDRImage.parseEndianness
+	 */
+	fun normalizeImage(Float: factor, float? luminosity=null){
+		var lum=luminosity ?: averageLuminosity()
+		var scale=factor/lum
+			for (i in 0 until pixels) {
+				pixels[i] = pixels[i] *scale
+			}
+	}
+	
 	// --- Default data class function overriding ---
 	
 	override fun equals(other: Any?): Boolean {

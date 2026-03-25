@@ -108,4 +108,9 @@ class HDRImageTest {
 	
 	// missing tests of writePFMImage and/or writePFMFile
 	
+	@Test
+	fun test normalizeLuminosity(){
+		
+	}
+	
 }
