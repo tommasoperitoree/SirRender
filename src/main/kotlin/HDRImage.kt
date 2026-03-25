@@ -1,11 +1,13 @@
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
+import java.lang.Math.pow
 import java.nio.ByteOrder
 import java.nio.ByteBuffer
 import java.nio.ByteOrder.BIG_ENDIAN
 import java.nio.ByteOrder.LITTLE_ENDIAN
-
+import kotlin.math.log10
+import kotlin.math.pow
 
 /**
  * Exception thrown when a file or stream does not perfectly match
@@ -104,12 +106,19 @@ data class HDRImage(
 				writePixel(x, y)
 			}
 		}
-		
 	}
 	
 	/** Uses the [writePFMImage] fun to save this image to [fileName] in PFM format. */
 	fun writePFMFile(fileName: String, order: ByteOrder = LITTLE_ENDIAN) {
 		File(fileName).outputStream().use { writePFMImage(it, order) }
+	}
+	
+	fun averageLuminosity(delta: Float = 1e-10f): Float {
+		var sum = 0.0
+		for (pix in pixels) {
+			sum += log10(delta + pix.luminosity())
+		}
+		return 10.0.pow(sum / pixels.size).toFloat()
 	}
 	
 	companion object {

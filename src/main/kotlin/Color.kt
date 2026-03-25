@@ -33,6 +33,13 @@ data class Color(
 	fun isCloseColor(other: Color) =
 		areClose(r, other.r) && areClose(g, other.g) && areClose(b, other.b)
 	
+	fun luminosity(): Float {
+		val a = maxOf(r, g)
+		val c = minOf(r, g)
+		
+		return (maxOf(a, b) + minOf(c, b)) / 2
+	}
+	
 	
 	// --- Default data class function overriding ---
 	

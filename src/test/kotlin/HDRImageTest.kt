@@ -82,7 +82,7 @@ class HDRImageTest {
 	}
 	
 	@Test
-	fun `test writePFImage`() {
+	fun `test writePFImage`() { //Test missing: ReadPixels
 		val filename = "PFMImage.pfm"
 		FileOutputStream(filename).use { stream -> img.writePFMImage(stream, LITTLE_ENDIAN) }
 		
@@ -91,7 +91,26 @@ class HDRImageTest {
 			assertEquals("$width $height", HDRImage.readLine(line))
 			assertEquals("-1.0", HDRImage.readLine(line))
 		}
+	}
+	
+	@Test
+	fun `test averageLuminosity`() {
+		img = HDRImage(2, 1)
+		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
+		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
 		
+		//We pass delta=0.0 to avoid roundings
+		print(img.averageLuminosity(delta = 0f))
+		assertTrue { areClose(100.0f, img.averageLuminosity(delta = 0f)) }
+	}
+	
+	@Test
+	fun `test averageLuminosityDelta`() {
+		img = HDRImage(2, 1)
+		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
+		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
+		print(img.averageLuminosity())
+		assertTrue { areClose(100.0f, img.averageLuminosity()) }
 	}
 	
 	@Test
@@ -121,7 +140,4 @@ class HDRImageTest {
 		val p = "PA"
 		assertThrows(InvalidPFMImageFormat::class.java) {HDRImage.fromPFMStream(p.byteInputStream())}
 	}
-	
-	// missing tests of writePFMImage and/or writePFMFile
-	
 }

@@ -31,6 +31,15 @@ class ColorTest {
 		assertFalse { colorA.isCloseColor(Color(11.0f, 2.0f, 3.0f)) }
 	}
 	
+	@Test
+	fun `test luminosity`() {
+		val col1 = Color(1.0f, 2.9f, 3.0f)
+		val col2 = Color(9.0f, 5.0f, 5.1f)
+		
+		assertTrue { areClose(col1.luminosity(), 2.0f) }
+		assertTrue { areClose(col2.luminosity(), 7.0f) }
+	}
+	
 	// missing tests to writePFMImage
 	
 }
