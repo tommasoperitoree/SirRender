@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.nio.ByteOrder
 import java.nio.ByteOrder.BIG_ENDIAN
 import java.nio.ByteOrder.LITTLE_ENDIAN
 
@@ -84,7 +83,7 @@ class HDRImageTest {
 	@Test
 	fun `test writePFImage`() { //Test missing: ReadPixels
 		val filename = "PFMImage.pfm"
-		FileOutputStream(filename).use { stream -> img.writePFMImage(stream, LITTLE_ENDIAN) }
+		FileOutputStream(filename).use { line -> img.writePFMImage(line, LITTLE_ENDIAN) }
 		
 		FileInputStream(filename).use { line ->
 			assertEquals("PF", HDRImage.readLine(line))
@@ -138,6 +137,6 @@ class HDRImageTest {
 			assertTrue(img.getPixel(2, 1).isCloseColor(Color(7.0e2f, 8.0e2f, 9.0e2f)))
 		}
 		val p = "PA"
-		assertThrows(InvalidPFMImageFormat::class.java) {HDRImage.fromPFMStream(p.byteInputStream())}
+		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.fromPFMStream(p.byteInputStream()) }
 	}
 }
