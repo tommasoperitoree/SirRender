@@ -6,6 +6,7 @@ import java.nio.ByteOrder
 import java.nio.ByteBuffer
 import java.nio.ByteOrder.BIG_ENDIAN
 import java.nio.ByteOrder.LITTLE_ENDIAN
+import kotlin.div
 import kotlin.math.log10
 import kotlin.math.pow
 
@@ -115,12 +116,45 @@ data class HDRImage(
 		File(fileName).outputStream().use { writePFMImage(it, order) }
 	}
 	
+	/**
+	 * Uses the [Color.luminosity] Color fun to calculate the logarithmic mean of the image luminosity.
+	 */
 	fun averageLuminosity(delta: Float = 1e-10f): Float {
 		var sum = 0.0
 		for (pix in pixels) {
 			sum += log10(delta + pix.luminosity())
 		}
 		return 10.0.pow(sum / pixels.size).toFloat()
+	}
+	
+	/**
+	 * Renormalizes the luminosity of the image pixels.
+	 *
+	 * Each pixel value is multiplied by a scaling factor calculated as [factor] / `lum`.
+	 * If no specific luminosity is provided, the function automatically calculates
+	 * the average luminosity of the current image.
+	 *
+	 * @param factor The target luminosity value to achieve.
+	 * @param luminosity An optional luminosity value to use as a baseline.
+	 * If `null`, it defaults to the result of [averageLuminosity].
+	 * * @sample HDRImage.parseEndianness
+	 */
+	fun normalizeImage(factor: Float, luminosity: Float? = null) {
+		val lum = luminosity ?: averageLuminosity()
+		val scale = factor / lum
+		for (i in 0 until pixels.size) {
+			pixels[i] = pixels[i] * scale
+		}
+	}
+	
+	fun clamp(x: Float): Float = x / (1 + x)
+	
+	fun clampImage() {
+		for (i in 0 until pixels.size) {
+			pixels[i].r = clamp(pixels[i].r)
+			pixels[i].g = clamp(pixels[i].g)
+			pixels[i].b = clamp(pixels[i].b)
+		}
 	}
 	
 	companion object {
@@ -235,26 +269,6 @@ data class HDRImage(
 			File(fileName).inputStream().use { fromPFMStream(it) }
 		// usage: val img = HDRImage.fromPFMFile("img.pfm")
 	}
-	
-	/**
-	 * Renormalizes the luminosity of the image pixels.
-	 *
-	 * Each pixel value is multiplied by a scaling factor calculated as [factor] / `lum`.
-	 * If no specific luminosity is provided, the function automatically calculates
-	 * the average luminosity of the current image.
-	 *
-	 * @param factor The target luminosity value to achieve.
-	 * @param luminosity An optional luminosity value to use as a baseline.
-	 * If `null`, it defaults to the result of [averageLuminosity].
-	 * * @sample HDRImage.parseEndianness
-	 */
-	//fun normalizeImage(Float: factor, float? luminosity=null){
-	//	var lum=luminosity ?: averageLuminosity()
-	//	var scale=factor/lum
-	//		for (i in 0 until pixels) {
-	//			pixels[i] = pixels[i] *scale
-	//		}
-	//}
 	
 	// --- Default data class function overriding ---
 	

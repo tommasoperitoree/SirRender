@@ -6,6 +6,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.nio.ByteOrder.BIG_ENDIAN
 import java.nio.ByteOrder.LITTLE_ENDIAN
+import kotlin.test.assertTrue
 
 
 class HDRImageTest {
@@ -110,6 +111,24 @@ class HDRImageTest {
 		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
 		print(img.averageLuminosity())
 		assertTrue { areClose(100.0f, img.averageLuminosity()) }
+	}
+	
+	@Test
+	fun `test normalizeImage`() {}
+	
+	@Test
+	fun `test clampImage`() {
+		img = HDRImage(2, 1)
+		img.setPixel(0, 0, Color(0.5e1f, 1.0e1f, 1.5e1f))
+		img.setPixel(1, 0, Color(0.5e3f, 1.0e3f, 1.5e3f))
+		
+		img.clampImage()
+		
+		for (clampPixel in img.pixels) {
+			assertTrue { clampPixel.r in 0.0f..1.0f }
+			assertTrue { clampPixel.g in 0.0f..1.0f }
+			assertTrue { clampPixel.b in 0.0f..1.0f }
+		}
 	}
 	
 	@Test
