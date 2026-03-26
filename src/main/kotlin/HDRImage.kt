@@ -1,3 +1,4 @@
+import java.awt.Image
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -9,6 +10,13 @@ import java.nio.ByteOrder.LITTLE_ENDIAN
 import kotlin.div
 import kotlin.math.log10
 import kotlin.math.pow
+import java.awt.image.BufferedImage
+import java.text.Format
+import javax.imageio.ImageIO
+import javax.imageio.stream.ImageInputStream
+import kotlin.collections.toIntArray
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 /**
  * Exception thrown when a file or stream does not perfectly match
@@ -146,6 +154,22 @@ data class HDRImage(
 			pixels[i].g = clamp(pixels[i].g)
 			pixels[i].b = clamp(pixels[i].b)
 		}
+	}
+	
+	fun gammaCorrection(stream: OutputStream, format: String, gamma: Double = 1.0) {
+		val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+		
+		for (y in 0 until height) {
+			for (x in 0 until width) {
+				val curColor = getPixel(x, y)
+				val curR = curColor.r.toDouble().pow(1 / gamma)
+				val curG = curColor.g.toDouble().pow(1 / gamma)
+				val curB = curColor.b.toDouble().pow(1 / gamma)
+				val value = arrayOf(curR, curG, curB)
+				//image.setRGB(x, y, value)
+			}
+		}
+		
 	}
 	
 	companion object {
