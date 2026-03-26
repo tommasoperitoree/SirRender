@@ -67,12 +67,7 @@ data class HDRImage(
 		pixels[pixelOffset(x, y)] = newColor
 	}
 	
-	/**
-	 * Writes this image to [stream] in PFM format.
-	 *
-	 * @param stream the output stream to write to
-	 * @param order the byte order to use for float encoding
-	 */
+	/** Writes this image to [stream] in PFM format with [order] endianness. */
 	fun writePFMImage(stream: OutputStream, order: ByteOrder) {
 		stream.write("PF\n".toByteArray())
 		stream.write("$width $height\n".toByteArray())
@@ -118,6 +113,7 @@ data class HDRImage(
 	
 	/**
 	 * Uses the [Color.luminosity] Color fun to calculate the logarithmic mean of the image luminosity.
+	 * [delta] is a default ...
 	 */
 	fun averageLuminosity(delta: Float = 1e-10f): Float {
 		var sum = 0.0
@@ -130,14 +126,9 @@ data class HDRImage(
 	/**
 	 * Renormalizes the luminosity of the image pixels.
 	 *
-	 * Each pixel value is multiplied by a scaling factor calculated as [factor] / `lum`.
+	 * Each pixel value is multiplied by a scaling factor calculated as [factor] / [luminosity].
 	 * If no specific luminosity is provided, the function automatically calculates
-	 * the average luminosity of the current image.
-	 *
-	 * @param factor The target luminosity value to achieve.
-	 * @param luminosity An optional luminosity value to use as a baseline.
-	 * If `null`, it defaults to the result of [averageLuminosity].
-	 * * @sample HDRImage.parseEndianness
+	 * the average luminosity of the current image calling [averageLuminosity].
 	 */
 	fun normalizeImage(factor: Float, luminosity: Float? = null) {
 		val lum = luminosity ?: averageLuminosity()

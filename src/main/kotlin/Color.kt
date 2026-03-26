@@ -1,4 +1,5 @@
 import kotlin.math.abs
+import kotlin.math.max
 
 // Checks if two Floats are within epsilon
 fun areClose(x: Float, y: Float, epsilon: Float = 1e-5f) =
@@ -33,11 +34,10 @@ data class Color(
 	fun isCloseColor(other: Color) =
 		areClose(r, other.r) && areClose(g, other.g) && areClose(b, other.b)
 	
-	/**
-	 * Calculate luminosity of a single pixel
-	 */
+	/** Calculates luminosity of a single pixel. */
 	fun luminosity(): Float {
 		val a = maxOf(r, g)
+		// val b = listOf(r, g, b).maxOrNull() ?: 0
 		val c = minOf(r, g)
 		
 		return (maxOf(a, b) + minOf(c, b)) / 2
