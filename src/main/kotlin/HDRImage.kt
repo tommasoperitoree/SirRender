@@ -1,6 +1,7 @@
 import java.awt.Image
 import java.io.File
 import java.io.InputStream
+import java.io.IOException
 import java.io.OutputStream
 import java.lang.Math.pow
 import java.nio.ByteOrder
@@ -158,8 +159,23 @@ data class HDRImage(
 	
 	
 	
-	//sto unendo gammaCorrrection con writeLDRimage
 	
+	/**
+	 * Saves the current image to an [OutputStream] in a standard LDR format (e.g., "png", "jpg").
+	 * * This method performs several operations to convert High Dynamic Range (HDR) data
+	 * to a 24-bit Low Dynamic Range (LDR) representation:
+	 * 1. It applies **Gamma Correction** using the formula: $P_{out} = P_{in}^{1/\gamma}$.
+	 * 2. It scales values to the 0-255 range and clamps them to avoid overflow.
+	 * 3. It packs the resulting R, G, B components into a 32-bit integer format ([BufferedImage.TYPE_INT_RGB]).
+	 *
+	 * @param stream The output destination for the encoded image data.
+	 * @param format The target image format string (e.g., "png" or "jpg").
+	 * @param gamma The gamma correction factor. A value of 2.2 is typical for most displays.
+	 * Defaults to 1.0 (linear).
+	 * @throws IOException If an error occurs during the writing process.
+	 * @see [javax.imageio.ImageIO.write]
+	 */
+	//sto unendo gammaCorrrection con writeLDRimage
 	fun writeLDRImage(stream: OutputStream, format: String, gamma: Double = 1.0) {
 		val imageldr = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
 		//TYPE_INT_RGB usa 8 bit per canale
@@ -176,8 +192,17 @@ data class HDRImage(
 				val valueldr= (curR shl 16) + (curG shl 8) + curB //dobbiamo scrivere i colori in questo formato per TYPE_INT_RGB
 				imageldr.setRGB(x,y,valueldr)
 			}
-			ImageIO.write(imageldr,format,stream) //salva l'immagine nello stream
 		}
+		try {
+			val saved = ImageIO.write(imageldr, format, stream)
+			if (!saved) {
+				throw IllegalArgumentException("No writer found for format: $format")
+			}
+		} catch (e: Exception) {
+			// Catturiamo errori generici di input/output
+			throw IOException("Failed to write $format image to stream", e)
+		}
+		ImageIO.write(imageldr,"PNG",stream) //salva l'immagine nello stream
 	}
 	
 	
