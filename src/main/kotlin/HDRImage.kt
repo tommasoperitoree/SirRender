@@ -171,6 +171,9 @@ data class HDRImage(
 		}
 		
 	}
+	//devo scrivere una funzione che mi restituisca il un oggetto bufferedImage che sia compatibile con la libreria
+	//imageIO e lo salvi come PNG
+	fun writeLDRImage()
 	
 	companion object {
 		

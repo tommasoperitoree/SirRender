@@ -114,7 +114,16 @@ class HDRImageTest {
 	}
 	
 	@Test
-	fun `test normalizeImage`() {}
+	fun `test normalizeImage`() {
+		img= HDRImage(width =2 , height = 1)
+		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
+		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
+		
+		img.normalizeImage(factor = 100.0f, luminosity=1000.0f)
+		
+		assertTrue { img.getPixel(0, 0).isCloseColor(Color(5.0e-1f, 1.0f, 1.5f)) }
+		assertTrue { img.getPixel(1,0).isCloseColor(Color(50.0f, 1.0e2f,1.5e2f)) }
+	}
 	
 	@Test
 	fun `test clampImage`() {

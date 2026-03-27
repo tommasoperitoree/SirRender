@@ -1,5 +1,4 @@
 import kotlin.math.abs
-import kotlin.math.max
 
 // Checks if two Floats are within epsilon
 fun areClose(x: Float, y: Float, epsilon: Float = 1e-5f) =
@@ -46,7 +45,7 @@ data class Color(
 	// --- Default data class function overriding ---
 	
 	override fun equals(other: Any?): Boolean {
-		if (this === other) return true
+		if (this == other) return true
 		if (javaClass != other?.javaClass) return false
 		
 		other as Color
