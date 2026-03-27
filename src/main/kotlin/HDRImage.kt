@@ -156,24 +156,30 @@ data class HDRImage(
 		}
 	}
 	
-	fun gammaCorrection(stream: OutputStream, format: String, gamma: Double = 1.0) {
-		val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+	
+	
+	//sto unendo gammaCorrrection con writeLDRimage
+	
+	fun writeLDRImage(stream: OutputStream, format: String, gamma: Double = 1.0) {
+		val imageldr = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+		//TYPE_INT_RGB usa 8 bit per canale
+		//moltiplico per 255 e converto in int
 		
 		for (y in 0 until height) {
 			for (x in 0 until width) {
 				val curColor = getPixel(x, y)
-				val curR = curColor.r.toDouble().pow(1 / gamma)
-				val curG = curColor.g.toDouble().pow(1 / gamma)
-				val curB = curColor.b.toDouble().pow(1 / gamma)
-				val value = arrayOf(curR, curG, curB)
+				val curR = (curColor.r.toDouble().pow(1 / gamma)*255).toInt()
+				val curG = (curColor.g.toDouble().pow(1 / gamma)*255).toInt()
+				val curB = (curColor.b.toDouble().pow(1 / gamma)*255).toInt()
+				//val value = arrayOf(curR, curG, curB))
 				//image.setRGB(x, y, value)
+				val valueldr= (curR shl 16) + (curG shl 8) + curB //dobbiamo scrivere i colori in questo formato per TYPE_INT_RGB
+				imageldr.setRGB(x,y,valueldr)
 			}
+			ImageIO.write(imageldr,format,stream) //salva l'immagine nello stream
 		}
-		
 	}
-	//devo scrivere una funzione che mi restituisca il un oggetto bufferedImage che sia compatibile con la libreria
-	//imageIO e lo salvi come PNG
-	fun writeLDRImage()
+	
 	
 	companion object {
 		
