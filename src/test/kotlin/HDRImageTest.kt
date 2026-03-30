@@ -59,6 +59,15 @@ class HDRImageTest {
 	}
 	
 	@Test
+	fun `test readLine`() {
+		val sb = "Hello\nWorld"
+		val line: InputStream = sb.byteInputStream()
+		assertEquals("Hello", HDRImage.readLine(line))
+		assertEquals("World", HDRImage.readLine(line))
+		// assertEquals("", HDRImage.readLine(line))  // gives error, should we allow reading EOF
+	}
+	
+	@Test
 	fun `test parseImgSize`() {
 		assertEquals(Pair(3, 2), HDRImage.parseImgSize("3 2"))
 		assertThrows(InvalidPFMImageFormat::class.java) {
@@ -69,74 +78,6 @@ class HDRImageTest {
 		}
 		assertThrows(InvalidPFMImageFormat::class.java) {
 			HDRImage.parseImgSize("width height")   // not integers
-		}
-	}
-	
-	@Test
-	fun `test PFM readLine`() {
-		val sb = "Hello\nWorld"
-		val line: InputStream = sb.byteInputStream()
-		assertEquals("Hello", HDRImage.readLine(line))
-		assertEquals("World", HDRImage.readLine(line))
-		// assertEquals("", HDRImage.readLine(line))  // gives error, should we allow reading EOF
-	}
-	
-	@Test
-	fun `test writePFImage`() { //Test missing: ReadPixels
-		val filename = "PFMImage.pfm"
-		FileOutputStream(filename).use { line -> img.writePFMImage(line, LITTLE_ENDIAN) }
-		
-		FileInputStream(filename).use { line ->
-			assertEquals("PF", HDRImage.readLine(line))
-			assertEquals("$width $height", HDRImage.readLine(line))
-			assertEquals("-1.0", HDRImage.readLine(line))
-		}
-	}
-	
-	@Test
-	fun `test averageLuminosity`() {
-		img = HDRImage(2, 1)
-		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
-		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
-		
-		//We pass delta=0.0 to avoid roundings
-		print(img.averageLuminosity(delta = 0f))
-		assertTrue { areClose(100.0f, img.averageLuminosity(delta = 0f)) }
-	}
-	
-	@Test
-	fun `test averageLuminosityDelta`() {
-		img = HDRImage(2, 1)
-		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
-		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
-		print(img.averageLuminosity())
-		assertTrue { areClose(100.0f, img.averageLuminosity()) }
-	}
-	
-	@Test
-	fun `test normalizeImage`() {
-		img = HDRImage(width = 2, height = 1)
-		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
-		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
-		
-		img.normalizeImage(factor = 100.0f, luminosity = 1000.0f)
-		
-		assertTrue { img.getPixel(0, 0).isCloseColor(Color(5.0e-1f, 1.0f, 1.5f)) }
-		assertTrue { img.getPixel(1,0).isCloseColor(Color(50.0f, 1.0e2f, 1.5e2f)) }
-	}
-	
-	@Test
-	fun `test clampImage`() {
-		img = HDRImage(2, 1)
-		img.setPixel(0, 0, Color(0.5e1f, 1.0e1f, 1.5e1f))
-		img.setPixel(1, 0, Color(0.5e3f, 1.0e3f, 1.5e3f))
-		
-		img.clampImage()
-		
-		for (clampPixel in img.pixels) {
-			assertTrue { clampPixel.r in 0.0f..1.0f }
-			assertTrue { clampPixel.g in 0.0f..1.0f }
-			assertTrue { clampPixel.b in 0.0f..1.0f }
 		}
 	}
 	
@@ -166,5 +107,69 @@ class HDRImageTest {
 		}
 		val p = "PA"
 		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.fromPFMStream(p.byteInputStream()) }
+	}
+	
+	@Test
+	fun `test writePFImage`() {
+		val filename = "PFMImage.pfm"
+		FileOutputStream(filename).use { line -> img.writePFMImage(line, LITTLE_ENDIAN) }
+		
+		FileInputStream(filename).use { line ->
+			assertEquals("PF", HDRImage.readLine(line))
+			assertEquals("$width $height", HDRImage.readLine(line))
+			assertEquals("-1.0", HDRImage.readLine(line))
+		}
+	}
+	
+	@Test
+	fun `test readPixels`() {
+		TODO()
+	}
+	
+	@Test
+	fun `test averageLuminosity`() {
+		img = HDRImage(2, 1)
+		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
+		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
+		
+		//We pass delta=0.0 to avoid roundings
+		print(img.averageLuminosity(delta = 0f))
+		assertTrue { areClose(100.0f, img.averageLuminosity(delta = 0f)) }
+	}
+	
+	@Test
+	fun `test averageLuminosityDelta`() {
+		img = HDRImage(2, 1)
+		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
+		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
+		print(img.averageLuminosity())
+		assertTrue { areClose(100.0f, img.averageLuminosity()) }
+	}
+	
+	@Test
+	fun `test normalizeImage`() {
+		img = HDRImage(width = 2, height = 1)
+		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
+		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
+		
+		img.normalizeImage(100.0f, 1000.0f)
+		
+		assertTrue { img.getPixel(0, 0).isCloseColor(Color(5.0e-1f, 1.0f, 1.5f)) }
+		assertTrue { img.getPixel(1,0).isCloseColor(Color(50.0f, 1.0e2f, 1.5e2f)) }
+	}
+	
+	@Test
+	fun `test clampImage`() {
+		img = HDRImage(2, 1)
+		img.setPixel(0, 0, Color(0.5e1f, 1.0e1f, 1.5e1f))
+		img.setPixel(1, 0, Color(0.5e3f, 1.0e3f, 1.5e3f))
+		
+		img.clampImage()
+		
+		for (clampPixel in img.pixels) {
+			assertTrue { clampPixel.r in 0.0f..1.0f }
+			assertTrue { clampPixel.g in 0.0f..1.0f }
+			assertTrue { clampPixel.b in 0.0f..1.0f }
+		}
 	}
 }
