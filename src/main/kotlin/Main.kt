@@ -8,6 +8,7 @@ data class Parameters(
 	val gamma: Float,
 	val outputFileName: String
 )
+
 fun main(args: Array<String>) {
 	
 	try {
