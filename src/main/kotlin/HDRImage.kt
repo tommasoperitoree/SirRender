@@ -55,7 +55,6 @@ data class HDRImage(
 		assert(validCoordinates(x, y))
 		return pixels[pixelOffset(x, y)] // e.g. pixels[3]
 	}
-	
 	/* example usage
 		val img = HDRImage()
 		val color = img.getPixel(1, 2)
@@ -74,28 +73,7 @@ data class HDRImage(
 		stream.write("$width $height\n".toByteArray())
 		val endiannessMarker = if (order == LITTLE_ENDIAN) "-1.0" else "1.0"
 		stream.write("$endiannessMarker\n".toByteArray())
-		
-		val writePixel: (Int, Int) -> Unit = { x, y ->
-			val c = getPixel(x, y)
-			writeFloat(stream, c.r, order)
-			writeFloat(stream, c.g, order)
-			writeFloat(stream, c.b, order)
-		}
-		
-		(height - 1 downTo 0).forEach { y ->
-			(0 until width).forEach { x ->
-				writePixel(x, y)
-			}
-		}
-	}
-	
-	/* old version
-	fun writePFMImage(stream: OutputStream, order: ByteOrder = LITTLE_ENDIAN) {
-		stream.write("PF\n".toByteArray())
-		stream.write("$width $height\n".toByteArray())
-		val endiannessMarker = if (order == LITTLE_ENDIAN) "-1.0" else "1.0"
-		stream.write("$endiannessMarker\n".toByteArray())
-		
+		/* old version
 		for (y in (height - 1) downTo 0) {
 			for (x in 0 until width) {
 				val c = getPixel(x, y)
@@ -103,9 +81,17 @@ data class HDRImage(
 				writeFloat(stream, c.g, order)
 				writeFloat(stream, c.b, order)
 			}
+		} */
+		val writePixel: (Int, Int) -> Unit = { x, y ->
+			val c = getPixel(x, y)
+			listOf(c.r, c.g, c.b).forEach { writeFloat(stream, it, order) }
 		}
-	} // listOf(c.r, c.g, c.b).forEach { writeFloat(stream, it, order) }
-	*/
+		(height - 1 downTo 0).forEach { y ->
+			(0 until width).forEach { x ->
+				writePixel(x, y)
+			}
+		}
+	}
 	
 	/** Uses the [writePFMImage] fun to save this image to [fileName] in PFM format. */
 	fun writePFMFile(fileName: String, order: ByteOrder = LITTLE_ENDIAN) {
@@ -152,16 +138,15 @@ data class HDRImage(
 	
 	/**
 	 * Saves the current image to an [OutputStream] in a standard LDR [format] (e.g., "png", "jpg"),
-	 * using **Gamma Correction** with [gamma] operator (default value 1.0).
+	 * using **Gamma Correction** with [gamma] operator (default value 1.0). `P_{out} = P_{in}^{1/\gamma}`.
 	 *
 	 * @throws IOException If an error occurs during the writing process.
 	 * @see [javax.imageio.ImageIO.write]
 	 */
-	//HO ELIMINATO QUESTI TRE PUNTI DI COMMENTO, SE PENSATE SIANO UTILI RIAGGIUNGETELI:
+	// HO ELIMINATO QUESTI TRE PUNTI DI COMMENTO, SE PENSATE SIANO UTILI RIAGGIUNGETELI:
 	//   * 1. It applies **Gamma Correction** using the formula: $P_{out} = P_{in}^{1/\gamma}$.
 	//	 * 2. It scales values to the 0-255 range and clamps them to avoid overflow.
 	//	 * 3. It packs the resulting R, G, B components into a 32-bit integer format ([BufferedImage.TYPE_INT_RGB]).
-	
 	fun writeLDRImage(stream: OutputStream, format: String, gamma: Float = 1.0f) {
 		
 		val imageLDR = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
