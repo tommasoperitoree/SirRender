@@ -35,7 +35,8 @@ data class Color(
 		areClose(r, other.r) && areClose(g, other.g) && areClose(b, other.b)
 	
 	/** Computes the luminosity of a color as
-	 * \\( L = \frac{\max(r,g,b) + \min(r,g,b)}{2} \\)
+	 *
+	 * `L = ( max(r,g,b) + min(r,g,b) ) / 2`
 	 */
 	fun luminosity(): Float {
 		val max = listOf(r, g, b).max()

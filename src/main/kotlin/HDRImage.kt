@@ -99,8 +99,9 @@ data class HDRImage(
 	}
 	
 	/**
-	 * Uses the [Color.luminosity] Color fun to calculate the logarithmic mean of the image luminosity.
-	 * [delta] is a default parameter to prevent black pixels from appearing in the output image
+	 * Uses [Color.luminosity] to calculate the logarithmic mean of the image luminosity as
+	 * `L_avg = 10 ^ ( sum( log10(delta + L(pixel)) ) / N )`.
+	 * default parameter [delta] is to prevent black pixels from appearing in the output image
 	 */
 	fun averageLuminosity(delta: Float = 1e-10f): Float {
 		var sum = 0.0
@@ -125,17 +126,22 @@ data class HDRImage(
 		}
 	}
 	
-	/** Apply this bright spot correction only after the [normalizeImage] fun */
+	/** Applies the bright spot correction as
+	 * `x -> x / (1 + x)`
+	 *
+	 * To be applied only after the [normalizeImage]
+	 */
 	fun clampImage() {
 		fun clamp(x: Float): Float = x / (1 + x)
 		for (i in 0 until pixels.size) {
-			pixels[i].r = clamp(pixels[i].r)
-			pixels[i].g = clamp(pixels[i].g)
-			pixels[i].b = clamp(pixels[i].b)
+			listOf(pixels[i].r, pixels[i].g, pixels[i].b).forEach { clamp(it) }
 		}
 	}
 	
-	
+	// Do we need these specifics in the description?
+	//   * 1. It applies **Gamma Correction** using the formula: $P_{out} = P_{in}^{1/\gamma}$.
+	//	 * 2. It scales values to the 0-255 range and clamps them to avoid overflow.
+	//	 * 3. It packs the resulting R, G, B components into a 32-bit integer format ([BufferedImage.TYPE_INT_RGB]).
 	/**
 	 * Saves the current image to an [OutputStream] in a standard LDR [format] (e.g., "png", "jpg"),
 	 * using **Gamma Correction** with [gamma] operator (default value 1.0). `P_{out} = P_{in}^{1/\gamma}`.
@@ -143,26 +149,19 @@ data class HDRImage(
 	 * @throws IOException If an error occurs during the writing process.
 	 * @see [javax.imageio.ImageIO.write]
 	 */
-	// HO ELIMINATO QUESTI TRE PUNTI DI COMMENTO, SE PENSATE SIANO UTILI RIAGGIUNGETELI:
-	//   * 1. It applies **Gamma Correction** using the formula: $P_{out} = P_{in}^{1/\gamma}$.
-	//	 * 2. It scales values to the 0-255 range and clamps them to avoid overflow.
-	//	 * 3. It packs the resulting R, G, B components into a 32-bit integer format ([BufferedImage.TYPE_INT_RGB]).
 	fun writeLDRImage(stream: OutputStream, format: String, gamma: Float = 1.0f) {
-		
 		val imageLDR = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
-		//TYPE_INT_RGB uses 8 bits per channel
+		// TYPE_INT_RGB uses 8 bits per channel
 		
-		//Uses Gamma Correction: 2^8 (=255) * R,G,B^(1/gamma) and convert to Int variable
+		// apply Gamma Correction: 2^8 (=255) * (R,G,B)^(1/gamma) and convert to Int
 		for (y in 0 until height) {
 			for (x in 0 until width) {
 				val curColor = getPixel(x, y)
-				val curR = (curColor.r.toDouble().pow(1 / gamma.toDouble()) * 255).toInt()
-				val curG = (curColor.g.toDouble().pow(1 / gamma.toDouble()) * 255).toInt()
-				val curB = (curColor.b.toDouble().pow(1 / gamma.toDouble()) * 255).toInt()
+				val (curR, curG, curB) = listOf(curColor.r, curColor.g, curColor.b)
+					.map { (it.toDouble().pow(1.0 / gamma) * 255).toInt() }
 				
-				val valueLDR =
-					(curR shl 16) + (curG shl 8) + curB //dobbiamo scrivere i colori in questo formato per TYPE_INT_RGB
-				imageLDR.setRGB(x, y, valueLDR)
+				// colors need to be converted in this format with shl for TYPE_INT_RGB
+				imageLDR.setRGB(x, y, (curR shl 16) + (curG shl 8) + curB)
 			}
 		}
 		try {
@@ -171,7 +170,7 @@ data class HDRImage(
 				throw IllegalArgumentException("No writer found for format: $format")
 			}
 		} catch (e: Exception) {
-			// Catturiamo errori generici di input/output
+			// generic errors of input/output
 			throw IOException("Failed to write $format image to stream", e)
 		}
 	}
