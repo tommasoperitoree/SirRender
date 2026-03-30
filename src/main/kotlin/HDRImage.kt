@@ -1,23 +1,15 @@
-import java.awt.Image
 import java.io.File
 import java.io.InputStream
 import java.io.IOException
 import java.io.OutputStream
-import java.lang.Math.pow
 import java.nio.ByteOrder
 import java.nio.ByteBuffer
 import java.nio.ByteOrder.BIG_ENDIAN
 import java.nio.ByteOrder.LITTLE_ENDIAN
-import kotlin.div
 import kotlin.math.log10
 import kotlin.math.pow
 import java.awt.image.BufferedImage
-import java.text.Format
 import javax.imageio.ImageIO
-import javax.imageio.stream.ImageInputStream
-import kotlin.collections.toIntArray
-import kotlin.math.pow
-import kotlin.math.roundToInt
 
 /**
  * Exception thrown when a file or stream does not perfectly match
@@ -158,8 +150,6 @@ data class HDRImage(
 	}
 	
 	
-	
-	
 	/**
 	 * Saves the current image to an [OutputStream] in a standard LDR format (e.g., "png", "jpg").
 	 * * This method performs several operations to convert High Dynamic Range (HDR) data
@@ -176,25 +166,27 @@ data class HDRImage(
 	 * @see [javax.imageio.ImageIO.write]
 	 */
 	//sto unendo gammaCorrrection con writeLDRimage
-	fun writeLDRImage(stream: OutputStream, format: String, gamma: Double = 1.0) {
-		val imageldr = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+	fun writeLDRImage(stream: OutputStream, format: String, gamma: Float = 1.0f) {
+		
+		val imageLDR = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
 		//TYPE_INT_RGB usa 8 bit per canale
 		//moltiplico per 255 e converto in int
 		
 		for (y in 0 until height) {
 			for (x in 0 until width) {
 				val curColor = getPixel(x, y)
-				val curR = (curColor.r.toDouble().pow(1 / gamma)*255).toInt()
-				val curG = (curColor.g.toDouble().pow(1 / gamma)*255).toInt()
-				val curB = (curColor.b.toDouble().pow(1 / gamma)*255).toInt()
+				val curR = (curColor.r.toDouble().pow(1 / gamma.toDouble()) * 255).toInt()
+				val curG = (curColor.g.toDouble().pow(1 / gamma.toDouble()) * 255).toInt()
+				val curB = (curColor.b.toDouble().pow(1 / gamma.toDouble()) * 255).toInt()
 				//val value = arrayOf(curR, curG, curB))
 				//image.setRGB(x, y, value)
-				val valueldr= (curR shl 16) + (curG shl 8) + curB //dobbiamo scrivere i colori in questo formato per TYPE_INT_RGB
-				imageldr.setRGB(x,y,valueldr)
+				val valueLDR =
+					(curR shl 16) + (curG shl 8) + curB //dobbiamo scrivere i colori in questo formato per TYPE_INT_RGB
+				imageLDR.setRGB(x, y, valueLDR)
 			}
 		}
 		try {
-			val saved = ImageIO.write(imageldr, format, stream)
+			val saved = ImageIO.write(imageLDR, format, stream)
 			if (!saved) {
 				throw IllegalArgumentException("No writer found for format: $format")
 			}
@@ -202,7 +194,6 @@ data class HDRImage(
 			// Catturiamo errori generici di input/output
 			throw IOException("Failed to write $format image to stream", e)
 		}
-		ImageIO.write(imageldr,"PNG",stream) //salva l'immagine nello stream
 	}
 	
 	

@@ -1,6 +1,7 @@
 plugins {
 	kotlin("jvm") version "2.3.0"
 	id("org.jetbrains.dokka") version "2.1.0"
+	application
 }
 
 group = "org.example"
@@ -18,6 +19,10 @@ dependencies {
 
 kotlin {
 	jvmToolchain(25)
+}
+
+application {
+	mainClass.set("MainKt")
 }
 
 tasks.test {
