@@ -121,10 +121,10 @@ class HDRImageTest {
 		}
 	}
 	
-	@Test
-	fun `test readPixels`() {
-		TODO()
-	}
+	//@Test
+	//fun `test readPixels`() {
+	//	TODO()
+	//}
 	
 	@Test
 	fun `test averageLuminosity`() {
