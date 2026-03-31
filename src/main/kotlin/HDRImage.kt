@@ -126,6 +126,12 @@ data class HDRImage(
 		}
 	}
 	
+	//Doesn't work the test clampImage because of
+	// for (i in 0 until pixels.size) {
+	//			listOf(pixels[i].r, pixels[i].g, pixels[i].b).forEach { clamp(it) }
+	//		}
+	//It doesn't save the result of the clamp
+	//For this fun we can't use .forEach
 	/** Applies the bright spot correction as
 	 * `x -> x / (1 + x)`
 	 *
@@ -134,7 +140,9 @@ data class HDRImage(
 	fun clampImage() {
 		fun clamp(x: Float): Float = x / (1 + x)
 		for (i in 0 until pixels.size) {
-			listOf(pixels[i].r, pixels[i].g, pixels[i].b).forEach { clamp(it) }
+			pixels[i].r = clamp(pixels[i].r)
+			pixels[i].g = clamp(pixels[i].g)
+			pixels[i].b = clamp(pixels[i].b)
 		}
 	}
 	

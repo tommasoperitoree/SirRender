@@ -1,3 +1,9 @@
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import kotlin.reflect.KParameter
+
 data class Parameters(
 	val inputFileName: String = "",
 	val factor: Float = 0.2f,
@@ -25,15 +31,26 @@ data class Parameters(
 
 fun main(args: Array<String>) {
 	
+	val params = Parameters.fromArgs(args)
+	
 	try {
-		val params = Parameters.fromArgs(args)
-		println("Loaded parameters: $params")
-		
+		Parameters.fromArgs(args)
+		println("Loaded parameters: $params\n")
 	} catch (e: IllegalArgumentException) {
 		println("Error: ${e.message}")
 	}
 	
+	val img = FileInputStream(params.inputFileName).use { input ->
+		HDRImage.fromPFMStream(input)
+	}
 	
-	// missing part of image import
-	// https://ziotom78.github.io/raytracing_course/tomasi-ray-tracing-04b.html#/the-main-function-22
+	img.normalizeImage(params.factor)
+	img.clampImage()
+	
+	FileOutputStream(params.outputFileName).use { output ->
+		img.writeLDRImage(output, "png", params.gamma)
+	}
+	
+	println("File ${params.outputFileName} has been created")
+	
 }
