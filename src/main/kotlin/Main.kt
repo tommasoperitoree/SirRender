@@ -34,8 +34,6 @@ fun main(args: Array<String>) {
 	}
 	
 	
-	
-	
 	// missing part of image import
 	// https://ziotom78.github.io/raytracing_course/tomasi-ray-tracing-04b.html#/the-main-function-22
 }
