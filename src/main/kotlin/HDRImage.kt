@@ -121,7 +121,7 @@ data class HDRImage(
 	fun normalizeImage(factor: Float, luminosity: Float? = null) {
 		val lum = luminosity ?: averageLuminosity()
 		val scale = factor / lum
-		for (i in 0 until pixels.size) {
+		for (i in pixels.indices) {
 			pixels[i] = pixels[i] * scale
 		}
 	}
@@ -133,8 +133,8 @@ data class HDRImage(
 	 */
 	fun clampImage() {
 		fun clamp(x: Float): Float = x / (1 + x)
-		for (i in 0 until pixels.size) {
-			listOf(pixels[i].r, pixels[i].g, pixels[i].b).forEach { clamp(it) }
+		for (i in pixels.indices) {
+			pixels[i] = Color(clamp(pixels[i].r), clamp(pixels[i].g), clamp(pixels[i].b))
 		}
 	}
 	
@@ -143,10 +143,13 @@ data class HDRImage(
 	//	 * 2. It scales values to the 0-255 range and clamps them to avoid overflow.
 	//	 * 3. It packs the resulting R, G, B components into a 32-bit integer format ([BufferedImage.TYPE_INT_RGB]).
 	/**
-	 * Saves the current image to an [OutputStream] in a standard LDR [format] (e.g., "png", "jpg"),
-	 * using **Gamma Correction** with [gamma] operator (default value 1.0). `P_{out} = P_{in}^{1/\gamma}`.
+	 * Saves the current image to [stream] in LDR [format] (e.g. "png", "jpg")
+	 * applying [gamma] correction through `P_out = P_in^(1/gamma)`.
 	 *
-	 * @throws IOException If an error occurs during the writing process.
+	 * Should be called after [normalizeImage] and [clampImage] to ensure
+	 * pixel values are in the expected [0.0, 1.0] range.
+	 *
+	 * @throws IOException if an error occurs during writing
 	 * @see [javax.imageio.ImageIO.write]
 	 */
 	fun writeLDRImage(stream: OutputStream, format: String, gamma: Float = 1.0f) {
@@ -199,7 +202,7 @@ data class HDRImage(
 		
 		/**
 		 * Reads 4 bytes from the [stream] and decodes them as a [Float] with the given [endianness].
-		 * * Uses [ByteBuffer] to wrap the [ByteArray] and decode the bits.
+		 * Uses [ByteBuffer] to wrap the [ByteArray] and decode the bits.
 		 * @throws InvalidPFMImageFormat if fewer than 4 bytes are available
 		 */
 		internal fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
