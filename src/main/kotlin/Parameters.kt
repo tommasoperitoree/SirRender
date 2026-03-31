@@ -1,3 +1,7 @@
+/** Parse inputs for main.
+ * [inputFileName] for the image location, [factor] and [gamma] for normalizing the images
+ * and [outputFileName] to save the produced image.
+ */
 data class Parameters(
 	val inputFileName: String = "",
 	val factor: Float = 0.2f,
