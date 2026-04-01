@@ -1,12 +1,13 @@
 import kotlin.math.sqrt
 import kotlin.math.abs
+import kotlin.times
 
 data class Vec(
 	var x: Float = 0.0f,
 	var y: Float = 0.0f,
 	var z: Float = 0.0f
 )
-//) {
+ {
 	
 	// --- Operator overloading ---
 	
@@ -32,7 +33,7 @@ data class Vec(
 	
 	/** Does the cross product between two [Vec]. */
 	fun cross(other: Vec): Vec =
-		Vec(y * other.z - x * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
+		Vec(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
 	
 	/** Does the norm of [Vec]. */
 	fun norm(): Float = sqrt((x * x + y * y + z * z))
@@ -50,7 +51,8 @@ data class Vec(
 }
 
 
-data class Point(val x: Float = 0.0f, val y: Float = 0.0f, val z: Float = 0.0f){
+data class Point(val x: Float = 0.0f, val y: Float = 0.0f, val z: Float = 0.0f)
+{
 	
 	override fun toString(): String {
 		return "Point = ($x, $y, $z)"
@@ -82,7 +84,8 @@ data class Point(val x: Float = 0.0f, val y: Float = 0.0f, val z: Float = 0.0f){
 	
 }
 
-data class Normal(val x:Float = 0.0f, val y:Float = 0.0f, val z:Float = 0.0f){
+data class Normal(val x:Float = 0.0f, val y:Float = 0.0f, val z:Float = 0.0f)
+{
 	override fun toString(): String {
 		return "Normal = ($x, $y, $z)"
 	}
@@ -91,10 +94,29 @@ data class Normal(val x:Float = 0.0f, val y:Float = 0.0f, val z:Float = 0.0f){
 		areClose(x,other.x) && areClose(y,other.y) && areClose(z,other.z)
 	}
 	
-	/**
-	 * from a given normal n return -n
-	 */
+	/**Does dot product between [Normal] and a [scalar] **/
+	operator fun times(scalar: Float){
+		Normal(x=x*scalar,y=y*scalar,z=z*scalar)
+	}
+	
+	/**from a given [Normal] n return -n **/
 	fun negNormal(): Normal {
 		return Normal(x=-x,y=-y,z=-z)
 	}
+	
+	
+	/** Does the cross product between [Normal] and [Normal]**/
+	fun crossNN(other:Normal): Vec{
+		return Vec(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
+	}
+	
+	/** Does the cross product between [Normal] and [Vec]**/
+	
+	fun crossNV(other:Vec): Vec{
+		return Vec(y * other.z - z* other.y, z * other.x - x * other.z, x * other.y - y * other.x)
+	}
+	
+	/** Does dot product between [Normal] and [Vec]**/
+	fun dotProductNV(other: Vec) = x * other.x + y * other.y + z * other.z
+	
 }
