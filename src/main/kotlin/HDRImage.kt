@@ -43,7 +43,7 @@ data class HDRImage(
 	// --- Helper functions ---
 	
 	/** Returns `true` if ([x], [y]) falls within the image bounds. */
-	fun validCoordinates(x: Int, y: Int): Boolean =
+	internal fun validCoordinates(x: Int, y: Int): Boolean =
 		x in 0 until width && y in 0 until height
 	
 	/** Converts 2D coordinates ([x], [y]) into a flat 1D array index. */
