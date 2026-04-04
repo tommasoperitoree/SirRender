@@ -31,7 +31,7 @@ data class Color(
 	// --- Utility functions ---
 	
 	/** Checks whether two [Color] are equal through [areClose] fun. */
-	fun isCloseColor(other: Color) =
+	fun isColorClose(other: Color) =
 		areClose(r, other.r) && areClose(g, other.g) && areClose(b, other.b)
 	
 	/** Computes the luminosity of a color as

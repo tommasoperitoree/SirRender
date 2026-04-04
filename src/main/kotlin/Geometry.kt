@@ -16,7 +16,8 @@ data class Vec(
 	operator fun minus(other: Vec): Vec =
 		Vec(x - other.x, y - other.y, z - other.z)
 	
-	operator fun unaryMinus() = Vec(-x, -y, -z)
+	operator fun unaryMinus() =
+		Vec(-x, -y, -z)
 	
 	operator fun times(scalar: Float): Vec =
 		Vec(x * scalar, y * scalar, z * scalar)
@@ -28,25 +29,26 @@ data class Vec(
 	// --- Utility functions ---
 	
 	/** Checks whether two [Vec] are equal through [areClose] fun. */
-	fun isCloseVector(other: Vec) = areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
+	fun isVectorClose(other: Vec) = areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	
-	/** Does the cross product between two [Vec]. */
+	/** Gives the cross product between two [Vec]. */
 	fun cross(other: Vec): Vec =
 		Vec(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
 	
-	/** Does the norm of [Vec]. */
-	fun norm(): Float = sqrt((x * x + y * y + z * z))
-	
-	/** Does the squared norm of [Vec]. */
+	/** Gives the squared norm of [Vec]. */
 	fun squaredNorm(): Float = x * x + y * y + z * z
+	
+	/** Gives the norm of [Vec]. */
+	fun norm(): Float = sqrt(squaredNorm())
 	
 	fun normalize(): Vec = times(1 / norm())
 	
 	//fun vectoNormal()
 	
+	
 	// --- Default data class function overriding ---
 	
-	override fun toString(): String = "Vec = ($x, $y, $z)"
+	override fun toString(): String = "Vec($x, $y, $z)"
 }
 
 
@@ -56,19 +58,15 @@ data class Point(
 	val z: Float = 0.0f
 ) {
 	
-	override fun toString(): String = "Point = ($x, $y, $z)"
 	
-	fun isClosePoint(other: Point) {
+	fun isPointClose(other: Point) {
 		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	}
 	
-	/**override fun toString(): String {
-	return "Point = ($x, $y, $z)"
-	}
-	 * this function return a typer vec from a given point
-	 * the final vector linked the origin of the sdr to the given point
+	/** this function return a type [Vec] from a given point
+	 * the final vector links the origin of the sdr to the given point
 	 */
-	fun PointToVec(): Vec {
+	fun pointToVec(): Vec {
 		return Vec(x, y, z)
 	}
 	
@@ -84,6 +82,11 @@ data class Point(
 		return Point(x = x - other.x, y = y - other.y, z = z - other.z)
 	}
 	
+	
+	// --- Default data class function overriding ---
+	
+	override fun toString(): String = "Point($x, $y, $z)"
+	
 }
 
 data class Normal(
@@ -92,18 +95,17 @@ data class Normal(
 	val z: Float = 0.0f
 ) {
 	
-	override fun toString(): String = "Normal = ($x, $y, $z)"
 	
-	fun isCloseNormal(other: Normal) {
+	fun isNormalClose(other: Normal) {
 		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	}
 	
-	/**Does dot product between [Normal] and a [scalar] **/
+	/** Does dot product between [Normal] and a [scalar] **/
 	operator fun times(scalar: Float) {
 		Normal(x = x * scalar, y = y * scalar, z = z * scalar)
 	}
 	
-	/**from a given [Normal] n return -n **/
+	/** From a given [Normal] n return -n **/
 	fun negNormal(): Normal {
 		return Normal(x = -x, y = -y, z = -z)
 	}
@@ -115,12 +117,15 @@ data class Normal(
 	}
 	
 	/** Does the cross product between [Normal] and [Vec]**/
-	
 	fun crossNV(other: Vec): Vec {
 		return Vec(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
 	}
 	
 	/** Does dot product between [Normal] and [Vec]**/
 	fun dotProductNV(other: Vec) = x * other.x + y * other.y + z * other.z
+	
+	// --- Default data class function overriding ---
+	
+	override fun toString(): String = "Normal($x, $y, $z)"
 	
 }

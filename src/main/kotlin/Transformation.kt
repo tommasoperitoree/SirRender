@@ -1,0 +1,208 @@
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.PI
+
+fun Float.toRadians(): Float = (this * PI / 180.0).toFloat()
+fun Float.toDegrees(): Float = (this * 180.0 / PI).toFloat()
+
+/** Simple function to return a [Pair] with cosine and sine of the given [angleDeg]. */
+fun angleCosSin(angleDeg: Float): Pair<Float, Float> {
+	val rad = angleDeg.toRadians().toDouble()
+	return Pair(cos(rad).toFloat(), sin(rad).toFloat())
+}
+
+/**
+ * An affine transformation.
+ *
+ * [m] is the Homogeneous Matrix (4x4) of the transformation
+ * and [invm] its inverse.
+ */
+data class Transformation(
+	val m: HomogMatr4x4, val invm: HomogMatr4x4
+) {
+	
+	/** Check internal consistency of the transformation. */
+	fun isConsistent(): Boolean = m.isInverseOf(invm)
+	
+	// --- Operations (between transformations and with vec, point, normal) ---
+	
+	operator fun times(other: Transformation) =
+		Transformation(
+			m * other.m,
+			other.invm * invm  // inverse order for the inverse
+		)
+	
+	/** Applies this transformation to [p], renormalizing when w ≠ 1. */
+	operator fun times(p: Point): Point {
+		val x = m[0, 0] * p.x + m[0, 1] * p.y + m[0, 2] * p.z + m[0, 3]
+		val y = m[1, 0] * p.x + m[1, 1] * p.y + m[1, 2] * p.z + m[1, 3]
+		val z = m[2, 0] * p.x + m[2, 1] * p.y + m[2, 2] * p.z + m[2, 3]
+		val w = m[3, 0] * p.x + m[3, 1] * p.y + m[3, 2] * p.z + m[3, 3]
+		
+		return if (areClose(w, 1f)) Point(x, y, z)
+		else Point(x / w, y / w, z / w)
+	}
+	
+	/** Applies this transformation to [vec], ignoring translation. */
+	operator fun times(vec: Vec): Vec =
+		Vec(
+			m[0, 0] * vec.x + m[0, 1] * vec.y + m[0, 2] * vec.z,
+			m[1, 0] * vec.x + m[1, 1] * vec.y + m[1, 2] * vec.z,
+			m[2, 0] * vec.x + m[2, 1] * vec.y + m[2, 2] * vec.z
+		)
+	
+	/** Applies this transformation to [normal] using the inverse transpose. */
+	operator fun times(normal: Normal): Normal =
+		Normal(
+			invm[0, 0] * normal.x + invm[1, 0] * normal.y + invm[2, 0] * normal.z,
+			invm[0, 1] * normal.x + invm[1, 1] * normal.y + invm[2, 1] * normal.z,
+			invm[0, 2] * normal.x + invm[1, 2] * normal.y + invm[2, 2] * normal.z
+		)
+	
+	/** Returns the inverse of this transformation, swapping [m] and [invm]. */
+	fun inverse(): Transformation =
+		Transformation(
+			invm,
+			m
+		)
+	
+	
+	// --- Generators of Transformations ---
+	
+	companion object {
+		
+		/** Generates a [Transformation] as translation of [vec]. */
+		fun translation(vec: Vec): Transformation =
+			Transformation(
+				HomogMatr4x4(
+					floatArrayOf(
+						1f, 0f, 0f, vec.x,
+						0f, 1f, 0f, vec.y,
+						0f, 0f, 1f, vec.z,
+						0f, 0f, 0f, 1f
+					)
+				),
+				HomogMatr4x4(
+					floatArrayOf(
+						1f, 0f, 0f, -vec.x,
+						0f, 1f, 0f, -vec.y,
+						0f, 0f, 1f, -vec.z,
+						0f, 0f, 0f, 1f
+					)
+				)
+			)
+		
+		/** Generates a [Transformation] encoding scaling of the amount per axis given by [vec]. */
+		fun scaling(vec: Vec): Transformation =
+			Transformation(
+				HomogMatr4x4(
+					floatArrayOf(
+						vec.x, 0f, 0f, 0f,
+						0f, vec.y, 0f, 0f,
+						0f, 0f, vec.z, 0f,
+						0f, 0f, 0f, 1f
+					)
+				),
+				HomogMatr4x4(
+					floatArrayOf(
+						1 / vec.x, 0f, 0f, 0f,
+						0f, 1 / vec.y, 0f, 0f,
+						0f, 0f, 1 / vec.z, 0f,
+						0f, 0f, 0f, 1f
+					)
+				)
+			)
+		
+		/** Generates a [Transformation] encoding rotation around the X axis by [angleDeg] degrees. */
+		fun rotationX(angleDeg: Float): Transformation {
+			val (c, s) = angleCosSin(angleDeg)
+			
+			return Transformation(
+				HomogMatr4x4(
+					floatArrayOf(
+						1f, 0f, 0f, 0f,
+						0f, c, -s, 0f,
+						0f, s, c, 0f,
+						0f, 0f, 0f, 1f
+					)
+				),
+				HomogMatr4x4(
+					floatArrayOf(
+						1f, 0f, 0f, 0f,
+						0f, c, s, 0f,
+						0f, -s, c, 0f,
+						0f, 0f, 0f, 1f
+					)
+				)
+			)
+		}
+		
+		/** Generates a [Transformation] encoding rotation around the Y axis by [angleDeg] degrees. */
+		fun rotationY(angleDeg: Float): Transformation {
+			val (c, s) = angleCosSin(angleDeg)
+			
+			return Transformation(
+				HomogMatr4x4(
+					floatArrayOf(
+						c, 0f, s, 0f,
+						0f, 1f, 0f, 0f,
+						-s, 0f, c, 0f,
+						0f, 0f, 0f, 1f
+					)
+				),
+				HomogMatr4x4(
+					floatArrayOf(
+						c, 0f, -s, 0f,
+						0f, 1f, 0f, 0f,
+						s, 0f, c, 0f,
+						0f, 0f, 0f, 1f
+					)
+				)
+			)
+		}
+		
+		/** Generates a [Transformation] encoding rotation around the Z axis by [angleDeg] degrees. */
+		fun rotationZ(angleDeg: Float): Transformation {
+			val (c, s) = angleCosSin(angleDeg)
+			
+			return Transformation(
+				HomogMatr4x4(
+					floatArrayOf(
+						c, -s, 0f, 0f,
+						s, c, 0f, 0f,
+						0f, 0f, 1f, 0f,
+						0f, 0f, 0f, 1f
+					)
+				),
+				HomogMatr4x4(
+					floatArrayOf(
+						c, s, 0f, 0f,
+						-s, c, 0f, 0f,
+						0f, 0f, 1f, 0f,
+						0f, 0f, 0f, 1f
+					)
+				)
+			)
+		}
+	}
+	
+	
+	// --- Default data class function overriding ---
+	
+	override fun toString(): String = "M = \n${m.toMatrixString()}"
+	
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (javaClass != other?.javaClass) return false
+		other as Transformation
+		if (!m.m.contentEquals(other.m.m)) return false
+		if (!invm.m.contentEquals(other.invm.m)) return false
+		return true
+	}
+	
+	override fun hashCode(): Int {
+		var result = m.m.contentHashCode()
+		result = 31 * result + invm.m.contentHashCode()
+		return result
+	}
+}
