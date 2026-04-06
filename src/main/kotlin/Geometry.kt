@@ -1,6 +1,4 @@
 import kotlin.math.sqrt
-import kotlin.math.abs
-import kotlin.times
 
 data class Vec(
 	var x: Float = 0.0f,
