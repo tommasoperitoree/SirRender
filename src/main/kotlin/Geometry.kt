@@ -52,6 +52,8 @@ data class Vec(
 }
 
 
+
+
 data class Point(
 	val x: Float = 0.0f,
 	val y: Float = 0.0f,
@@ -59,8 +61,8 @@ data class Point(
 ) {
 	
 	
-	fun isPointClose(other: Point) {
-		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
+	fun isClosePoint(other: Point): Boolean {
+		return areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	}
 	
 	/** this function return a type [Vec] from a given point
@@ -70,6 +72,7 @@ data class Point(
 		return Vec(x, y, z)
 	}
 	
+	/** sum between a [Point] & [Vec] return [Point]*/
 	operator fun plus(other: Vec): Point {
 		return Point(x = x + other.x, y = y + other.y, z = z + other.z)
 	}
@@ -101,8 +104,8 @@ data class Normal(
 	}
 	
 	/** Does dot product between [Normal] and a [scalar] **/
-	operator fun times(scalar: Float) {
-		Normal(x = x * scalar, y = y * scalar, z = z * scalar)
+	operator fun times(scalar: Float): Normal {
+		return Normal(x = x * scalar, y = y * scalar, z = z * scalar)
 	}
 	
 	/** From a given [Normal] n return -n **/
@@ -123,6 +126,14 @@ data class Normal(
 	
 	/** Does dot product between [Normal] and [Vec]**/
 	fun dotProductNV(other: Vec) = x * other.x + y * other.y + z * other.z
+	
+	fun squaredNorm(): Float = x * x + y * y + z * z
+	
+	/** Gives the norm of [Normal]. */
+	fun normN(): Float = sqrt(squaredNorm())
+	
+	/** Gives a [Normal] width lenght 1*/
+	fun normalize(): Normal = times (1 / normN())
 	
 	// --- Default data class function overriding ---
 	

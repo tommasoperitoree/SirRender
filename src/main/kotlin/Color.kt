@@ -31,9 +31,19 @@ data class Color(
 	// --- Utility functions ---
 	
 	/** Checks whether two [Color] are equal through [areClose] fun. */
+	fun isCloseColor(other: Color): Boolean {
+		return areClose(this.r, other.r) &&
+				areClose(this.g, other.g) &&
+				areClose(this.b, other.b)
+	}
+	
+	
+	/* questa funzione non viene usata mai,
+	quella sopra è identica ma restituisce un booleano che va bene per AssertTrue
+	
 	fun isColorClose(other: Color) =
 		areClose(r, other.r) && areClose(g, other.g) && areClose(b, other.b)
-	
+	*/
 	/** Computes the luminosity of a color as
 	 *
 	 * `L = ( max(r,g,b) + min(r,g,b) ) / 2`
@@ -66,5 +76,6 @@ data class Color(
 		result = 31 * result + b.hashCode()
 		return result
 	}
+	
 	
 }
