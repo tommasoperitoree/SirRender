@@ -1,6 +1,6 @@
 import kotlin.math.abs
 
-/** Checks if two [Float] [x] and [y] are within [epsilon]. */
+/** Checks if the two [Float]s, [x] and [y] are within [epsilon] of each other. */
 fun areClose(x: Float, y: Float, epsilon: Float = 1e-5f) =
 	abs(x - y) < epsilon
 

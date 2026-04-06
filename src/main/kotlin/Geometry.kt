@@ -29,7 +29,8 @@ data class Vec(
 	// --- Utility functions ---
 	
 	/** Checks whether two [Vec] are equal through [areClose] fun. */
-	fun isVectorClose(other: Vec) = areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
+	fun isVectorClose(other: Vec) =
+		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	
 	/** Gives the cross product between two [Vec]. */
 	fun cross(other: Vec): Vec =
@@ -58,29 +59,19 @@ data class Point(
 	val z: Float = 0.0f
 ) {
 	
-	
-	fun isPointClose(other: Point) {
+	fun isPointClose(other: Point) =
 		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
-	}
 	
 	/** this function return a type [Vec] from a given point
 	 * the final vector links the origin of the sdr to the given point
 	 */
-	fun pointToVec(): Vec {
-		return Vec(x, y, z)
-	}
+	fun pointToVec(): Vec = Vec(x, y, z)
 	
-	operator fun plus(other: Vec): Point {
-		return Point(x = x + other.x, y = y + other.y, z = z + other.z)
-	}
+	operator fun plus(other: Vec): Point = Point(x = x + other.x, y = y + other.y, z = z + other.z)
 	
-	operator fun minus(other: Point): Vec {
-		return Vec(x = x - other.x, y = y - other.y, z = z - other.z)
-	}
+	operator fun minus(other: Point): Vec = Vec(x = x - other.x, y = y - other.y, z = z - other.z)
 	
-	operator fun minus(other: Vec): Point {
-		return Point(x = x - other.x, y = y - other.y, z = z - other.z)
-	}
+	operator fun minus(other: Vec): Point = Point(x = x - other.x, y = y - other.y, z = z - other.z)
 	
 	
 	// --- Default data class function overriding ---
@@ -95,21 +86,16 @@ data class Normal(
 	val z: Float = 0.0f
 ) {
 	
-	
-	fun isNormalClose(other: Normal) {
+	fun isNormalClose(other: Normal) =
 		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
-	}
 	
 	/** Does dot product between [Normal] and a [scalar] **/
-	operator fun times(scalar: Float) {
-		Normal(x = x * scalar, y = y * scalar, z = z * scalar)
-	}
+	operator fun times(scalar: Float): Normal =
+		Normal(x * scalar, y * scalar, z * scalar)
 	
 	/** From a given [Normal] n return -n **/
-	fun negNormal(): Normal {
-		return Normal(x = -x, y = -y, z = -z)
-	}
-	
+	operator fun unaryMinus(): Normal =
+		Normal(-x, -y, -z)
 	
 	/** Does the cross product between [Normal] and [Normal]**/
 	fun crossNN(other: Normal): Vec {
