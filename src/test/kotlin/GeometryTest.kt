@@ -4,24 +4,23 @@ import org.junit.jupiter.api.Test
 import kotlin.math.abs
 
 
-
-class PointTest(){
+class PointTest() {
 	
-	val pointA=Point( x = 1.0f, y = 2.0f, z = 3.0f)
-	val pointB=Point(x=1.0f,y=1.0f,z=1.0f)
-	val pointC=Point()
+	val pointA = Point(1.0f, 2.0f, 3.0f)
+	val pointB = Point(1.0f, 1.0f, 1.0f)
+	val pointC = Point()
 	
-	val vecB=Vec(x=1.0f,y=1.0f,z=1.0f)
+	val vecB = Vec(1.0f, 1.0f, 1.0f)
 	
 	@Test
-	fun `test isClosePoint`(){
+	fun `test isClosePoint`() {
 		assertTrue(pointA.isPointClose(Point(1.0f, 2.0f, 3.0f)))
 		assertFalse(pointB.isPointClose(Point(1.0f, 2.0f, 3.0f)))
 	}
 	
 	@Test
-	fun `test pointToVec`(){
-		assertTrue(actual = pointB.pointToVec()== vecB)
+	fun `test pointToVec`() {
+		assertTrue(actual = pointB.pointToVec() == vecB)
 	}
 	
 }
