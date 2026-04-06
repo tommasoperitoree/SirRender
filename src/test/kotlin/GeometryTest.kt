@@ -15,8 +15,8 @@ class PointTest(){
 	
 	@Test
 	fun `test isClosePoint`(){
-		assertTrue(pointA.isClosePoint(Point(1.0f, 2.0f, 3.0f)))
-		assertFalse(pointB.isClosePoint(Point(1.0f, 2.0f, 3.0f)))
+		assertTrue(pointA.isPointClose(Point(1.0f, 2.0f, 3.0f)))
+		assertFalse(pointB.isPointClose(Point(1.0f, 2.0f, 3.0f)))
 	}
 	
 	@Test
