@@ -27,13 +27,16 @@ data class Vec(
 	// --- Utility functions ---
 	
 	/** Checks whether two [Vec] are equal through [areClose] fun. */
-	fun isVectorClose(other: Vec) =
+	fun isClose(other: Vec) =
 		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	
 	/** Gives the cross product between two [Vec]. */
-	fun cross(other: Vec): Vec =
-		Vec(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
 	
+	infix fun cross(other: Vec) = Vec(
+		y * other.z - z * other.y,
+		z * other.x - x * other.z,
+		x * other.y - y * other.x
+	)
 	/** Gives the squared norm of [Vec]. */
 	fun squaredNorm(): Float = x * x + y * y + z * z
 	
@@ -57,7 +60,7 @@ data class Point(
 	val z: Float = 0.0f
 ) {
 	
-	fun isPointClose(other: Point) =
+	fun isClose(other: Point) =
 		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	
 	/** this function return a type [Vec] from a given point
@@ -84,7 +87,7 @@ data class Normal(
 	val z: Float = 0.0f
 ) {
 	
-	fun isNormalClose(other: Normal) =
+	fun isClose(other: Normal) =
 		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	
 	/** Does dot product between [Normal] and a [scalar] **/
@@ -95,18 +98,22 @@ data class Normal(
 	operator fun unaryMinus(): Normal =
 		Normal(-x, -y, -z)
 	
-	/** Does the cross product between [Normal] and [Normal]**/
-	fun crossNN(other: Normal): Vec {
-		return Vec(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
-	}
+	/** Returns the dot product of this normal and [other] vector. */
+	infix fun dot(other: Normal): Float = x * other.x + y * other.y + z * other.z
 	
-	/** Does the cross product between [Normal] and [Vec]**/
-	fun crossNV(other: Vec): Vec {
-		return Vec(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
-	}
+	/** Returns the cross product of this normal and [other] normal. */
+	infix fun cross(other: Normal) = Vec(
+		y * other.z - z * other.y,
+		z * other.x - x * other.z,
+		x * other.y - y * other.x
+	)
 	
-	/** Does dot product between [Normal] and [Vec]**/
-	fun dotProductNV(other: Vec) = x * other.x + y * other.y + z * other.z
+	/** Returns the cross product of this normal and [other] vector. */
+	infix fun cross(other: Vec) = Vec(
+		y * other.z - z * other.y,
+		z * other.x - x * other.z,
+		x * other.y - y * other.x
+	)
 	
 	// --- Default data class function overriding ---
 	
