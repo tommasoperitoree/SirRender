@@ -20,8 +20,13 @@ class PointTest() {
 	
 	@Test
 	fun `test pointToVec`() {
-		assertTrue(actual = pointB.pointToVec() == vecB)
+		val vecRes=pointB.pointToVec()
+		assertTrue(vecRes.isVectorClose(vecB)) //questa va cambiata in isClose di tommi?
 	}
 	
+	@Test
+	fun `test sum`() {
+		val c=Vec()
+	}
 }
 
