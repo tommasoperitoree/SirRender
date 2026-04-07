@@ -13,20 +13,20 @@ class PointTest() {
 	val vecB = Vec(1.0f, 1.0f, 1.0f)
 	
 	@Test
-	fun `test isClosePoint`() {
-		assertTrue(pointA.isPointClose(Point(1.0f, 2.0f, 3.0f)))
-		assertFalse(pointB.isPointClose(Point(1.0f, 2.0f, 3.0f)))
+	fun `test isCloseGeometry`() {
+		assertTrue(pointA.isCloseTo(Point(1.0f, 2.0f, 3.0f)))
+		assertFalse(pointB.isCloseTo(Point(1.0f, 2.0f, 3.0f)))
 	}
 	
 	@Test
 	fun `test pointToVec`() {
-		val vecRes=pointB.pointToVec()
-		assertTrue(vecRes.isVectorClose(vecB)) //questa va cambiata in isClose di tommi?
+		val vecRes = pointB.pointToVec()
+		assertTrue(vecRes.isCloseTo(vecB))
 	}
 	
 	@Test
 	fun `test sum`() {
-		val c=Vec()
+		val c = Vec()
 	}
 }
 

@@ -1,10 +1,34 @@
 import kotlin.math.sqrt
 
+interface Geometry {
+	val x: Float
+	val y: Float
+	val z: Float
+}
+
+/** Checks whether two [Geometry] elements are equal through [areClose] fun. */
+fun Geometry.isCloseTo(other: Geometry): Boolean =
+	areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
+
+/** Gives the dot product between two [Geometry] elements. */
+infix fun Geometry.dot(other: Geometry): Float = x * other.x + y * other.y + z * other.z
+
+/** Gives the cross product between two [Geometry] elements. */
+infix fun Geometry.cross(other: Geometry) =
+	Vec(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
+
+/** Gives the squared norm of [Geometry] elements. */
+fun Geometry.squaredNorm(): Float = x * x + y * y + z * z
+
+/** Gives the norm of [Geometry] elements. */
+fun Geometry.norm(): Float = sqrt(squaredNorm())
+
+
 data class Vec(
-	var x: Float = 0.0f,
-	var y: Float = 0.0f,
-	var z: Float = 0.0f
-) {
+	override val x: Float = 0.0f,
+	override val y: Float = 0.0f,
+	override val z: Float = 0.0f
+) : Geometry {
 	
 	// --- Operator overloading ---
 	
@@ -20,29 +44,10 @@ data class Vec(
 	operator fun times(scalar: Float): Vec =
 		Vec(x * scalar, y * scalar, z * scalar)
 	
-	operator fun times(other: Vec): Vec =
-		Vec(x * other.x, y * other.y, z * other.z)
-	
-	
-	// --- Utility functions ---
-	
-	/** Checks whether two [Vec] are equal through [areClose] fun. */
-	fun isVectorClose(other: Vec) =
-		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
-	
-	/** Gives the cross product between two [Vec]. */
-	fun cross(other: Vec): Vec =
-		Vec(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
-	
-	/** Gives the squared norm of [Vec]. */
-	fun squaredNorm(): Float = x * x + y * y + z * z
-	
-	/** Gives the norm of [Vec]. */
-	fun norm(): Float = sqrt(squaredNorm())
-	
-	fun normalize(): Vec = times(1 / norm())
-	
-	//fun vectoNormal()
+	fun normalizeVec(): Vec {
+		val n = norm()
+		return if (n == 0f) this else times(1f / n)
+	}
 	
 	
 	// --- Default data class function overriding ---
@@ -50,15 +55,11 @@ data class Vec(
 	override fun toString(): String = "Vec($x, $y, $z)"
 }
 
-
 data class Point(
-	val x: Float = 0.0f,
-	val y: Float = 0.0f,
-	val z: Float = 0.0f
-) {
-	
-	fun isPointClose(other: Point) =
-		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
+	override val x: Float = 0.0f,
+	override val y: Float = 0.0f,
+	override val z: Float = 0.0f
+) : Geometry {
 	
 	/** this function return a type [Vec] from a given point
 	 * the final vector links the origin of the sdr to the given point
@@ -79,13 +80,10 @@ data class Point(
 }
 
 data class Normal(
-	val x: Float = 0.0f,
-	val y: Float = 0.0f,
-	val z: Float = 0.0f
-) {
-	
-	fun isNormalClose(other: Normal) =
-		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
+	override val x: Float = 0.0f,
+	override val y: Float = 0.0f,
+	override val z: Float = 0.0f
+) : Geometry {
 	
 	/** Does dot product between [Normal] and a [scalar] **/
 	operator fun times(scalar: Float): Normal =
@@ -94,19 +92,6 @@ data class Normal(
 	/** From a given [Normal] n return -n **/
 	operator fun unaryMinus(): Normal =
 		Normal(-x, -y, -z)
-	
-	/** Does the cross product between [Normal] and [Normal]**/
-	fun crossNN(other: Normal): Vec {
-		return Vec(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
-	}
-	
-	/** Does the cross product between [Normal] and [Vec]**/
-	fun crossNV(other: Vec): Vec {
-		return Vec(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x)
-	}
-	
-	/** Does dot product between [Normal] and [Vec]**/
-	fun dotProductNV(other: Vec) = x * other.x + y * other.y + z * other.z
 	
 	// --- Default data class function overriding ---
 	
