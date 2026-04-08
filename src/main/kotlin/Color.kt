@@ -1,6 +1,6 @@
 import kotlin.math.abs
 
-/** Checks if two [Float] [x] and [y] are within [epsilon]. */
+/** Checks if the two [Float]s, [x] and [y] are within [epsilon] of each other. */
 fun areClose(x: Float, y: Float, epsilon: Float = 1e-5f) =
 	abs(x - y) < epsilon
 
@@ -32,18 +32,17 @@ data class Color(
 	
 	/** Checks whether two [Color] are equal through [areClose] fun. */
 	fun isCloseColor(other: Color) =
-		areClose(r, other.r) && areClose(g, other.g) && areClose(b, other.b)
+		areClose(this.r, other.r) && areClose(this.g, other.g) && areClose(this.b, other.b)
 	
 	/** Computes the luminosity of a color as
-	 *
 	 * `L = ( max(r,g,b) + min(r,g,b) ) / 2`
 	 */
 	fun luminosity(): Float {
 		val max = listOf(r, g, b).max()
 		val min = listOf(r, g, b).min()
-		
 		return (max + min) / 2
 	}
+	
 	
 	// --- Default data class function overriding ---
 	
