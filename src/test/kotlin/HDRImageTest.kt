@@ -9,7 +9,6 @@ import java.nio.ByteOrder.LITTLE_ENDIAN
 import kotlin.test.assertTrue
 
 
-
 class HDRImageTest {
 	
 	val width: Int = 10
@@ -156,7 +155,7 @@ class HDRImageTest {
 		img.normalizeImage(100.0f, 1000.0f)
 		
 		assertTrue { img.getPixel(0, 0).isCloseColor(Color(5.0e-1f, 1.0f, 1.5f)) }
-		assertTrue { img.getPixel(1,0).isCloseColor(Color(50.0f, 1.0e2f, 1.5e2f)) }
+		assertTrue { img.getPixel(1, 0).isCloseColor(Color(50.0f, 1.0e2f, 1.5e2f)) }
 	}
 	
 	@Test

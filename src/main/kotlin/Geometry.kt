@@ -51,10 +51,10 @@ data class Vec(
 	 * ```
 	 * val a = Vec(1f, 0f, 0f)
 	 * val b = Vec(0f, 1f, 0f)
-	 * val d = a dot b  // 0.0 a.dot(b)
+	 * val d = a dot b  // 0.0
 	 * ```
 	 */
-	infix fun dot(other: Vec2): Float = x * other.x + y * other.y + z * other.z
+	infix fun dot(other: Vec): Float = x * other.x + y * other.y + z * other.z
 	
 	/** Returns the cross product of this vector and [other] vector.
 	 * Example:
