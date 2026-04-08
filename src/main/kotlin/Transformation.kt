@@ -2,30 +2,52 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.PI
 
+// --- Angle utilities ---
+
+/** Converts this angle from degrees to radians. */
 fun Float.toRadians(): Float = (this * PI / 180.0).toFloat()
+
+/** Converts this angle from radians to degrees. */
 fun Float.toDegrees(): Float = (this * 180.0 / PI).toFloat()
 
-/** Simple function to return a [Pair] with cosine and sine of the given [angleDeg]. */
+/** Simple function to return a [Pair] of `(cos(angleDeg), sin(angleDeg))` of the given [angleDeg] in degrees.
+ * Converts to radians internally.
+ * Used by rotation factory functions to avoid computing [toRadians] twice.
+ */
 fun angleCosSin(angleDeg: Float): Pair<Float, Float> {
 	val rad = angleDeg.toRadians().toDouble()
 	return Pair(cos(rad).toFloat(), sin(rad).toFloat())
 }
 
+
+// --- Transformation ---
+
 /**
- * An affine transformation.
+ * Represents an affine transformation as a pair of 4×4 homogeneous matrices.
  *
- * [m] is the Homogeneous Matrix (4x4) of the transformation
- * and [invm] its inverse.
+ * @property m the transformation matrix
+ * @property invm the inverse of [m]
+ *
+ * Always construct via the [companion object][Transformation.Companion] factory functions:
+ * [translation], [scaling], [rotationX], [rotationY], [rotationZ].
  */
 data class Transformation(
 	val m: HomogMatr4x4, val invm: HomogMatr4x4
 ) {
 	
-	/** Check internal consistency of the transformation. */
-	fun isConsistent(): Boolean = m.isInverseOf(invm)
+	/**
+	 * Returns `true` if `m * invm` is close to the identity matrix.
+	 * Use this in tests to verify that a transformation was constructed correctly.
+	 */
+	fun isConsistent(): Boolean = invm.isInverseOf(m)
 	
-	// --- Operations (between transformations and with vec, point, normal) ---
 	
+	// --- Operations ---
+	
+	/**
+	 * Returns the composition of this transformation with [other].
+	 * Multiplies both matrices and maintains the correct inverse: `(A*B)⁻¹ = B⁻¹ * A⁻¹`.
+	 */
 	operator fun times(other: Transformation) =
 		Transformation(
 			m * other.m,
@@ -51,7 +73,7 @@ data class Transformation(
 			m[2, 0] * vec.x + m[2, 1] * vec.y + m[2, 2] * vec.z
 		)
 	
-	/** Applies this transformation to [normal] using the inverse transpose. */
+	/** Applies this transformation to [normal] using the inverse transpose of [m]. */
 	operator fun times(normal: Normal): Normal =
 		Normal(
 			invm[0, 0] * normal.x + invm[1, 0] * normal.y + invm[2, 0] * normal.z,
@@ -71,7 +93,7 @@ data class Transformation(
 	
 	companion object {
 		
-		/** Generates a [Transformation] as translation of [vec]. */
+		/** Returns a [Transformation] encoding translation by [vec]. */
 		fun translation(vec: Vec): Transformation =
 			Transformation(
 				HomogMatr4x4(
@@ -92,7 +114,7 @@ data class Transformation(
 				)
 			)
 		
-		/** Generates a [Transformation] encoding scaling of the amount per axis given by [vec]. */
+		/** Returns a [Transformation] encoding scaling of the amount per axis given by [vec]. */
 		fun scaling(vec: Vec): Transformation =
 			Transformation(
 				HomogMatr4x4(
@@ -105,15 +127,18 @@ data class Transformation(
 				),
 				HomogMatr4x4(
 					floatArrayOf(
-						1 / vec.x, 0f, 0f, 0f,
-						0f, 1 / vec.y, 0f, 0f,
-						0f, 0f, 1 / vec.z, 0f,
+						1f / vec.x, 0f, 0f, 0f,
+						0f, 1f / vec.y, 0f, 0f,
+						0f, 0f, 1f / vec.z, 0f,
 						0f, 0f, 0f, 1f
 					)
 				)
 			)
 		
-		/** Generates a [Transformation] encoding rotation around the X axis by [angleDeg] degrees. */
+		/**
+		 * Returns a [Transformation] encoding rotation around the X axis by [angleDeg] degrees.
+		 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
+		 */
 		fun rotationX(angleDeg: Float): Transformation {
 			val (c, s) = angleCosSin(angleDeg)
 			
@@ -137,7 +162,10 @@ data class Transformation(
 			)
 		}
 		
-		/** Generates a [Transformation] encoding rotation around the Y axis by [angleDeg] degrees. */
+		/**
+		 * Returns a [Transformation] encoding rotation around the Y axis by [angleDeg] degrees.
+		 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
+		 */
 		fun rotationY(angleDeg: Float): Transformation {
 			val (c, s) = angleCosSin(angleDeg)
 			
@@ -161,7 +189,10 @@ data class Transformation(
 			)
 		}
 		
-		/** Generates a [Transformation] encoding rotation around the Z axis by [angleDeg] degrees. */
+		/**
+		 * Returns a [Transformation] encoding rotation around the Z axis by [angleDeg] degrees.
+		 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
+		 */
 		fun rotationZ(angleDeg: Float): Transformation {
 			val (c, s) = angleCosSin(angleDeg)
 			
@@ -187,9 +218,9 @@ data class Transformation(
 	}
 	
 	
-	// --- Default data class function overriding ---
+	// --- Default data class function overrides ---
 	
-	override fun toString(): String = "M = \n${m.toMatrixString()}"
+	override fun toString(): String = "Transformation:\n${m.toMatrixString()}"
 	
 	override fun equals(other: Any?): Boolean {
 		if (this === other) return true
