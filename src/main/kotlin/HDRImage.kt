@@ -138,10 +138,6 @@ data class HDRImage(
 		}
 	}
 	
-	// Do we need these specifics in the description?
-	//   * 1. It applies **Gamma Correction** using the formula: $P_{out} = P_{in}^{1/\gamma}$.
-	//	 * 2. It scales values to the 0-255 range and clamps them to avoid overflow.
-	//	 * 3. It packs the resulting R, G, B components into a 32-bit integer format ([BufferedImage.TYPE_INT_RGB]).
 	/**
 	 * Saves the current image to [stream] in LDR [format] (e.g. "png", "jpg")
 	 * applying [gamma] correction through `P_out = P_in^(1/gamma)`.
