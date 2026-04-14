@@ -163,7 +163,7 @@ data class Normal(
 		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	
 	/** Returns the dot product of this normal and [other] vector. */
-	infix fun dot(other: Normal): Float = x * other.x + y * other.y + z * other.z
+	infix fun dot(other: Vec): Float = x * other.x + y * other.y + z * other.z
 	
 	/** Returns the cross product of this normal and [other] normal. */
 	infix fun cross(other: Normal) = Vec(
