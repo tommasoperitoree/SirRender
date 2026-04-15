@@ -25,7 +25,7 @@ class RayTest {
 	@Test
 	fun `test Ray transform`() {
 		val ray = Ray(Point(1.0f, 2.0f, 3.0f), Vec(6.0f, 5.0f, 4.0f))
-		val transformation = translation(Vec(10.0f, 11.0f, 12.0f)) * rotationX(90.0f)
+		val transformation = Transformation.translation(Vec(10.0f, 11.0f, 12.0f)) * Transformation.rotationX(90.0f)
 		val transformed = ray.transform(transformation)
 		assertTrue(transformed.origin.isClose(Point(11.0f, 8.0f, 14.0f)))
 		assertTrue(transformed.dir.isClose(Vec(6.0f, -4.0f, 5.0f)))
