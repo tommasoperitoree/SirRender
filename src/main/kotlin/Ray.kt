@@ -5,6 +5,11 @@ class Ray(
 	var tMax: Float = Float.POSITIVE_INFINITY,
 	var depth: Int = 0,
 ) {
+	
+	/**
+	 * Checks whether two [Ray]s are equal, comparing [origin] and [dir]
+	 * (within floating point tolerance) through [areClose] fun.
+	 */
 	fun isClose(other: Ray) =
 		origin.isClose(other.origin) && dir.isClose(other.dir)
 	
@@ -21,6 +26,4 @@ class Ray(
 			tMax,
 			depth,
 		)
-	
-	
 }
