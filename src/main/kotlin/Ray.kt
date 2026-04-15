@@ -5,6 +5,8 @@ class Ray(
 	var tMax: Float = Float.POSITIVE_INFINITY,
 	var depth: Int = 0,
 ) {
+	fun isClose(other: Ray) =
+		origin.isClose(other.origin) && dir.isClose(other.dir)
 	
 	/** Calculates the [Point] along the ray's path at some distance from the origin given by [t]. */
 	fun at(t: Float) =
