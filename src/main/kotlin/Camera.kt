@@ -12,4 +12,15 @@ class Orthogonal(
 }
 
 
-class P
+class Perspective(
+	var distance: Float = 1.0f,
+	var aspectRatio: Float = 1.0f,
+	var transformation: Transformation
+): Camera {
+	
+	fun fireRay(u: Float, v: Float): Ray{
+		val origin = Point(-distance, 0.0f, 0.0f)
+		val direction = Vec(distance, ( 1 - 2 * u ) * aspectRatio, 2 * v - 1 )
+		return Ray(origin, direction).transform(transformation)
+	}
+}
