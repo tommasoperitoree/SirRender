@@ -6,4 +6,19 @@ class Ray(
 	var depth: Int = 0,
 ) {
 	
+	/** Calculates the [Point] along the ray's path at some distance from the origin given by [t]. */
+	fun at(t: Float) =
+		origin + dir * t
+	
+	/** Returns a new ray whose [origin] and [dir] are the transformation of the original [Ray]. */
+	fun transform(transformation: Transformation) =
+		Ray(
+			transformation * origin,
+			transformation * dir,
+			tMin,
+			tMax,
+			depth,
+		)
+	
+	
 }
