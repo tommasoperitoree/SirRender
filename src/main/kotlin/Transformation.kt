@@ -91,130 +91,128 @@ data class Transformation(
 	
 	// --- Generators of Transformations ---
 	
-	companion object {
-		
-		/** Returns a [Transformation] encoding translation by [vec]. */
-		fun translation(vec: Vec): Transformation =
-			Transformation(
-				HomogMatr4x4(
-					floatArrayOf(
-						1f, 0f, 0f, vec.x,
-						0f, 1f, 0f, vec.y,
-						0f, 0f, 1f, vec.z,
-						0f, 0f, 0f, 1f
-					)
-				),
-				HomogMatr4x4(
-					floatArrayOf(
-						1f, 0f, 0f, -vec.x,
-						0f, 1f, 0f, -vec.y,
-						0f, 0f, 1f, -vec.z,
-						0f, 0f, 0f, 1f
-					)
+	/** Returns a [Transformation] encoding translation by [vec]. */
+	fun translation(vec: Vec): Transformation =
+		Transformation(
+			HomogMatr4x4(
+				floatArrayOf(
+					1f, 0f, 0f, vec.x,
+					0f, 1f, 0f, vec.y,
+					0f, 0f, 1f, vec.z,
+					0f, 0f, 0f, 1f
+				)
+			),
+			HomogMatr4x4(
+				floatArrayOf(
+					1f, 0f, 0f, -vec.x,
+					0f, 1f, 0f, -vec.y,
+					0f, 0f, 1f, -vec.z,
+					0f, 0f, 0f, 1f
 				)
 			)
-		
-		/** Returns a [Transformation] encoding scaling of the amount per axis given by [vec]. */
-		fun scaling(vec: Vec): Transformation =
-			Transformation(
-				HomogMatr4x4(
-					floatArrayOf(
-						vec.x, 0f, 0f, 0f,
-						0f, vec.y, 0f, 0f,
-						0f, 0f, vec.z, 0f,
-						0f, 0f, 0f, 1f
-					)
-				),
-				HomogMatr4x4(
-					floatArrayOf(
-						1f / vec.x, 0f, 0f, 0f,
-						0f, 1f / vec.y, 0f, 0f,
-						0f, 0f, 1f / vec.z, 0f,
-						0f, 0f, 0f, 1f
-					)
+		)
+	
+	/** Returns a [Transformation] encoding scaling of the amount per axis given by [vec]. */
+	fun scaling(vec: Vec): Transformation =
+		Transformation(
+			HomogMatr4x4(
+				floatArrayOf(
+					vec.x, 0f, 0f, 0f,
+					0f, vec.y, 0f, 0f,
+					0f, 0f, vec.z, 0f,
+					0f, 0f, 0f, 1f
+				)
+			),
+			HomogMatr4x4(
+				floatArrayOf(
+					1f / vec.x, 0f, 0f, 0f,
+					0f, 1f / vec.y, 0f, 0f,
+					0f, 0f, 1f / vec.z, 0f,
+					0f, 0f, 0f, 1f
 				)
 			)
+		)
+	
+	/**
+	 * Returns a [Transformation] encoding rotation around the X axis by [angleDeg] degrees.
+	 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
+	 */
+	fun rotationX(angleDeg: Float): Transformation {
+		val (c, s) = angleCosSin(angleDeg)
 		
-		/**
-		 * Returns a [Transformation] encoding rotation around the X axis by [angleDeg] degrees.
-		 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
-		 */
-		fun rotationX(angleDeg: Float): Transformation {
-			val (c, s) = angleCosSin(angleDeg)
-			
-			return Transformation(
-				HomogMatr4x4(
-					floatArrayOf(
-						1f, 0f, 0f, 0f,
-						0f, c, -s, 0f,
-						0f, s, c, 0f,
-						0f, 0f, 0f, 1f
-					)
-				),
-				HomogMatr4x4(
-					floatArrayOf(
-						1f, 0f, 0f, 0f,
-						0f, c, s, 0f,
-						0f, -s, c, 0f,
-						0f, 0f, 0f, 1f
-					)
+		return Transformation(
+			HomogMatr4x4(
+				floatArrayOf(
+					1f, 0f, 0f, 0f,
+					0f, c, -s, 0f,
+					0f, s, c, 0f,
+					0f, 0f, 0f, 1f
+				)
+			),
+			HomogMatr4x4(
+				floatArrayOf(
+					1f, 0f, 0f, 0f,
+					0f, c, s, 0f,
+					0f, -s, c, 0f,
+					0f, 0f, 0f, 1f
 				)
 			)
-		}
+		)
+	}
+	
+	/**
+	 * Returns a [Transformation] encoding rotation around the Y axis by [angleDeg] degrees.
+	 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
+	 */
+	fun rotationY(angleDeg: Float): Transformation {
+		val (c, s) = angleCosSin(angleDeg)
 		
-		/**
-		 * Returns a [Transformation] encoding rotation around the Y axis by [angleDeg] degrees.
-		 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
-		 */
-		fun rotationY(angleDeg: Float): Transformation {
-			val (c, s) = angleCosSin(angleDeg)
-			
-			return Transformation(
-				HomogMatr4x4(
-					floatArrayOf(
-						c, 0f, s, 0f,
-						0f, 1f, 0f, 0f,
-						-s, 0f, c, 0f,
-						0f, 0f, 0f, 1f
-					)
-				),
-				HomogMatr4x4(
-					floatArrayOf(
-						c, 0f, -s, 0f,
-						0f, 1f, 0f, 0f,
-						s, 0f, c, 0f,
-						0f, 0f, 0f, 1f
-					)
+		return Transformation(
+			HomogMatr4x4(
+				floatArrayOf(
+					c, 0f, s, 0f,
+					0f, 1f, 0f, 0f,
+					-s, 0f, c, 0f,
+					0f, 0f, 0f, 1f
+				)
+			),
+			HomogMatr4x4(
+				floatArrayOf(
+					c, 0f, -s, 0f,
+					0f, 1f, 0f, 0f,
+					s, 0f, c, 0f,
+					0f, 0f, 0f, 1f
 				)
 			)
-		}
+		)
+	}
+	
+	/**
+	 * Returns a [Transformation] encoding rotation around the Z axis by [angleDeg] degrees.
+	 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
+	 */
+	fun rotationZ(angleDeg: Float): Transformation {
+		val (c, s) = angleCosSin(angleDeg)
 		
-		/**
-		 * Returns a [Transformation] encoding rotation around the Z axis by [angleDeg] degrees.
-		 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
-		 */
-		fun rotationZ(angleDeg: Float): Transformation {
-			val (c, s) = angleCosSin(angleDeg)
-			
-			return Transformation(
-				HomogMatr4x4(
-					floatArrayOf(
-						c, -s, 0f, 0f,
-						s, c, 0f, 0f,
-						0f, 0f, 1f, 0f,
-						0f, 0f, 0f, 1f
-					)
-				),
-				HomogMatr4x4(
-					floatArrayOf(
-						c, s, 0f, 0f,
-						-s, c, 0f, 0f,
-						0f, 0f, 1f, 0f,
-						0f, 0f, 0f, 1f
-					)
+		return Transformation(
+			HomogMatr4x4(
+				floatArrayOf(
+					c, -s, 0f, 0f,
+					s, c, 0f, 0f,
+					0f, 0f, 1f, 0f,
+					0f, 0f, 0f, 1f
+				)
+			),
+			HomogMatr4x4(
+				floatArrayOf(
+					c, s, 0f, 0f,
+					-s, c, 0f, 0f,
+					0f, 0f, 1f, 0f,
+					0f, 0f, 0f, 1f
 				)
 			)
-		}
+		)
+		
 	}
 	
 	

@@ -56,7 +56,7 @@ data class Vec(
 	 */
 	infix fun dot(other: Vec): Float = x * other.x + y * other.y + z * other.z
 	
-	/** Returns the cross product of this vector and [other] vector.
+	/** Returns the cross product of this vector and [other] vector which is a [Normal]
 	 * Example:
 	 * ```
 	 * val a = Vec(1f, 0f, 0f)
@@ -65,14 +65,14 @@ data class Vec(
 	 * ```
 	 */
 	infix fun cross(other: Vec) =
-		Vec(
+		Normal(
 			y * other.z - z * other.y,
 			z * other.x - x * other.z,
 			x * other.y - y * other.x
 		)
 	
 	/**
-	 * Returns a normalized (unit length) copy of this vector.
+	 * Returns a normalized (unit length) copy of this [Normal].
 	 * @throws ArithmeticException if the vector has zero length
 	 */
 	fun normalize(): Vec = times(1 / norm())
@@ -165,19 +165,17 @@ data class Normal(
 	/** Returns the dot product of this normal and [other] vector. */
 	infix fun dot(other: Vec): Float = x * other.x + y * other.y + z * other.z
 	
-	/** Returns the cross product of this normal and [other] normal. */
-	infix fun cross(other: Normal) = Vec(
-		y * other.z - z * other.y,
-		z * other.x - x * other.z,
-		x * other.y - y * other.x
-	)
+	/** Gives the squared norm of [Normal]. */
+	fun squaredNorm(): Float = x * x + y * y + z * z
 	
-	/** Returns the cross product of this normal and [other] vector. */
-	infix fun cross(other: Vec) = Vec(
-		y * other.z - z * other.y,
-		z * other.x - x * other.z,
-		x * other.y - y * other.x
-	)
+	/** Gives the norm of [Normal]. */
+	fun norm(): Float = sqrt(squaredNorm())
+	
+	/**
+	 * Returns a normalized (unit length) copy of this [Normal].
+	 * @throws ArithmeticException if the vector has zero length
+	 */
+	fun normalize(): Normal = times(1 / norm())
 	
 	
 	override fun toString(): String = "Normal($x, $y, $z)"

@@ -1,6 +1,8 @@
 interface Camera{}
 
-class Orthogonal(
+fun fireRay(u: Float, v: Float) {}
+
+class OrthogonalCamera(
 	val aspectRatio: Float,
 	val transformation: Transformation
 ): Camera{
