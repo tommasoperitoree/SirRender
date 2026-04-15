@@ -20,6 +20,13 @@ class RayTest {
 		assertTrue(ray1.isClose(ray2))
 		assertFalse(ray1.isClose(ray3))
 	}
-
-
+	
+	@Test
+	fun `test at Ray`() {
+		assertTrue(ray1.at(0.0f).isClose(Point(1.0f, 2.0f, 3.0f)))
+		assertTrue(ray1.at(1.0f).isClose(Point(6.0f, 6.0f, 2.0f)))
+		assertTrue(ray1.at(2.0f).isClose(Point(11.0f, 10.0f, 1.0f)))
+		
+	}
+	
 }
