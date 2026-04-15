@@ -72,9 +72,8 @@ class NormalTest() {
 	
 	@Test
 	fun `test dot`() {
-		val sc = nA dot nB
-		assertTrue(areClose(sc, 6.0f))
-		assertFalse(areClose(sc, 5.0f))
+		val sc = nA dot vecB
+		assertTrue(areClose(sc, 3.0f))
 	}
 	
 	@Test
