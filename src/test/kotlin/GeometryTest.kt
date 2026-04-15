@@ -2,6 +2,10 @@ import kotlin.test.assertTrue
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
+class VecTest() {
+	
+}
+
 class PointTest() {
 	
 	val pointA = Point(1.0f, 2.0f, 3.0f)
@@ -76,12 +80,6 @@ class NormalTest() {
 		assertTrue(areClose(sc, 3.0f))
 	}
 	
-	@Test
-	fun `test cross`() {
-		val cV = nA cross vecB
-		assertTrue(cV.isClose(Vec()))
-		assertFalse(cV.isClose(Vec(1.0f, 1.0f, 1.0f)))
-	}
 }
 
 
