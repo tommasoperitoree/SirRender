@@ -1,12 +1,26 @@
-abstract class Camera(){}
+/**
+ *
+ */
+interface Camera {
+	
+	fun fireRay(u: Float, v: Float) {}
 
-class Orthogonal(
+}
+
+class OrthogonalCamera(
 	val a: Float,
 	val transformation: Transformation
-): Camera (){
-
-	fun fireRay
+) : Camera {
+	
+	fun fireRay(){
+	
+	}
 }
 
 
-class P
+class PerspectiveCamera(
+	var distance: Float = 1.0f,
+	
+) : Camera {
+
+}
