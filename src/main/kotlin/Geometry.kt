@@ -7,9 +7,9 @@ import kotlin.math.sqrt
  * dot product, cross product, and normalization.
  */
 data class Vec(
-	var x: Float = 0.0f,
-	var y: Float = 0.0f,
-	var z: Float = 0.0f
+	val x: Float = 0f,
+	val y: Float = 0f,
+	val z: Float = 0f
 ) {
 	
 	// --- Operator overloading ---
@@ -82,6 +82,17 @@ data class Vec(
 	
 }
 
+// --- Basic vector constructors ---
+
+fun vecX() =
+	Vec(1f, 0f, 0f)
+
+fun vecY() =
+	Vec(0f, 1f, 0f)
+
+fun vecZ() =
+	Vec(0f, 0f, 1f)
+
 
 /**
  * Represents a 3D point with coordinates ([x], [y], [z]).
@@ -91,9 +102,9 @@ data class Vec(
  * adding a vector to a point yields a point, subtracting two points yields a vector.
  */
 data class Point(
-	val x: Float = 0.0f,
-	val y: Float = 0.0f,
-	val z: Float = 0.0f
+	val x: Float = 0f,
+	val y: Float = 0f,
+	val z: Float = 0f
 ) {
 	
 	// --- Operator overloading ---
@@ -137,9 +148,9 @@ data class Point(
  * See [Transformation.times] for details.
  */
 data class Normal(
-	val x: Float = 0.0f,
-	val y: Float = 0.0f,
-	val z: Float = 0.0f
+	val x: Float = 0f,
+	val y: Float = 0f,
+	val z: Float = 0f
 ) {
 	
 	// --- Operator overloading ---
