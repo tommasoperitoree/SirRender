@@ -6,8 +6,6 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.nio.ByteOrder.BIG_ENDIAN
 import java.nio.ByteOrder.LITTLE_ENDIAN
-import kotlin.test.assertTrue
-
 
 class HDRImageTest {
 	
