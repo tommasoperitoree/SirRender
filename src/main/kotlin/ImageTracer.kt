@@ -1,3 +1,4 @@
+/** Orchestrates the rendering process by casting rays through an [image] using a [camera]. */
 class ImageTracer(
 	val image: HDRImage,
 	val camera: Camera,

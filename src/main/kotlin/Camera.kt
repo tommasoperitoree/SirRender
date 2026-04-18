@@ -1,9 +1,25 @@
+/**
+ * An abstract observer capable of projecting a 3D scene onto a 2D plane.
+ * Concrete subclasses [OrthogonalCamera] and [PerspectiveCamera] define
+ * specific projection geometries.
+ */
 interface Camera {
-	// needed to call fireRay on a generic Camera type
-	// do we need more, e.g. an error if we actually call it on interface Camera
-	fun fireRay(u: Float, v: Float): Ray = Ray()
+	/**
+	 * Fires a [Ray] through the camera screen at normalized coordinates ([u], [v]).
+	 * The exact projection logic is implemented by derived classes.
+	 */
+	fun fireRay(u: Float, v: Float): Ray =
+		throw NotImplementedError("Camera.fireRay($u, $v) is not implemented")
 }
 
+
+/**
+ * A camera implementing an orthogonal 3D to 2D projection: parallel rays are cast from the screen plane,
+ * preserving the relative size of objects regardless of their distance from the observer.
+ *
+ * @property aspectRatio Defines the width/height ratio (e.g., 1.77 for 16:9).
+ * @property transformation Initial orientation and position in the world.
+ */
 class OrthogonalCamera(
 	val aspectRatio: Float = 1f,
 	val transformation: Transformation = Transformation()
@@ -17,6 +33,14 @@ class OrthogonalCamera(
 }
 
 
+/**
+ * A camera implementing a perspective 3D to 2D projection: simulates a pinhole camera
+ * where rays converge at a single point, creating a realistic sense of depth and foreshortening.
+ *
+ * @property distance The distance between the observer's eye and the projection screen.
+ * @property aspectRatio Defines the width/height ratio (e.g., 1.77 for 16:9).
+ * @property transformation Initial orientation and position in the world.
+ */
 class PerspectiveCamera(
 	var distance: Float = 1f,
 	var aspectRatio: Float = 1f,
