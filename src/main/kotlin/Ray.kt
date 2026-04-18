@@ -1,6 +1,6 @@
 class Ray(
-	var origin: Point,
-	var dir: Vec,
+	var origin: Point = Point(),
+	var dir: Vec = Vec(),
 	var tMin: Float = 1e-5f,
 	var tMax: Float = Float.POSITIVE_INFINITY,
 	var depth: Int = 0,
