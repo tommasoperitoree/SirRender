@@ -1,6 +1,4 @@
-# Classes description
-
-## Color
+# Classes description and things to remember
 
 ## HDRImage
 
@@ -28,30 +26,7 @@ example of a `PFM` file we had from the reference file used for testing (encoded
 - **Important** `PFM` files store their pixel data bottom-to-top, thus the above first pixel is actually the one at the
   bottom left of the image.
 
-### 🛠️ Implementation Checklist
+## Cameras
 
-The following functions must be implemented to achieve a fully functional PFM parser.
-
-#### 1. Reading Utilities (Building Blocks)
-
-* **`readLine(stream: InputStream): String`**
-    * **Requirement:** Reads exactly one byte at a time until it hits `0x0a` (`\n`).
-    * **Constraint:** Do not use `Scanner` or `readln()`, as they may over-read into the binary pixel data.
-* **`readFloat(stream: InputStream, endianness: ByteOrder): Float`**
-    * **Requirement:** Uses a 4-byte `ByteBuffer` to decode the binary data into a Kotlin `Float` based on the detected
-      endianness.
-
-#### 2. Writing Utilities
-
-* **`writeFloat(stream: OutputStream, value: Float, endianness: ByteOrder)`**
-    * **Requirement:** The inverse of `readFloat`. Converts a `Float` to 4 bytes and writes to the stream.
-* **`writePFMImage(stream: OutputStream)`**
-    * **Requirement:** Writes the PFM header (`PF`, dimensions, scale factor) followed by the binary pixel payload.
-
-#### 3. Orchestrator Functions (Integration)
-
-* **`readPFMImage(stream: InputStream): HDRImage`**
-    * **Requirement:** The main factory function. It must call the reading utilities in order to verify the header, set
-      the image dimensions, and populate the pixel array.
-    * **The "PFM Trap":** You must implement a **Bottom-Up** loop. PFM stores the bottom-left pixel first; if you read
-      top-down, the image will be inverted.
+To avoid confusion between spatial coordinates (x, y, z) and 2D screen coordinates, we will use the letters (u,v) to
+indicate screen points:
