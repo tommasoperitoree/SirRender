@@ -1,0 +1,1072 @@
+Index: src/main/kotlin/Geometry.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import kotlin.math.sqrt\n\n/**\n * Represents a 3D vector with components ([x], [y], [z]).\n *\n * Supports standard vector arithmetic: addition, subtraction, scalar multiplication,\n * dot product, cross product, and normalization.\n */\ndata class Vec(\n\tvar x: Float = 0.0f,\n\tvar y: Float = 0.0f,\n\tvar z: Float = 0.0f\n) {\n\t\n\t// --- Operator overloading ---\n\t\n\t/** Returns the sum of this vector and [other] vector. */\n\toperator fun plus(other: Vec): Vec =\n\t\tVec(x + other.x, y + other.y, z + other.z)\n\t\n\t/** Returns the difference of this vector and [other] vector. */\n\toperator fun minus(other: Vec): Vec =\n\t\tVec(x - other.x, y - other.y, z - other.z)\n\t\n\t/** Returns the negation of this vector. */\n\toperator fun unaryMinus() =\n\t\tVec(-x, -y, -z)\n\t\n\t/** Returns this vector scaled by [scalar]. */\n\toperator fun times(scalar: Float): Vec =\n\t\tVec(x * scalar, y * scalar, z * scalar)\n\t\n\t\n\t// --- Utility functions ---\n\t\n\t/**\n\t * Checks whether two [Vec]s are equal component-wise\n\t * (within floating point tolerance) through [areClose] fun.\n\t */\n\tfun isClose(other: Vec) =\n\t\tareClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)\n\t\n\t/** Gives the squared norm of [Vec]. */\n\tfun squaredNorm(): Float = x * x + y * y + z * z\n\t\n\t/** Gives the norm of [Vec]. */\n\tfun norm(): Float = sqrt(squaredNorm())\n\t\n\t/** Returns the dot product of this vector and [other] vector.\n\t * Example:\n\t * ```\n\t * val a = Vec(1f, 0f, 0f)\n\t * val b = Vec(0f, 1f, 0f)\n\t * val d = a dot b  // 0.0\n\t * ```\n\t */\n\tinfix fun dot(other: Vec): Float = x * other.x + y * other.y + z * other.z\n\t\n\t/** Returns the cross product of this vector and [other] vector.\n\t * Example:\n\t * ```\n\t * val a = Vec(1f, 0f, 0f)\n\t * val b = Vec(0f, 1f, 0f)\n\t * val c = a cross b  // Vec(0.0, 0.0, 1.0)\n\t * ```\n\t */\n\tinfix fun cross(other: Vec) =\n\t\tVec(\n\t\t\ty * other.z - z * other.y,\n\t\t\tz * other.x - x * other.z,\n\t\t\tx * other.y - y * other.x\n\t\t)\n\t\n\t/**\n\t * Returns a normalized (unit length) copy of this vector.\n\t * @throws ArithmeticException if the vector has zero length\n\t */\n\tfun normalize(): Vec = times(1 / norm())\n\t\n\t\n\toverride fun toString(): String = \"Vec($x, $y, $z)\"\n\t\n}\n\n\n/**\n * Represents a 3D point with coordinates ([x], [y], [z]).\n *\n * Unlike [Vec], a point represents a position in space — not a direction.\n * Arithmetic is restricted to geometrically meaningful operations:\n * adding a vector to a point yields a point, subtracting two points yields a vector.\n */\ndata class Point(\n\tval x: Float = 0.0f,\n\tval y: Float = 0.0f,\n\tval z: Float = 0.0f\n) {\n\t\n\t// --- Operator overloading ---\n\t\n\t/** Returns the point displaced by [other] vector. */\n\toperator fun plus(other: Vec): Point =\n\t\tPoint(x + other.x, y + other.y, z + other.z)\n\t\n\t/** Returns the vector from [other] point to this point. */\n\toperator fun minus(other: Point): Vec =\n\t\tVec(x - other.x, y - other.y, z - other.z)\n\t\n\t/** Returns this point displaced by the negation of [other] vector. */\n\toperator fun minus(other: Vec): Point =\n\t\tPoint(x - other.x, y - other.y, z - other.z)\n\t\n\t\n\t// --- Utility functions ---\n\t\n\t/** Converts this point to a [Vec] representing the vector from the origin to this point. */\n\tfun toVec(): Vec = Vec(x, y, z)\n\t\n\t/**\n\t * Checks whether two [Point]s are equal component-wise\n\t * (within floating point tolerance) through [areClose] fun.\n\t */\n\tfun isClose(other: Point) =\n\t\tareClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)\n\t\n\t\n\toverride fun toString(): String = \"Point($x, $y, $z)\"\n\t\n}\n\n\n/**\n * Represents a 3D surface normal with components ([x], [y], [z]).\n *\n * Normals behave differently from vectors under non-uniform transformations —\n * they must be transformed by the inverse transpose of the transformation matrix.\n * See [Transformation.times] for details.\n */\ndata class Normal(\n\tval x: Float = 0.0f,\n\tval y: Float = 0.0f,\n\tval z: Float = 0.0f\n) {\n\t\n\t// --- Operator overloading ---\n\t\n\t/** Returns the negation of this normal. */\n\toperator fun unaryMinus(): Normal =\n\t\tNormal(-x, -y, -z)\n\t\n\t/** Returns this normal scaled by [scalar]. */\n\toperator fun times(scalar: Float): Normal =\n\t\tNormal(x * scalar, y * scalar, z * scalar)\n\t\n\t\n\t// --- Utility functions ---\n\t\n\t/**\n\t * Checks whether two [Normal]s are equal component-wise\n\t * (within floating point tolerance) through [areClose] fun.\n\t */\n\tfun isClose(other: Normal) =\n\t\tareClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)\n\t\n\t/** Returns the dot product of this normal and [other] vector. */\n\tinfix fun dot(other: Vec): Float = x * other.x + y * other.y + z * other.z\n\t\n\t/** Returns the cross product of this normal and [other] normal. */\n\tinfix fun cross(other: Normal) = Vec(\n\t\ty * other.z - z * other.y,\n\t\tz * other.x - x * other.z,\n\t\tx * other.y - y * other.x\n\t)\n\t\n\t/** Returns the cross product of this normal and [other] vector. */\n\tinfix fun cross(other: Vec) = Vec(\n\t\ty * other.z - z * other.y,\n\t\tz * other.x - x * other.z,\n\t\tx * other.y - y * other.x\n\t)\n\t\n\t\n\toverride fun toString(): String = \"Normal($x, $y, $z)\"\n\t\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/kotlin/Geometry.kt b/src/main/kotlin/Geometry.kt
+--- a/src/main/kotlin/Geometry.kt	(revision 65b38e2e19943b2319e02ed40aabbd288b9ea7b1)
++++ b/src/main/kotlin/Geometry.kt	(date 1776454224806)
+@@ -7,9 +7,9 @@
+  * dot product, cross product, and normalization.
+  */
+ data class Vec(
+-	var x: Float = 0.0f,
+-	var y: Float = 0.0f,
+-	var z: Float = 0.0f
++	val x: Float = 0f,
++	val y: Float = 0f,
++	val z: Float = 0f
+ ) {
+ 	
+ 	// --- Operator overloading ---
+@@ -56,7 +56,7 @@
+ 	 */
+ 	infix fun dot(other: Vec): Float = x * other.x + y * other.y + z * other.z
+ 	
+-	/** Returns the cross product of this vector and [other] vector.
++	/** Returns the cross product of this vector and [other] vector which is a [Normal]
+ 	 * Example:
+ 	 * ```
+ 	 * val a = Vec(1f, 0f, 0f)
+@@ -65,14 +65,14 @@
+ 	 * ```
+ 	 */
+ 	infix fun cross(other: Vec) =
+-		Vec(
++		Normal(
+ 			y * other.z - z * other.y,
+ 			z * other.x - x * other.z,
+ 			x * other.y - y * other.x
+ 		)
+ 	
+ 	/**
+-	 * Returns a normalized (unit length) copy of this vector.
++	 * Returns a normalized (unit length) copy of this [Normal].
+ 	 * @throws ArithmeticException if the vector has zero length
+ 	 */
+ 	fun normalize(): Vec = times(1 / norm())
+@@ -82,6 +82,17 @@
+ 	
+ }
+ 
++// --- Basic vector constructors ---
++
++fun vecX() =
++	Vec(1f, 0f, 0f)
++
++fun vecY() =
++	Vec(0f, 1f, 0f)
++
++fun vecZ() =
++	Vec(0f, 0f, 1f)
++
+ 
+ /**
+  * Represents a 3D point with coordinates ([x], [y], [z]).
+@@ -91,9 +102,9 @@
+  * adding a vector to a point yields a point, subtracting two points yields a vector.
+  */
+ data class Point(
+-	val x: Float = 0.0f,
+-	val y: Float = 0.0f,
+-	val z: Float = 0.0f
++	val x: Float = 0f,
++	val y: Float = 0f,
++	val z: Float = 0f
+ ) {
+ 	
+ 	// --- Operator overloading ---
+@@ -137,9 +148,9 @@
+  * See [Transformation.times] for details.
+  */
+ data class Normal(
+-	val x: Float = 0.0f,
+-	val y: Float = 0.0f,
+-	val z: Float = 0.0f
++	val x: Float = 0f,
++	val y: Float = 0f,
++	val z: Float = 0f
+ ) {
+ 	
+ 	// --- Operator overloading ---
+@@ -165,19 +176,17 @@
+ 	/** Returns the dot product of this normal and [other] vector. */
+ 	infix fun dot(other: Vec): Float = x * other.x + y * other.y + z * other.z
+ 	
+-	/** Returns the cross product of this normal and [other] normal. */
+-	infix fun cross(other: Normal) = Vec(
+-		y * other.z - z * other.y,
+-		z * other.x - x * other.z,
+-		x * other.y - y * other.x
+-	)
++	/** Gives the squared norm of [Normal]. */
++	fun squaredNorm(): Float = x * x + y * y + z * z
+ 	
+-	/** Returns the cross product of this normal and [other] vector. */
+-	infix fun cross(other: Vec) = Vec(
+-		y * other.z - z * other.y,
+-		z * other.x - x * other.z,
+-		x * other.y - y * other.x
+-	)
++	/** Gives the norm of [Normal]. */
++	fun norm(): Float = sqrt(squaredNorm())
++	
++	/**
++	 * Returns a normalized (unit length) copy of this [Normal].
++	 * @throws ArithmeticException if the vector has zero length
++	 */
++	fun normalize(): Normal = times(1 / norm())
+ 	
+ 	
+ 	override fun toString(): String = "Normal($x, $y, $z)"
+Index: src/main/kotlin/Camera.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>interface Camera{}\n\nclass Orthogonal(\n\tval aspectRatio: Float,\n\tval transformation: Transformation\n): Camera{\n\tfun fireRay(u: Float, v: Float):Ray{\n\t\tval origin=Point(-1.0f,(1.0f-2*u)*aspectRatio,1.0f-2*v)\n\t\tval dir=Vec(1.0f, 0F, 0F)\n\t\treturn Ray(origin,dir).transform(transformation)\n\t}\n}\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/kotlin/Camera.kt b/src/main/kotlin/Camera.kt
+--- a/src/main/kotlin/Camera.kt	(revision 65b38e2e19943b2319e02ed40aabbd288b9ea7b1)
++++ b/src/main/kotlin/Camera.kt	(date 1776455239231)
+@@ -1,13 +1,28 @@
+ interface Camera{}
+ 
+-class Orthogonal(
+-	val aspectRatio: Float,
+-	val transformation: Transformation
+-): Camera{
+-	fun fireRay(u: Float, v: Float):Ray{
+-		val origin=Point(-1.0f,(1.0f-2*u)*aspectRatio,1.0f-2*v)
+-		val dir=Vec(1.0f, 0F, 0F)
+-		return Ray(origin,dir).transform(transformation)
++
++class OrthogonalCamera(
++	val aspectRatio: Float = 1f,
++	val transformation: Transformation = Transformation()
++) : Camera {
++	
++	override fun fireRay(u: Float, v: Float): Ray {
++		val origin = Point(-1f, (1 - 2 * u) * aspectRatio, 2 * v - 1)
++		val dir = Vec(1f, 0f, 0f)
++		return Ray(origin, dir).transform(transformation)
+ 	}
+ }
+ 
++
++class PerspectiveCamera(
++	var distance: Float = 1f,
++	var aspectRatio: Float = 1f,
++	var transformation: Transformation = Transformation()
++) : Camera {
++	
++	override fun fireRay(u: Float, v: Float): Ray {
++		val origin = Point(-distance, 0f, 0f)
++		val direction = Vec(distance, (1 - 2 * u) * aspectRatio, 2 * v - 1)
++		return Ray(origin, direction).transform(transformation)
++	}
++}
+\ No newline at end of file
+Index: src/main/kotlin/Ray.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>class Ray(\n\tvar origin: Point,\n\tvar dir: Vec,\n\tvar tMin: Float = 1e-5f,\n\tvar tMax: Float = Float.POSITIVE_INFINITY,\n\tvar depth: Int = 0,\n) {\n\t\n\t/**\n\t * Checks whether two [Ray]s are equal, comparing [origin] and [dir]\n\t * (within floating point tolerance) through [areClose] fun.\n\t */\n\tfun isClose(other: Ray) =\n\t\torigin.isClose(other.origin) && dir.isClose(other.dir)\n\t\n\t/** Calculates the [Point] along the ray's path at some distance from the origin given by [t]. */\n\tfun at(t: Float) =\n\t\torigin + dir * t\n\t\n\t/** Returns a new ray whose [origin] and [dir] are the transformation of the original [Ray]. */\n\tfun transform(transformation: Transformation) =\n\t\tRay(\n\t\t\ttransformation * origin,\n\t\t\ttransformation * dir,\n\t\t\ttMin,\n\t\t\ttMax,\n\t\t\tdepth,\n\t\t)\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/kotlin/Ray.kt b/src/main/kotlin/Ray.kt
+--- a/src/main/kotlin/Ray.kt	(revision 65b38e2e19943b2319e02ed40aabbd288b9ea7b1)
++++ b/src/main/kotlin/Ray.kt	(date 1776454224807)
+@@ -1,6 +1,6 @@
+ class Ray(
+-	var origin: Point,
+-	var dir: Vec,
++	var origin: Point = Point(),
++	var dir: Vec = Vec(),
+ 	var tMin: Float = 1e-5f,
+ 	var tMax: Float = Float.POSITIVE_INFINITY,
+ 	var depth: Int = 0,
+Index: src/main/kotlin/Transformation.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import kotlin.math.cos\nimport kotlin.math.sin\nimport kotlin.math.PI\n\n// --- Angle utilities ---\n\n/** Converts this angle from degrees to radians. */\nfun Float.toRadians(): Float = (this * PI / 180.0).toFloat()\n\n/** Converts this angle from radians to degrees. */\nfun Float.toDegrees(): Float = (this * 180.0 / PI).toFloat()\n\n/** Simple function to return a [Pair] of `(cos(angleDeg), sin(angleDeg))` of the given [angleDeg] in degrees.\n * Converts to radians internally.\n * Used by rotation factory functions to avoid computing [toRadians] twice.\n */\nfun angleCosSin(angleDeg: Float): Pair<Float, Float> {\n\tval rad = angleDeg.toRadians().toDouble()\n\treturn Pair(cos(rad).toFloat(), sin(rad).toFloat())\n}\n\n\n// --- Transformation ---\n\n/**\n * Represents an affine transformation as a pair of 4×4 homogeneous matrices.\n *\n * @property m the transformation matrix\n * @property invm the inverse of [m]\n *\n * Always construct via the [companion object][Transformation.Companion] factory functions:\n * [translation], [scaling], [rotationX], [rotationY], [rotationZ].\n */\ndata class Transformation(\n\tval m: HomogMatr4x4, val invm: HomogMatr4x4\n) {\n\t\n\t/**\n\t * Returns `true` if `m * invm` is close to the identity matrix.\n\t * Use this in tests to verify that a transformation was constructed correctly.\n\t */\n\tfun isConsistent(): Boolean = invm.isInverseOf(m)\n\t\n\t\n\t// --- Operations ---\n\t\n\t/**\n\t * Returns the composition of this transformation with [other].\n\t * Multiplies both matrices and maintains the correct inverse: `(A*B)⁻¹ = B⁻¹ * A⁻¹`.\n\t */\n\toperator fun times(other: Transformation) =\n\t\tTransformation(\n\t\t\tm * other.m,\n\t\t\tother.invm * invm  // inverse order for the inverse\n\t\t)\n\t\n\t/** Applies this transformation to [p], renormalizing when w ≠ 1. */\n\toperator fun times(p: Point): Point {\n\t\tval x = m[0, 0] * p.x + m[0, 1] * p.y + m[0, 2] * p.z + m[0, 3]\n\t\tval y = m[1, 0] * p.x + m[1, 1] * p.y + m[1, 2] * p.z + m[1, 3]\n\t\tval z = m[2, 0] * p.x + m[2, 1] * p.y + m[2, 2] * p.z + m[2, 3]\n\t\tval w = m[3, 0] * p.x + m[3, 1] * p.y + m[3, 2] * p.z + m[3, 3]\n\t\t\n\t\treturn if (areClose(w, 1f)) Point(x, y, z)\n\t\telse Point(x / w, y / w, z / w)\n\t}\n\t\n\t/** Applies this transformation to [vec], ignoring translation. */\n\toperator fun times(vec: Vec): Vec =\n\t\tVec(\n\t\t\tm[0, 0] * vec.x + m[0, 1] * vec.y + m[0, 2] * vec.z,\n\t\t\tm[1, 0] * vec.x + m[1, 1] * vec.y + m[1, 2] * vec.z,\n\t\t\tm[2, 0] * vec.x + m[2, 1] * vec.y + m[2, 2] * vec.z\n\t\t)\n\t\n\t/** Applies this transformation to [normal] using the inverse transpose of [m]. */\n\toperator fun times(normal: Normal): Normal =\n\t\tNormal(\n\t\t\tinvm[0, 0] * normal.x + invm[1, 0] * normal.y + invm[2, 0] * normal.z,\n\t\t\tinvm[0, 1] * normal.x + invm[1, 1] * normal.y + invm[2, 1] * normal.z,\n\t\t\tinvm[0, 2] * normal.x + invm[1, 2] * normal.y + invm[2, 2] * normal.z\n\t\t)\n\t\n\t/** Returns the inverse of this transformation, swapping [m] and [invm]. */\n\tfun inverse(): Transformation =\n\t\tTransformation(\n\t\t\tinvm,\n\t\t\tm\n\t\t)\n\t\n\t\n\t// --- Generators of Transformations ---\n\t\n\tcompanion object {\n\t\t\n\t\t/** Returns a [Transformation] encoding translation by [vec]. */\n\t\tfun translation(vec: Vec): Transformation =\n\t\t\tTransformation(\n\t\t\t\tHomogMatr4x4(\n\t\t\t\t\tfloatArrayOf(\n\t\t\t\t\t\t1f, 0f, 0f, vec.x,\n\t\t\t\t\t\t0f, 1f, 0f, vec.y,\n\t\t\t\t\t\t0f, 0f, 1f, vec.z,\n\t\t\t\t\t\t0f, 0f, 0f, 1f\n\t\t\t\t\t)\n\t\t\t\t),\n\t\t\t\tHomogMatr4x4(\n\t\t\t\t\tfloatArrayOf(\n\t\t\t\t\t\t1f, 0f, 0f, -vec.x,\n\t\t\t\t\t\t0f, 1f, 0f, -vec.y,\n\t\t\t\t\t\t0f, 0f, 1f, -vec.z,\n\t\t\t\t\t\t0f, 0f, 0f, 1f\n\t\t\t\t\t)\n\t\t\t\t)\n\t\t\t)\n\t\t\n\t\t/** Returns a [Transformation] encoding scaling of the amount per axis given by [vec]. */\n\t\tfun scaling(vec: Vec): Transformation =\n\t\t\tTransformation(\n\t\t\t\tHomogMatr4x4(\n\t\t\t\t\tfloatArrayOf(\n\t\t\t\t\t\tvec.x, 0f, 0f, 0f,\n\t\t\t\t\t\t0f, vec.y, 0f, 0f,\n\t\t\t\t\t\t0f, 0f, vec.z, 0f,\n\t\t\t\t\t\t0f, 0f, 0f, 1f\n\t\t\t\t\t)\n\t\t\t\t),\n\t\t\t\tHomogMatr4x4(\n\t\t\t\t\tfloatArrayOf(\n\t\t\t\t\t\t1f / vec.x, 0f, 0f, 0f,\n\t\t\t\t\t\t0f, 1f / vec.y, 0f, 0f,\n\t\t\t\t\t\t0f, 0f, 1f / vec.z, 0f,\n\t\t\t\t\t\t0f, 0f, 0f, 1f\n\t\t\t\t\t)\n\t\t\t\t)\n\t\t\t)\n\t\t\n\t\t/**\n\t\t * Returns a [Transformation] encoding rotation around the X axis by [angleDeg] degrees.\n\t\t * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).\n\t\t */\n\t\tfun rotationX(angleDeg: Float): Transformation {\n\t\t\tval (c, s) = angleCosSin(angleDeg)\n\t\t\t\n\t\t\treturn Transformation(\n\t\t\t\tHomogMatr4x4(\n\t\t\t\t\tfloatArrayOf(\n\t\t\t\t\t\t1f, 0f, 0f, 0f,\n\t\t\t\t\t\t0f, c, -s, 0f,\n\t\t\t\t\t\t0f, s, c, 0f,\n\t\t\t\t\t\t0f, 0f, 0f, 1f\n\t\t\t\t\t)\n\t\t\t\t),\n\t\t\t\tHomogMatr4x4(\n\t\t\t\t\tfloatArrayOf(\n\t\t\t\t\t\t1f, 0f, 0f, 0f,\n\t\t\t\t\t\t0f, c, s, 0f,\n\t\t\t\t\t\t0f, -s, c, 0f,\n\t\t\t\t\t\t0f, 0f, 0f, 1f\n\t\t\t\t\t)\n\t\t\t\t)\n\t\t\t)\n\t\t}\n\t\t\n\t\t/**\n\t\t * Returns a [Transformation] encoding rotation around the Y axis by [angleDeg] degrees.\n\t\t * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).\n\t\t */\n\t\tfun rotationY(angleDeg: Float): Transformation {\n\t\t\tval (c, s) = angleCosSin(angleDeg)\n\t\t\t\n\t\t\treturn Transformation(\n\t\t\t\tHomogMatr4x4(\n\t\t\t\t\tfloatArrayOf(\n\t\t\t\t\t\tc, 0f, s, 0f,\n\t\t\t\t\t\t0f, 1f, 0f, 0f,\n\t\t\t\t\t\t-s, 0f, c, 0f,\n\t\t\t\t\t\t0f, 0f, 0f, 1f\n\t\t\t\t\t)\n\t\t\t\t),\n\t\t\t\tHomogMatr4x4(\n\t\t\t\t\tfloatArrayOf(\n\t\t\t\t\t\tc, 0f, -s, 0f,\n\t\t\t\t\t\t0f, 1f, 0f, 0f,\n\t\t\t\t\t\ts, 0f, c, 0f,\n\t\t\t\t\t\t0f, 0f, 0f, 1f\n\t\t\t\t\t)\n\t\t\t\t)\n\t\t\t)\n\t\t}\n\t\t\n\t\t/**\n\t\t * Returns a [Transformation] encoding rotation around the Z axis by [angleDeg] degrees.\n\t\t * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).\n\t\t */\n\t\tfun rotationZ(angleDeg: Float): Transformation {\n\t\t\tval (c, s) = angleCosSin(angleDeg)\n\t\t\t\n\t\t\treturn Transformation(\n\t\t\t\tHomogMatr4x4(\n\t\t\t\t\tfloatArrayOf(\n\t\t\t\t\t\tc, -s, 0f, 0f,\n\t\t\t\t\t\ts, c, 0f, 0f,\n\t\t\t\t\t\t0f, 0f, 1f, 0f,\n\t\t\t\t\t\t0f, 0f, 0f, 1f\n\t\t\t\t\t)\n\t\t\t\t),\n\t\t\t\tHomogMatr4x4(\n\t\t\t\t\tfloatArrayOf(\n\t\t\t\t\t\tc, s, 0f, 0f,\n\t\t\t\t\t\t-s, c, 0f, 0f,\n\t\t\t\t\t\t0f, 0f, 1f, 0f,\n\t\t\t\t\t\t0f, 0f, 0f, 1f\n\t\t\t\t\t)\n\t\t\t\t)\n\t\t\t)\n\t\t}\n\t}\n\t\n\t\n\t// --- Default data class function overrides ---\n\t\n\toverride fun toString(): String = \"Transformation:\\n${m.toMatrixString()}\"\n\t\n\toverride fun equals(other: Any?): Boolean {\n\t\tif (this === other) return true\n\t\tif (javaClass != other?.javaClass) return false\n\t\tother as Transformation\n\t\tif (!m.m.contentEquals(other.m.m)) return false\n\t\tif (!invm.m.contentEquals(other.invm.m)) return false\n\t\treturn true\n\t}\n\t\n\toverride fun hashCode(): Int {\n\t\tvar result = m.m.contentHashCode()\n\t\tresult = 31 * result + invm.m.contentHashCode()\n\t\treturn result\n\t}\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/kotlin/Transformation.kt b/src/main/kotlin/Transformation.kt
+--- a/src/main/kotlin/Transformation.kt	(revision 65b38e2e19943b2319e02ed40aabbd288b9ea7b1)
++++ b/src/main/kotlin/Transformation.kt	(date 1776454224809)
+@@ -32,7 +32,8 @@
+  * [translation], [scaling], [rotationX], [rotationY], [rotationZ].
+  */
+ data class Transformation(
+-	val m: HomogMatr4x4, val invm: HomogMatr4x4
++	val m: HomogMatr4x4 = HomogMatr4x4.identity(),
++	val invm: HomogMatr4x4 = HomogMatr4x4.identity()
+ ) {
+ 	
+ 	/**
+@@ -89,151 +90,149 @@
+ 		)
+ 	
+ 	
+-	// --- Generators of Transformations ---
+-	
+-	companion object {
+-		
+-		/** Returns a [Transformation] encoding translation by [vec]. */
+-		fun translation(vec: Vec): Transformation =
+-			Transformation(
+-				HomogMatr4x4(
+-					floatArrayOf(
+-						1f, 0f, 0f, vec.x,
+-						0f, 1f, 0f, vec.y,
+-						0f, 0f, 1f, vec.z,
+-						0f, 0f, 0f, 1f
+-					)
+-				),
+-				HomogMatr4x4(
+-					floatArrayOf(
+-						1f, 0f, 0f, -vec.x,
+-						0f, 1f, 0f, -vec.y,
+-						0f, 0f, 1f, -vec.z,
+-						0f, 0f, 0f, 1f
+-					)
+-				)
+-			)
+-		
+-		/** Returns a [Transformation] encoding scaling of the amount per axis given by [vec]. */
+-		fun scaling(vec: Vec): Transformation =
+-			Transformation(
+-				HomogMatr4x4(
+-					floatArrayOf(
+-						vec.x, 0f, 0f, 0f,
+-						0f, vec.y, 0f, 0f,
+-						0f, 0f, vec.z, 0f,
+-						0f, 0f, 0f, 1f
+-					)
+-				),
+-				HomogMatr4x4(
+-					floatArrayOf(
+-						1f / vec.x, 0f, 0f, 0f,
+-						0f, 1f / vec.y, 0f, 0f,
+-						0f, 0f, 1f / vec.z, 0f,
+-						0f, 0f, 0f, 1f
+-					)
+-				)
+-			)
+-		
+-		/**
+-		 * Returns a [Transformation] encoding rotation around the X axis by [angleDeg] degrees.
+-		 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
+-		 */
+-		fun rotationX(angleDeg: Float): Transformation {
+-			val (c, s) = angleCosSin(angleDeg)
+-			
+-			return Transformation(
+-				HomogMatr4x4(
+-					floatArrayOf(
+-						1f, 0f, 0f, 0f,
+-						0f, c, -s, 0f,
+-						0f, s, c, 0f,
+-						0f, 0f, 0f, 1f
+-					)
+-				),
+-				HomogMatr4x4(
+-					floatArrayOf(
+-						1f, 0f, 0f, 0f,
+-						0f, c, s, 0f,
+-						0f, -s, c, 0f,
+-						0f, 0f, 0f, 1f
+-					)
+-				)
+-			)
+-		}
+-		
+-		/**
+-		 * Returns a [Transformation] encoding rotation around the Y axis by [angleDeg] degrees.
+-		 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
+-		 */
+-		fun rotationY(angleDeg: Float): Transformation {
+-			val (c, s) = angleCosSin(angleDeg)
+-			
+-			return Transformation(
+-				HomogMatr4x4(
+-					floatArrayOf(
+-						c, 0f, s, 0f,
+-						0f, 1f, 0f, 0f,
+-						-s, 0f, c, 0f,
+-						0f, 0f, 0f, 1f
+-					)
+-				),
+-				HomogMatr4x4(
+-					floatArrayOf(
+-						c, 0f, -s, 0f,
+-						0f, 1f, 0f, 0f,
+-						s, 0f, c, 0f,
+-						0f, 0f, 0f, 1f
+-					)
+-				)
+-			)
+-		}
+-		
+-		/**
+-		 * Returns a [Transformation] encoding rotation around the Z axis by [angleDeg] degrees.
+-		 * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
+-		 */
+-		fun rotationZ(angleDeg: Float): Transformation {
+-			val (c, s) = angleCosSin(angleDeg)
+-			
+-			return Transformation(
+-				HomogMatr4x4(
+-					floatArrayOf(
+-						c, -s, 0f, 0f,
+-						s, c, 0f, 0f,
+-						0f, 0f, 1f, 0f,
+-						0f, 0f, 0f, 1f
+-					)
+-				),
+-				HomogMatr4x4(
+-					floatArrayOf(
+-						c, s, 0f, 0f,
+-						-s, c, 0f, 0f,
+-						0f, 0f, 1f, 0f,
+-						0f, 0f, 0f, 1f
+-					)
+-				)
+-			)
+-		}
+-	}
+-	
+-	
+-	// --- Default data class function overrides ---
+-	
+-	override fun toString(): String = "Transformation:\n${m.toMatrixString()}"
++	// --- Default data class function overrides ---
++	
++	override fun toString(): String = "Transformation:\n${m.toMatrixString()}"
++	
++	override fun equals(other: Any?): Boolean {
++		if (this === other) return true
++		if (javaClass != other?.javaClass) return false
++		other as Transformation
++		if (!m.m.contentEquals(other.m.m)) return false
++		if (!invm.m.contentEquals(other.invm.m)) return false
++		return true
++	}
++	
++	override fun hashCode(): Int {
++		var result = m.m.contentHashCode()
++		result = 31 * result + invm.m.contentHashCode()
++		return result
++	}
++}
++
++
++// --- Generators of Transformations ---
++
++/** Returns a [Transformation] encoding translation by [vec]. */
++fun translation(vec: Vec): Transformation =
++	Transformation(
++		HomogMatr4x4(
++			floatArrayOf(
++				1f, 0f, 0f, vec.x,
++				0f, 1f, 0f, vec.y,
++				0f, 0f, 1f, vec.z,
++				0f, 0f, 0f, 1f
++			)
++		),
++		HomogMatr4x4(
++			floatArrayOf(
++				1f, 0f, 0f, -vec.x,
++				0f, 1f, 0f, -vec.y,
++				0f, 0f, 1f, -vec.z,
++				0f, 0f, 0f, 1f
++			)
++		)
++	)
++
++/** Returns a [Transformation] encoding scaling of the amount per axis given by [vec]. */
++fun scaling(vec: Vec): Transformation =
++	Transformation(
++		HomogMatr4x4(
++			floatArrayOf(
++				vec.x, 0f, 0f, 0f,
++				0f, vec.y, 0f, 0f,
++				0f, 0f, vec.z, 0f,
++				0f, 0f, 0f, 1f
++			)
++		),
++		HomogMatr4x4(
++			floatArrayOf(
++				1f / vec.x, 0f, 0f, 0f,
++				0f, 1f / vec.y, 0f, 0f,
++				0f, 0f, 1f / vec.z, 0f,
++				0f, 0f, 0f, 1f
++			)
++		)
++	)
++
++/**
++ * Returns a [Transformation] encoding rotation around the X axis by [angleDeg] degrees.
++ * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
++ */
++fun rotationX(angleDeg: Float): Transformation {
++	val (c, s) = angleCosSin(angleDeg)
++	
++	return Transformation(
++		HomogMatr4x4(
++			floatArrayOf(
++				1f, 0f, 0f, 0f,
++				0f, c, -s, 0f,
++				0f, s, c, 0f,
++				0f, 0f, 0f, 1f
++			)
++		),
++		HomogMatr4x4(
++			floatArrayOf(
++				1f, 0f, 0f, 0f,
++				0f, c, s, 0f,
++				0f, -s, c, 0f,
++				0f, 0f, 0f, 1f
++			)
++		)
++	)
++}
++
++/**
++ * Returns a [Transformation] encoding rotation around the Y axis by [angleDeg] degrees.
++ * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
++ */
++fun rotationY(angleDeg: Float): Transformation {
++	val (c, s) = angleCosSin(angleDeg)
++	
++	return Transformation(
++		HomogMatr4x4(
++			floatArrayOf(
++				c, 0f, s, 0f,
++				0f, 1f, 0f, 0f,
++				-s, 0f, c, 0f,
++				0f, 0f, 0f, 1f
++			)
++		),
++		HomogMatr4x4(
++			floatArrayOf(
++				c, 0f, -s, 0f,
++				0f, 1f, 0f, 0f,
++				s, 0f, c, 0f,
++				0f, 0f, 0f, 1f
++			)
++		)
++	)
++}
++
++/**
++ * Returns a [Transformation] encoding rotation around the Z axis by [angleDeg] degrees.
++ * The inverse is the transpose of the rotation matrix (rotation by -[angleDeg]).
++ */
++fun rotationZ(angleDeg: Float): Transformation {
++	val (c, s) = angleCosSin(angleDeg)
++	
++	return Transformation(
++		HomogMatr4x4(
++			floatArrayOf(
++				c, -s, 0f, 0f,
++				s, c, 0f, 0f,
++				0f, 0f, 1f, 0f,
++				0f, 0f, 0f, 1f
++			)
++		),
++		HomogMatr4x4(
++			floatArrayOf(
++				c, s, 0f, 0f,
++				-s, c, 0f, 0f,
++				0f, 0f, 1f, 0f,
++				0f, 0f, 0f, 1f
++			)
++		)
++	)
+ 	
+-	override fun equals(other: Any?): Boolean {
+-		if (this === other) return true
+-		if (javaClass != other?.javaClass) return false
+-		other as Transformation
+-		if (!m.m.contentEquals(other.m.m)) return false
+-		if (!invm.m.contentEquals(other.invm.m)) return false
+-		return true
+-	}
+-	
+-	override fun hashCode(): Int {
+-		var result = m.m.contentHashCode()
+-		result = 31 * result + invm.m.contentHashCode()
+-		return result
+-	}
+ }
+\ No newline at end of file
+Index: .github/workflows/gradle.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># This workflow uses actions that are not certified by GitHub.\n# They are provided by a third-party and are governed by\n# separate terms of service, privacy policy, and support\n# documentation.\n# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time\n# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle\n\nname: Java CI with Gradle\n\non:\n  push:\n    branches: [ \"main\" ]\n  pull_request:\n    branches: [ \"main\" ]\n\njobs:\n  build:\n\n    runs-on: ubuntu-latest\n    permissions:\n      contents: read\n\n    steps:\n      - uses: actions/checkout@v4\n      - name: Set up JDK 17\n        uses: actions/setup-java@v4\n        with:\n          java-version: '17'\n          distribution: 'temurin'\n\n      # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.\n      # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md\n      - name: Setup Gradle\n        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0\n\n      - name: Build with Gradle Wrapper\n        run: ./gradlew build\n\n    # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).\n    # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.\n    #\n    # - name: Setup Gradle\n    #   uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0\n    #   with:\n    #     gradle-version: '8.9'\n    #\n    # - name: Build with Gradle 8.9\n    #   run: Gradle build\n\n  dependency-submission:\n\n    runs-on: ubuntu-latest\n    permissions:\n      contents: write\n\n    steps:\n      - uses: actions/checkout@v4\n      - name: Set up JDK 17\n        uses: actions/setup-java@v4\n        with:\n          java-version: '17'\n          distribution: 'temurin'\n\n      # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.\n      # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md\n      - name: Generate and submit dependency graph\n        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.github/workflows/gradle.yml b/.github/workflows/gradle.yml
+--- a/.github/workflows/gradle.yml	(revision 65b38e2e19943b2319e02ed40aabbd288b9ea7b1)
++++ b/.github/workflows/gradle.yml	(date 1776454224803)
+@@ -1,10 +1,3 @@
+-# This workflow uses actions that are not certified by GitHub.
+-# They are provided by a third-party and are governed by
+-# separate terms of service, privacy policy, and support
+-# documentation.
+-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+-
+ name: Java CI with Gradle
+ 
+ on:
+@@ -15,53 +8,46 @@
+ 
+ jobs:
+   build:
+-
+-    runs-on: ubuntu-latest
++    strategy:
++      fail-fast: false # Ensures one OS failure doesn't cancel the others
++      matrix:
++        os: [ ubuntu-latest, macos-latest, windows-latest ]
++    
++    runs-on: ${{ matrix.os }}
+     permissions:
+       contents: read
+ 
+     steps:
+-      - uses: actions/checkout@v4
+-      - name: Set up JDK 17
+-        uses: actions/setup-java@v4
++      - name: Checkout
++        uses: actions/checkout@v5
++
++      - name: Set up JDK 21
++        uses: actions/setup-java@v5
+         with:
+-          java-version: '17'
++          java-version: '21'
+           distribution: 'temurin'
+ 
+-      # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
+-      # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
+       - name: Setup Gradle
+-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
++        uses: gradle/actions/setup-gradle@v4
+ 
+       - name: Build with Gradle Wrapper
+         run: ./gradlew build
+ 
+-    # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
+-    # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
+-    #
+-    # - name: Setup Gradle
+-    #   uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+-    #   with:
+-    #     gradle-version: '8.9'
+-    #
+-    # - name: Build with Gradle 8.9
+-    #   run: Gradle build
+-
+   dependency-submission:
+-
++    # This only needs to run on Linux to scan your build file
+     runs-on: ubuntu-latest
+     permissions:
+       contents: write
+ 
+     steps:
+-      - uses: actions/checkout@v4
+-      - name: Set up JDK 17
+-        uses: actions/setup-java@v4
++      - name: Checkout
++        uses: actions/checkout@v5
++
++      - name: Set up JDK 21
++        uses: actions/setup-java@v5
+         with:
+-          java-version: '17'
++          java-version: '21'
+           distribution: 'temurin'
+ 
+-      # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
+-      # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
+       - name: Generate and submit dependency graph
+-        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
++        uses: gradle/actions/dependency-submission@v4
+\ No newline at end of file
+Index: src/test/kotlin/RayTest.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import org.junit.jupiter.api.Assertions.*\nimport org.junit.jupiter.api.Test\nimport java.io.ByteArrayInputStream\nimport java.io.FileInputStream\nimport java.io.FileOutputStream\nimport java.io.InputStream\nimport java.nio.ByteOrder.BIG_ENDIAN\nimport java.nio.ByteOrder.LITTLE_ENDIAN\nimport kotlin.test.assertTrue\n\n\nclass RayTest {\n\t\n\tval ray1 = Ray(Point(1.0f, 2.0f, 3.0f), Vec(5.0f, 4.0f, -1.0f))\n\tval ray2 = Ray(Point(1.0f, 2.0f, 3.0f), Vec(5.0f, 4.0f, -1.0f))\n\tval ray3 = Ray(Point(5.0f, 1.0f, 0.0f), Vec(3.0f, 9.0f, 4.0f))\n\t\n\t@Test\n\tfun `test isClose`() {\n\t\tassertTrue(ray1.isClose(ray2))\n\t\tassertFalse(ray1.isClose(ray3))\n\t}\n\t\n\t@Test\n\tfun `test at Ray`() {\n\t\tassertTrue(ray1.at(0.0f).isClose(Point(1.0f, 2.0f, 3.0f)))\n\t\tassertTrue(ray1.at(1.0f).isClose(Point(6.0f, 6.0f, 2.0f)))\n\t\tassertTrue(ray1.at(2.0f).isClose(Point(11.0f, 10.0f, 1.0f)))\n\t\t\n\t}\n\t\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/kotlin/RayTest.kt b/src/test/kotlin/RayTest.kt
+--- a/src/test/kotlin/RayTest.kt	(revision 65b38e2e19943b2319e02ed40aabbd288b9ea7b1)
++++ b/src/test/kotlin/RayTest.kt	(date 1776454224813)
+@@ -1,13 +1,5 @@
+ import org.junit.jupiter.api.Assertions.*
+ import org.junit.jupiter.api.Test
+-import java.io.ByteArrayInputStream
+-import java.io.FileInputStream
+-import java.io.FileOutputStream
+-import java.io.InputStream
+-import java.nio.ByteOrder.BIG_ENDIAN
+-import java.nio.ByteOrder.LITTLE_ENDIAN
+-import kotlin.test.assertTrue
+-
+ 
+ class RayTest {
+ 	
+@@ -26,7 +18,15 @@
+ 		assertTrue(ray1.at(0.0f).isClose(Point(1.0f, 2.0f, 3.0f)))
+ 		assertTrue(ray1.at(1.0f).isClose(Point(6.0f, 6.0f, 2.0f)))
+ 		assertTrue(ray1.at(2.0f).isClose(Point(11.0f, 10.0f, 1.0f)))
+-		
++	}
++	
++	@Test
++	fun `test Ray transform`() {
++		val ray = Ray(Point(1.0f, 2.0f, 3.0f), Vec(6.0f, 5.0f, 4.0f))
++		val transformation = translation(Vec(10.0f, 11.0f, 12.0f)) * rotationX(90.0f)
++		val transformed = ray.transform(transformation)
++		assertTrue(transformed.origin.isClose(Point(11.0f, 8.0f, 14.0f)))
++		assertTrue(transformed.dir.isClose(Vec(6.0f, -4.0f, 5.0f)))
+ 	}
+ 	
+ }
+\ No newline at end of file
+Index: src/test/kotlin/HDRImageTest.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import org.junit.jupiter.api.Assertions.*\nimport org.junit.jupiter.api.Test\nimport java.io.ByteArrayInputStream\nimport java.io.FileInputStream\nimport java.io.FileOutputStream\nimport java.io.InputStream\nimport java.nio.ByteOrder.BIG_ENDIAN\nimport java.nio.ByteOrder.LITTLE_ENDIAN\nimport kotlin.test.assertTrue\n\n\nclass HDRImageTest {\n\t\n\tval width: Int = 10\n\tval height: Int = 10\n\tvar img = HDRImage(width, height)\n\t\n\t// generic Height and Width for testing\n\tval x: Int = 2\n\tval y: Int = 6\n\t\n\t// pfm reference files val declaration\n\tval referenceBE = byteArrayOfInts(\n\t\t0x50, 0x46, 0x0a, 0x33, 0x20, 0x32, 0x0a, 0x31, 0x2e, 0x30, 0x0a, 0x42,\n\t\t0xc8, 0x00, 0x00, 0x43, 0x48, 0x00, 0x00, 0x43, 0x96, 0x00, 0x00, 0x43,\n\t\t0xc8, 0x00, 0x00, 0x43, 0xfa, 0x00, 0x00, 0x44, 0x16, 0x00, 0x00, 0x44,\n\t\t0x2f, 0x00, 0x00, 0x44, 0x48, 0x00, 0x00, 0x44, 0x61, 0x00, 0x00, 0x41,\n\t\t0x20, 0x00, 0x00, 0x41, 0xa0, 0x00, 0x00, 0x41, 0xf0, 0x00, 0x00, 0x42,\n\t\t0x20, 0x00, 0x00, 0x42, 0x48, 0x00, 0x00, 0x42, 0x70, 0x00, 0x00, 0x42,\n\t\t0x8c, 0x00, 0x00, 0x42, 0xa0, 0x00, 0x00, 0x42, 0xb4, 0x00, 0x00\n\t)\n\t\n\tval referenceLE = byteArrayOfInts(\n\t\t0x50, 0x46, 0x0a, 0x33, 0x20, 0x32, 0x0a, 0x2d, 0x31, 0x2e, 0x30, 0x0a,\n\t\t0x00, 0x00, 0xc8, 0x42, 0x00, 0x00, 0x48, 0x43, 0x00, 0x00, 0x96, 0x43,\n\t\t0x00, 0x00, 0xc8, 0x43, 0x00, 0x00, 0xfa, 0x43, 0x00, 0x00, 0x16, 0x44,\n\t\t0x00, 0x00, 0x2f, 0x44, 0x00, 0x00, 0x48, 0x44, 0x00, 0x00, 0x61, 0x44,\n\t\t0x00, 0x00, 0x20, 0x41, 0x00, 0x00, 0xa0, 0x41, 0x00, 0x00, 0xf0, 0x41,\n\t\t0x00, 0x00, 0x20, 0x42, 0x00, 0x00, 0x48, 0x42, 0x00, 0x00, 0x70, 0x42,\n\t\t0x00, 0x00, 0x8c, 0x42, 0x00, 0x00, 0xa0, 0x42, 0x00, 0x00, 0xb4, 0x42\n\t)\n\t\n\t@Test\n\tfun `test overwritten equals operator`() {\n\t\tassertEquals(width, img.width)\n\t\tassertEquals(height, img.height)\n\t}\n\t\n\t@Test\n\tfun `test validCoordinates function`() {\n\t\tassertTrue(img.validCoordinates(x, y))\n\t\tassertFalse(img.validCoordinates(-1, 0))\n\t\tassertFalse(img.validCoordinates(width, height)) // out of bounds (exclusive)\n\t}\n\t\n\t@Test\n\tfun `test pixelOffset function`() {\n\t\tassertEquals(y * width + x, img.pixelOffset(x, y))\n\t}\n\t\n\t@Test\n\tfun `test readLine`() {\n\t\tval sb = \"Hello\\nWorld\"\n\t\tval line: InputStream = sb.byteInputStream()\n\t\tassertEquals(\"Hello\", HDRImage.readLine(line))\n\t\tassertEquals(\"World\", HDRImage.readLine(line))\n\t\t// assertEquals(\"\", HDRImage.readLine(line))  // gives error, should we allow reading EOF\n\t}\n\t\n\t@Test\n\tfun `test parseImgSize`() {\n\t\tassertEquals(Pair(3, 2), HDRImage.parseImgSize(\"3 2\"))\n\t\tassertThrows(InvalidPFMImageFormat::class.java) {\n\t\t\tHDRImage.parseImgSize(\"1 2 3\")         // too many args\n\t\t}\n\t\tassertThrows(InvalidPFMImageFormat::class.java) {\n\t\t\tHDRImage.parseImgSize(\"-1 2\")           // negative dimension\n\t\t}\n\t\tassertThrows(InvalidPFMImageFormat::class.java) {\n\t\t\tHDRImage.parseImgSize(\"width height\")   // not integers\n\t\t}\n\t}\n\t\n\t@Test\n\tfun `test parseEndianness`() {\n\t\tassertEquals(BIG_ENDIAN, HDRImage.parseEndianness(\"1.0\"))\n\t\tassertEquals(LITTLE_ENDIAN, HDRImage.parseEndianness(\"-3.0\"))\n\t\tassertThrows(InvalidPFMImageFormat::class.java) { HDRImage.parseEndianness(\"0.0\") }\n\t\tassertThrows(InvalidPFMImageFormat::class.java) { HDRImage.parseEndianness(\"ABC\") }\n\t}\n\t\n\t@Test\n\tfun `test constructor fromPFMStream`() {\n\t\tfor (referenceBytes in arrayOf(referenceBE, referenceLE)) {\n\t\t\timg = HDRImage.fromPFMStream(ByteArrayInputStream(referenceBytes))\n\t\t\t\n\t\t\tassertEquals(img.width, 3)\n\t\t\tassertEquals(img.height, 2)\n\t\t\t\n\t\t\tassertTrue(img.getPixel(0, 0).isCloseColor(Color(1.0e1f, 2.0e1f, 3.0e1f)))\n\t\t\tassertTrue(img.getPixel(1, 0).isCloseColor(Color(4.0e1f, 5.0e1f, 6.0e1f)))\n\t\t\tassertTrue(img.getPixel(2, 0).isCloseColor(Color(7.0e1f, 8.0e1f, 9.0e1f)))\n\t\t\tassertTrue(img.getPixel(0, 1).isCloseColor(Color(1.0e2f, 2.0e2f, 3.0e2f)))\n\t\t\tassertTrue(img.getPixel(0, 0).isCloseColor(Color(1.0e1f, 2.0e1f, 3.0e1f)))\n\t\t\tassertTrue(img.getPixel(1, 1).isCloseColor(Color(4.0e2f, 5.0e2f, 6.0e2f)))\n\t\t\tassertTrue(img.getPixel(2, 1).isCloseColor(Color(7.0e2f, 8.0e2f, 9.0e2f)))\n\t\t}\n\t\tval p = \"PA\"\n\t\tassertThrows(InvalidPFMImageFormat::class.java) { HDRImage.fromPFMStream(p.byteInputStream()) }\n\t}\n\t\n\t@Test\n\tfun `test writePFImage`() {\n\t\tval filename = \"PFMImage.pfm\"\n\t\tFileOutputStream(filename).use { line -> img.writePFMImage(line, LITTLE_ENDIAN) }\n\t\t\n\t\tFileInputStream(filename).use { line ->\n\t\t\tassertEquals(\"PF\", HDRImage.readLine(line))\n\t\t\tassertEquals(\"$width $height\", HDRImage.readLine(line))\n\t\t\tassertEquals(\"-1.0\", HDRImage.readLine(line))\n\t\t}\n\t}\n\t\n\t//@Test\n\t//fun `test readPixels`() {\n\t//\tTODO()\n\t//}\n\t\n\t@Test\n\tfun `test averageLuminosity`() {\n\t\timg = HDRImage(2, 1)\n\t\timg.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))\n\t\timg.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))\n\t\t\n\t\t//We pass delta=0.0 to avoid roundings\n\t\tprint(img.averageLuminosity(delta = 0f))\n\t\tassertTrue { areClose(100.0f, img.averageLuminosity(delta = 0f)) }\n\t}\n\t\n\t@Test\n\tfun `test averageLuminosityDelta`() {\n\t\timg = HDRImage(2, 1)\n\t\timg.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))\n\t\timg.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))\n\t\tprint(img.averageLuminosity())\n\t\tassertTrue { areClose(100.0f, img.averageLuminosity()) }\n\t}\n\t\n\t@Test\n\tfun `test normalizeImage`() {\n\t\timg = HDRImage(width = 2, height = 1)\n\t\timg.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))\n\t\timg.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))\n\t\t\n\t\timg.normalizeImage(100.0f, 1000.0f)\n\t\t\n\t\tassertTrue { img.getPixel(0, 0).isCloseColor(Color(5.0e-1f, 1.0f, 1.5f)) }\n\t\tassertTrue { img.getPixel(1, 0).isCloseColor(Color(50.0f, 1.0e2f, 1.5e2f)) }\n\t}\n\t\n\t@Test\n\tfun `test clampImage`() {\n\t\timg = HDRImage(2, 1)\n\t\timg.setPixel(0, 0, Color(0.5e1f, 1.0e1f, 1.5e1f))\n\t\timg.setPixel(1, 0, Color(0.5e3f, 1.0e3f, 1.5e3f))\n\t\t\n\t\timg.clampImage()\n\t\t\n\t\tfor (clampPixel in img.pixels) {\n\t\t\tassertTrue { clampPixel.r in 0.0f..1.0f }\n\t\t\tassertTrue { clampPixel.g in 0.0f..1.0f }\n\t\t\tassertTrue { clampPixel.b in 0.0f..1.0f }\n\t\t}\n\t}\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/kotlin/HDRImageTest.kt b/src/test/kotlin/HDRImageTest.kt
+--- a/src/test/kotlin/HDRImageTest.kt	(revision 65b38e2e19943b2319e02ed40aabbd288b9ea7b1)
++++ b/src/test/kotlin/HDRImageTest.kt	(date 1776454224812)
+@@ -6,8 +6,6 @@
+ import java.io.InputStream
+ import java.nio.ByteOrder.BIG_ENDIAN
+ import java.nio.ByteOrder.LITTLE_ENDIAN
+-import kotlin.test.assertTrue
+-
+ 
+ class HDRImageTest {
+ 	
+Index: src/main/kotlin/ReadMe.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Classes description\n\n## Color\n\n## HDRImage\n\n### `PFM` Format\n\nexample of a `PFM` file we had from the reference file used for testing (encoded _little endian_), `reference_le.pfm`:\n\n0x50, 0x46, 0x0a, 0x33, 0x20, 0x32, 0x0a, 0x2d, 0x31, 0x2e, 0x30, 0x0a,\n0x00, 0x00, 0xc8, 0x42, 0x00, 0x00, 0x48, 0x43, 0x00, 0x00, 0x96, 0x43,\n0x00, 0x00, 0xc8, 0x43, 0x00, 0x00, 0xfa, 0x43, 0x00, 0x00, 0x16, 0x44,\n0x00, 0x00, 0x2f, 0x44, 0x00, 0x00, 0x48, 0x44, 0x00, 0x00, 0x61, 0x44,\n0x00, 0x00, 0x20, 0x41, 0x00, 0x00, 0xa0, 0x41, 0x00, 0x00, 0xf0, 0x41,\n0x00, 0x00, 0x20, 0x42, 0x00, 0x00, 0x48, 0x42, 0x00, 0x00, 0x70, 0x42,\n0x00, 0x00, 0x8c, 0x42, 0x00, 0x00, 0xa0, 0x42, 0x00, 0x00, 0xb4, 0x42\n\n- as seen above, the content of a `PFM` file is in bytes, so we extract byte by byte until we get `0x0a` which is `\\n`,\n  or backspace\n- the first two bytes, `0x50, 0x46` spell `PF` which is the tag that ensures we have a `.pfm` file\n- the next line, up to the next backspace, is `0x33, 0x20, 0x32` which converts to `3 2` with the space, giving us our\n  `height` and `width`\n- lastly, the next 4 bytes, `0x2d, 0x31, 0x2e, 0x30` give the `-1.0`, i.e. the _little endian_ flag\n- here the 4 Byte to 32-bit floating-point content begins, now we can get the content of our $3\\times2=6$ pixels. Since\n  we're using `r g b` colors, we need $3$ numbers each, thus $18$ total Floats, e.g. the first 4 Bytes are\n  `0x00, 0x00, 0xc8, 0x42` $= 100.0$, the `red` of the first pixel.\n- **Important** `PFM` files store their pixel data bottom-to-top, thus the above first pixel is actually the one at the\n  bottom left of the image.\n\n### \uD83D\uDEE0\uFE0F Implementation Checklist\n\nThe following functions must be implemented to achieve a fully functional PFM parser.\n\n#### 1. Reading Utilities (Building Blocks)\n\n* **`readLine(stream: InputStream): String`**\n    * **Requirement:** Reads exactly one byte at a time until it hits `0x0a` (`\\n`).\n    * **Constraint:** Do not use `Scanner` or `readln()`, as they may over-read into the binary pixel data.\n* **`readFloat(stream: InputStream, endianness: ByteOrder): Float`**\n    * **Requirement:** Uses a 4-byte `ByteBuffer` to decode the binary data into a Kotlin `Float` based on the detected\n      endianness.\n\n#### 2. Writing Utilities\n\n* **`writeFloat(stream: OutputStream, value: Float, endianness: ByteOrder)`**\n    * **Requirement:** The inverse of `readFloat`. Converts a `Float` to 4 bytes and writes to the stream.\n* **`writePFMImage(stream: OutputStream)`**\n    * **Requirement:** Writes the PFM header (`PF`, dimensions, scale factor) followed by the binary pixel payload.\n\n#### 3. Orchestrator Functions (Integration)\n\n* **`readPFMImage(stream: InputStream): HDRImage`**\n    * **Requirement:** The main factory function. It must call the reading utilities in order to verify the header, set\n      the image dimensions, and populate the pixel array.\n    * **The \"PFM Trap\":** You must implement a **Bottom-Up** loop. PFM stores the bottom-left pixel first; if you read\n      top-down, the image will be inverted.
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/kotlin/ReadMe.md b/src/main/kotlin/ReadMe.md
+--- a/src/main/kotlin/ReadMe.md	(revision 65b38e2e19943b2319e02ed40aabbd288b9ea7b1)
++++ b/src/main/kotlin/ReadMe.md	(date 1776454224808)
+@@ -1,6 +1,4 @@
+-# Classes description
+-
+-## Color
++# Classes description and things to remember
+ 
+ ## HDRImage
+ 
+@@ -28,30 +26,7 @@
+ - **Important** `PFM` files store their pixel data bottom-to-top, thus the above first pixel is actually the one at the
+   bottom left of the image.
+ 
+-### 🛠️ Implementation Checklist
+-
+-The following functions must be implemented to achieve a fully functional PFM parser.
+-
+-#### 1. Reading Utilities (Building Blocks)
+-
+-* **`readLine(stream: InputStream): String`**
+-    * **Requirement:** Reads exactly one byte at a time until it hits `0x0a` (`\n`).
+-    * **Constraint:** Do not use `Scanner` or `readln()`, as they may over-read into the binary pixel data.
+-* **`readFloat(stream: InputStream, endianness: ByteOrder): Float`**
+-    * **Requirement:** Uses a 4-byte `ByteBuffer` to decode the binary data into a Kotlin `Float` based on the detected
+-      endianness.
+-
+-#### 2. Writing Utilities
++## Cameras
+ 
+-* **`writeFloat(stream: OutputStream, value: Float, endianness: ByteOrder)`**
+-    * **Requirement:** The inverse of `readFloat`. Converts a `Float` to 4 bytes and writes to the stream.
+-* **`writePFMImage(stream: OutputStream)`**
+-    * **Requirement:** Writes the PFM header (`PF`, dimensions, scale factor) followed by the binary pixel payload.
+-
+-#### 3. Orchestrator Functions (Integration)
+-
+-* **`readPFMImage(stream: InputStream): HDRImage`**
+-    * **Requirement:** The main factory function. It must call the reading utilities in order to verify the header, set
+-      the image dimensions, and populate the pixel array.
+-    * **The "PFM Trap":** You must implement a **Bottom-Up** loop. PFM stores the bottom-left pixel first; if you read
+-      top-down, the image will be inverted.
+\ No newline at end of file
++To avoid confusion between spatial coordinates (x, y, z) and 2D screen coordinates, we will use the letters (u,v) to
++indicate screen points:
+\ No newline at end of file
+Index: build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\n\tkotlin(\"jvm\") version \"2.3.0\"\n\tid(\"org.jetbrains.dokka\") version \"2.1.0\"\n\tapplication\n}\n\ngroup = \"org.example\"\nversion = \"v0.1.0\"\n\nrepositories {\n\tmavenCentral()\n}\n\ndependencies {\n\ttestImplementation(kotlin(\"test\"))                              // adds kotlin test helpers\n\ttestImplementation(\"org.junit.jupiter:junit-jupiter:5.11.0\")   // aggregate: pulls api + engine together\n\ttestRuntimeOnly(\"org.junit.platform:junit-platform-launcher\")\n\t// dokkaPlugin(\"org.jetbrains.dokka:mathjax-plugin:2.0.0\")\n}\n\nkotlin {\n\tjvmToolchain(25)\n}\n\napplication {\n\tmainClass.set(\"MainKt\")\n}\n\ntasks.test {\n\tuseJUnitPlatform()\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/build.gradle.kts b/build.gradle.kts
+--- a/build.gradle.kts	(revision 65b38e2e19943b2319e02ed40aabbd288b9ea7b1)
++++ b/build.gradle.kts	(date 1776454224804)
+@@ -7,6 +7,17 @@
+ group = "org.example"
+ version = "v0.1.0"
+ 
++// --- SECURITY FIX ---
++// This block intercepts all dependencies across all configurations (including Dokka)
++configurations.all {
++	resolutionStrategy.eachDependency {
++		if (requested.group == "com.fasterxml.jackson.core" && requested.name == "jackson-core") {
++			useVersion("2.18.6")
++			because("fixes a DoS vulnerability in the async parser (GHSA-72hv-8253-57qq)")
++		}
++	}
++}
++
+ repositories {
+ 	mavenCentral()
+ }
+@@ -15,7 +26,6 @@
+ 	testImplementation(kotlin("test"))                              // adds kotlin test helpers
+ 	testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")   // aggregate: pulls api + engine together
+ 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+-	// dokkaPlugin("org.jetbrains.dokka:mathjax-plugin:2.0.0")
+ }
+ 
+ kotlin {
+Index: gradle.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>kotlin.code.style=official\norg.gradle.configuration-cache=true\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/gradle.properties b/gradle.properties
+--- a/gradle.properties	(revision 65b38e2e19943b2319e02ed40aabbd288b9ea7b1)
++++ b/gradle.properties	(date 1776454224805)
+@@ -1,2 +1,2 @@
+ kotlin.code.style=official
+-org.gradle.configuration-cache=true
++org.gradle.configuration-cache=true
+\ No newline at end of file
+Index: src/main/kotlin/ImageTracer.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/kotlin/ImageTracer.kt b/src/main/kotlin/ImageTracer.kt
+new file mode 100644
+--- /dev/null	(date 1776454224807)
++++ b/src/main/kotlin/ImageTracer.kt	(date 1776454224807)
+@@ -0,0 +1,31 @@
++class ImageTracer(
++	val image: HDRImage,
++	val camera: Camera,
++) {
++	
++	/**
++	 * Maps pixel coordinates ([col], [row]) to a [Ray] passing through the pixel's surface.
++	 * * Since pixels have area, [uPixel] and [vPixel] specify the relative position within
++	 * the pixel boundaries (defaulting to 0.5 for the center).
++	 */
++	fun fireRay(col: Int, row: Int, uPixel: Float = 0.5f, vPixel: Float = 0.5f): Ray {
++		// BUG: below formula has known error, will use to creat GitHub Issue
++		val u = (col + uPixel) / (image.width - 1)
++		val v = (row + vPixel) / (image.height - 1)
++		return camera.fireRay(u, v)
++	}
++	
++	/**
++	 * Iterates over every pixel in the image.
++	 * For each pixel, it invokes the [shader] function to determine the color.
++	 */
++	fun fireAllRays(shader: (Ray) -> Color) {
++		for (row in 0 until image.height) {
++			for (col in 0 until image.width) {
++				val ray = fireRay(col, row)
++				val color = shader(ray)
++				image.setPixel(col, row, color)
++			}
++		}
++	}
++}
+\ No newline at end of file
+Index: src/test/kotlin/CameraTest.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/kotlin/CameraTest.kt b/src/test/kotlin/CameraTest.kt
+new file mode 100644
+--- /dev/null	(date 1776454224809)
++++ b/src/test/kotlin/CameraTest.kt	(date 1776454224809)
+@@ -0,0 +1,56 @@
++import org.junit.jupiter.api.Assertions.*
++import org.junit.jupiter.api.Test
++
++class CameraTest {
++	
++	@Test
++	fun `test OrthogonalCamera`() {
++		
++		val cam = OrthogonalCamera(2f)
++		
++		val ray1 = cam.fireRay(0f, 0f)
++		val ray2 = cam.fireRay(1f, 0f)
++		val ray3 = cam.fireRay(0f, 1f)
++		val ray4 = cam.fireRay(1f, 1f)
++		
++		// verify that the rays are parallel by verifying that cross products vanish
++		assertTrue(areClose(0f, (ray1.dir cross ray2.dir).squaredNorm()))
++		assertTrue(areClose(0f, (ray1.dir cross ray3.dir).squaredNorm()))
++		assertTrue(areClose(0f, (ray1.dir cross ray4.dir).squaredNorm()))
++		
++		// verify that the ray hitting the corners have the right coordinates
++		assertTrue(ray1.at(1f).isClose(Point(0f, 2f, -1f)))
++		assertTrue(ray2.at(1f).isClose(Point(0f, -2f, -1f)))
++		assertTrue(ray3.at(1f).isClose(Point(0f, 2f, 1f)))
++		assertTrue(ray4.at(1f).isClose(Point(0f, -2f, 1f)))
++	}
++	
++	@Test
++	fun `test OrthogonalCamera transform`() {
++		val cam = OrthogonalCamera(transformation = (translation(-vecY() * 2f)) * rotationZ(90f))
++		val ray = cam.fireRay(0.5f, 0.5f)
++		assertTrue(ray.at(1f).isClose(Point(0f, -2f, 0f)))
++	}
++	
++	@Test
++	fun `test PerspectiveCamera`() {
++		val cam = PerspectiveCamera(1f, 2f)
++		
++		val ray1 = cam.fireRay(0f, 0f)
++		val ray2 = cam.fireRay(1f, 0f)
++		val ray3 = cam.fireRay(0f, 1f)
++		val ray4 = cam.fireRay(1f, 1f)
++		
++		// Verify that all the rays depart from the same point
++		assertTrue(ray1.origin.isClose(ray2.origin))
++		assertTrue(ray1.origin.isClose(ray3.origin))
++		assertTrue(ray1.origin.isClose(ray4.origin))
++		
++		// Verify that the ray hitting the corners have the right coordinates
++		assertTrue(ray1.at(1f).isClose(Point(0f, 2f, -1f)))
++		assertTrue(ray2.at(1f).isClose(Point(0f, -2f, -1f)))
++		assertTrue(ray3.at(1f).isClose(Point(0f, 2f, 1f)))
++		assertTrue(ray4.at(1f).isClose(Point(0f, -2f, 1f)))
++	}
++	
++}
+\ No newline at end of file
+Index: src/test/kotlin/GeometryTest.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import kotlin.test.assertTrue\nimport org.junit.jupiter.api.Assertions.*\nimport org.junit.jupiter.api.Test\n\nclass PointTest() {\n\t\n\tval pointA = Point(1.0f, 2.0f, 3.0f)\n\tval pointB = Point(1.0f, 1.0f, 1.0f)\n\tval pointC = Point()\n\t\n\tval vecB = Vec(1.0f, 1.0f, 1.0f)\n\t\n\t@Test\n\tfun `test isClose`() {\n\t\tassertTrue(pointA.isClose(Point(1.0f, 2.0f, 3.0f)))\n\t\tassertFalse(pointB.isClose(Point(1.0f, 2.0f, 3.0f)))\n\t}\n\t\n\t/** With vector and floats it is convenient to use the fun isClose instead of ==. */\n\t@Test\n\tfun `test point fun toVec`() {\n\t\tval vecRes = pointB.toVec()\n\t\tassertTrue(vecRes.isClose(vecB))\n\t}\n\t\n\t@Test\n\tfun `test sum`() {\n\t\tval c = pointA.plus(vecB)\n\t\tassertTrue(c.isClose(Point(2.0f, 3.0f, 4.0f)))\n\t}\n\t\n\t/** Difference between two [Point]s returns a [Vec]. */\n\t@Test\n\tfun `test minus Vec`() {\n\t\tval d = pointA.minus(pointB)\n\t\tassertTrue(d.isClose(Vec(0.0f, 1.0f, 2.0f)))\n\t}\n\t\n\t/** Difference between a [Point] & a [Vec] returns a [Point]. */\n\t@Test\n\tfun `test minus Point`() {\n\t\tval e = pointB.minus(vecB)\n\t\tassertTrue(e.isClose(Point(0.0f, 0.0f, 0.0f)))\n\t\tassertFalse(e.isClose(pointA))\n\t}\n}\n\nclass NormalTest() {\n\tval nA = Normal(1.0f, 1.0f, 1.0f)\n\tval nB = Normal(1.0f, 2.0f, 3.0f)\n\tval vecB = Vec(1.0f, 1.0f, 1.0f)\n\tval scalar = 3.0f\n\t\n\t@Test\n\tfun `test isClose`() {\n\t\tassertTrue(nB.isClose(Normal(1.0f, 2.0f, 3.0f)))\n\t\tassertFalse(nA.isClose(Normal(1.0f, 2.0f, 3.0f)))\n\t}\n\t\n\t@Test\n\tfun `test times`() {\n\t\tval nC = nA * scalar\n\t\tassertTrue(nC.isClose(Normal(3.0f, 3.0f, 3.0f)))\n\t\tassertFalse(nC.isClose(Normal(3.0f, 1.0f, 3.0f)))\n\t}\n\t\n\t@Test\n\tfun `test unaryMinus`() {\n\t\tval nN = nA.unaryMinus()\n\t\tassertTrue(nN.isClose(Normal(-1.0f, -1.0f, -1.0f)))\n\t}\n\t\n\t@Test\n\tfun `test dot`() {\n\t\tval sc = nA dot vecB\n\t\tassertTrue(areClose(sc, 3.0f))\n\t}\n\t\n\t@Test\n\tfun `test cross`() {\n\t\tval cV = nA cross vecB\n\t\tassertTrue(cV.isClose(Vec()))\n\t\tassertFalse(cV.isClose(Vec(1.0f, 1.0f, 1.0f)))\n\t}\n}\n\n\n\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/kotlin/GeometryTest.kt b/src/test/kotlin/GeometryTest.kt
+--- a/src/test/kotlin/GeometryTest.kt	(revision 65b38e2e19943b2319e02ed40aabbd288b9ea7b1)
++++ b/src/test/kotlin/GeometryTest.kt	(date 1776454224810)
+@@ -1,87 +1,131 @@
+-import kotlin.test.assertTrue
+ import org.junit.jupiter.api.Assertions.*
+ import org.junit.jupiter.api.Test
+ 
++class VecTest() {
++	
++	val vecA = Vec(1f, 2f, 3f)
++	val vecB = Vec(1f, 1f, 1f)
++	
++	@Test
++	fun `test isClose`() {
++		assertTrue(vecA.isClose(Vec(1f, 2f, 3f)))
++		assertFalse(vecB.isClose(Vec(1f, 2f, 3f)))
++	}
++	
++	@Test
++	fun `test operator plus`() {
++		val vecC = vecA + vecB
++		assertTrue(vecC.isClose(Vec(2f, 3f, 4f)))
++	}
++	
++	@Test
++	fun `test operator minus`() {
++		val vecC = vecA - vecB
++		assertTrue(vecC.isClose(Vec(0f, 1f, 2f)))
++	}
++	
++	@Test
++	fun `test operator times Scalar`() {
++		val vecC = vecA * 2f
++		assertTrue(vecC.isClose(Vec(2f, 4f, 6f)))
++	}
++	
++	@Test
++	fun `test squaredNorm function`() {
++		val squaredNormA: Float = vecA.squaredNorm()
++		assertTrue(areClose(squaredNormA, 14f))
++	}
++	
++	@Test
++	fun `test dot product Vec`() {
++		val dot = vecA dot vecB
++		assertTrue(areClose(dot, 6f))
++	}
++	
++	@Test
++	fun `test cross product Vec`() {
++		val cross: Normal = vecA cross vecB
++		assertTrue(cross.isClose(Normal(-1f, 2f, -1f)))
++	}
++}
++
+ class PointTest() {
+ 	
+-	val pointA = Point(1.0f, 2.0f, 3.0f)
+-	val pointB = Point(1.0f, 1.0f, 1.0f)
+-	val pointC = Point()
+-	
+-	val vecB = Vec(1.0f, 1.0f, 1.0f)
++	val pointA = Point(1f, 2f, 3f)
++	val pointB = Point(1f, 1f, 1f)
++	val vecB = Vec(1f, 1f, 1f)
+ 	
+ 	@Test
+ 	fun `test isClose`() {
+-		assertTrue(pointA.isClose(Point(1.0f, 2.0f, 3.0f)))
+-		assertFalse(pointB.isClose(Point(1.0f, 2.0f, 3.0f)))
++		assertTrue(pointA.isClose(Point(1f, 2f, 3f)))
++		assertFalse(pointB.isClose(Point(1f, 2f, 3f)))
+ 	}
+ 	
+ 	/** With vector and floats it is convenient to use the fun isClose instead of ==. */
+ 	@Test
+-	fun `test point fun toVec`() {
++	fun `test point toVec`() {
+ 		val vecRes = pointB.toVec()
+ 		assertTrue(vecRes.isClose(vecB))
+ 	}
+ 	
+ 	@Test
+-	fun `test sum`() {
+-		val c = pointA.plus(vecB)
+-		assertTrue(c.isClose(Point(2.0f, 3.0f, 4.0f)))
++	fun `test operator plus Vec`() {
++		val c = pointA + vecB
++		assertTrue(c.isClose(Point(2f, 3f, 4f)))
+ 	}
+ 	
+ 	/** Difference between two [Point]s returns a [Vec]. */
+ 	@Test
+-	fun `test minus Vec`() {
+-		val d = pointA.minus(pointB)
+-		assertTrue(d.isClose(Vec(0.0f, 1.0f, 2.0f)))
++	fun `test operator minus Vec`() {
++		val d = pointA - pointB
++		assertTrue(d.isClose(Vec(0f, 1f, 2f)))
+ 	}
+ 	
+ 	/** Difference between a [Point] & a [Vec] returns a [Point]. */
+ 	@Test
+ 	fun `test minus Point`() {
+ 		val e = pointB.minus(vecB)
+-		assertTrue(e.isClose(Point(0.0f, 0.0f, 0.0f)))
++		assertTrue(e.isClose(Point(0f, 0f, 0f)))
+ 		assertFalse(e.isClose(pointA))
+ 	}
+ }
+ 
+ class NormalTest() {
+-	val nA = Normal(1.0f, 1.0f, 1.0f)
+-	val nB = Normal(1.0f, 2.0f, 3.0f)
+-	val vecB = Vec(1.0f, 1.0f, 1.0f)
+-	val scalar = 3.0f
++	val nA = Normal(1f, 1f, 1f)
++	val nB = Normal(1f, 2f, 3f)
++	val vecB = Vec(1f, 1f, 1f)
+ 	
+ 	@Test
+ 	fun `test isClose`() {
+-		assertTrue(nB.isClose(Normal(1.0f, 2.0f, 3.0f)))
+-		assertFalse(nA.isClose(Normal(1.0f, 2.0f, 3.0f)))
++		assertTrue(nB.isClose(Normal(1f, 2f, 3f)))
++		assertFalse(nA.isClose(Normal(1f, 2f, 3f)))
+ 	}
+ 	
+ 	@Test
+-	fun `test times`() {
+-		val nC = nA * scalar
+-		assertTrue(nC.isClose(Normal(3.0f, 3.0f, 3.0f)))
+-		assertFalse(nC.isClose(Normal(3.0f, 1.0f, 3.0f)))
++	fun `test times Scalar`() {
++		val nC = nA * 3f
++		assertTrue(nC.isClose(Normal(3f, 3f, 3f)))
++		assertFalse(nC.isClose(Normal(3f, 1f, 3f)))
+ 	}
+ 	
+ 	@Test
+ 	fun `test unaryMinus`() {
+-		val nN = nA.unaryMinus()
+-		assertTrue(nN.isClose(Normal(-1.0f, -1.0f, -1.0f)))
++		val nN = -nA
++		assertTrue(nN.isClose(Normal(-1f, -1f, -1f)))
+ 	}
+ 	
+ 	@Test
+ 	fun `test dot`() {
+ 		val sc = nA dot vecB
+-		assertTrue(areClose(sc, 3.0f))
++		assertTrue(areClose(sc, 3f))
+ 	}
+ 	
+ 	@Test
+-	fun `test cross`() {
+-		val cV = nA cross vecB
+-		assertTrue(cV.isClose(Vec()))
+-		assertFalse(cV.isClose(Vec(1.0f, 1.0f, 1.0f)))
++	fun `test squaredNorm function`() {
++		val squaredNormA: Float = nB.squaredNorm()
++		assertTrue(areClose(squaredNormA, 14f))
+ 	}
++	
+ }
+ 
+ 
+Index: src/test/kotlin/ImageTracerTest.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/kotlin/ImageTracerTest.kt b/src/test/kotlin/ImageTracerTest.kt
+new file mode 100644
+--- /dev/null	(date 1776454224812)
++++ b/src/test/kotlin/ImageTracerTest.kt	(date 1776454224812)
+@@ -0,0 +1,7 @@
++import org.junit.jupiter.api.Assertions.*
++import org.junit.jupiter.api.Test
++
++class ImageTracerTest {
++	
++
++}
+\ No newline at end of file
