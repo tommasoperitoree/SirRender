@@ -15,7 +15,7 @@ class ImageTracerTest {
 	
 	@Test
 	fun `test ImageTracer fireAllRays`() {
-		tracer.fireAllRays { ray -> Color(1f, 2f, 3f) }
+		tracer.fireAllRays { _ -> Color(1f, 2f, 3f) }
 		for (row in 0 until tracer.image.height) {
 			for (col in 0 until tracer.image.width) {
 				assertTrue(tracer.image.getPixel(col, row).isClose(Color(1f, 2f, 3f)))
