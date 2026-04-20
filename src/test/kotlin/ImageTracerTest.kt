@@ -2,14 +2,17 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class ImageTracerTest {
-	val image = HDRImage(4, 2)
-	val camera = PerspectiveCamera(aspectRatio = 2f)
+	val image = HDRImage(2, 4)
+	val camera = PerspectiveCamera(1.0f, 2.0f)
 	val tracer = ImageTracer(image, camera)
 	
+	val ray1 = tracer.fireRay(0, 0, 2.5f, 1.5f)
+	val ray2 = tracer.fireRay(2, 1, 0.5f, 0.5f)
+	
+	// the two rays should be the same, because the first jumps beyond the pixel(0,0),
+	// since u & v should be floats numbers in [0,1], with default 0.5 in the center
 	@Test
-	fun `test ImageTracer fireRay`() {
-		val ray1 = tracer.fireRay(0, 0, 2.5f, 1.5f)
-		val ray2 = tracer.fireRay(2, 1, .5f, .5f)
+	fun `fireRay test`() {
 		assertTrue(ray1.isClose(ray2))
 	}
 	
