@@ -15,7 +15,7 @@ class ImageTracerTest {
 		val topLeftRay = tracer.fireRay(0, 0, 0f, 0f)
 		assertTrue(Point(0f, 2f, 1f).isClose(topLeftRay.at(1f)))
 		
-		val bottomRightRay = tracer.fireRay(3, 1, 1f, 1f)
+		val bottomRightRay = tracer.fireRay(1, 3, 1f, 1f)
 		assertTrue(Point(0f, -2f, -1f).isClose(bottomRightRay.at(1f)))
 	}
 	
