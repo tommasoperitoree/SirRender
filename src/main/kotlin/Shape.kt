@@ -1,2 +1,7 @@
-class Shape {
+interface Shape {
+
+}
+
+class Sphere(){
+
 }
