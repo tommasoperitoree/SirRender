@@ -7,6 +7,17 @@ plugins {
 group = "org.example"
 version = "v0.1.0"
 
+// --- SECURITY FIX ---
+// This block intercepts all dependencies across all configurations (including Dokka)
+configurations.all {
+	resolutionStrategy.eachDependency {
+		if (requested.group == "com.fasterxml.jackson.core" && requested.name == "jackson-core") {
+			useVersion("2.18.6")
+			because("fixes a DoS vulnerability in the async parser (GHSA-72hv-8253-57qq)")
+		}
+	}
+}
+
 repositories {
 	mavenCentral()
 }
@@ -15,7 +26,6 @@ dependencies {
 	testImplementation(kotlin("test"))                              // adds kotlin test helpers
 	testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")   // aggregate: pulls api + engine together
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	// dokkaPlugin("org.jetbrains.dokka:mathjax-plugin:2.0.0")
 }
 
 kotlin {

@@ -7,9 +7,9 @@ import kotlin.math.sqrt
  * dot product, cross product, and normalization.
  */
 data class Vec(
-	var x: Float = 0.0f,
-	var y: Float = 0.0f,
-	var z: Float = 0.0f
+	val x: Float = 0f,
+	val y: Float = 0f,
+	val z: Float = 0f
 ) {
 	
 	// --- Operator overloading ---
@@ -56,7 +56,7 @@ data class Vec(
 	 */
 	infix fun dot(other: Vec): Float = x * other.x + y * other.y + z * other.z
 	
-	/** Returns the cross product of this vector and [other] vector.
+	/** Returns the cross product of this vector and [other] vector which is a [Normal]
 	 * Example:
 	 * ```
 	 * val a = Vec(1f, 0f, 0f)
@@ -65,14 +65,14 @@ data class Vec(
 	 * ```
 	 */
 	infix fun cross(other: Vec) =
-		Vec(
+		Normal(
 			y * other.z - z * other.y,
 			z * other.x - x * other.z,
 			x * other.y - y * other.x
 		)
 	
 	/**
-	 * Returns a normalized (unit length) copy of this vector.
+	 * Returns a normalized (unit length) copy of this [Normal].
 	 * @throws ArithmeticException if the vector has zero length
 	 */
 	fun normalize(): Vec = times(1 / norm())
@@ -81,6 +81,17 @@ data class Vec(
 	override fun toString(): String = "Vec($x, $y, $z)"
 	
 }
+
+// --- Basic vector constructors ---
+
+fun vecX() =
+	Vec(1f, 0f, 0f)
+
+fun vecY() =
+	Vec(0f, 1f, 0f)
+
+fun vecZ() =
+	Vec(0f, 0f, 1f)
 
 
 /**
@@ -91,9 +102,9 @@ data class Vec(
  * adding a vector to a point yields a point, subtracting two points yields a vector.
  */
 data class Point(
-	val x: Float = 0.0f,
-	val y: Float = 0.0f,
-	val z: Float = 0.0f
+	val x: Float = 0f,
+	val y: Float = 0f,
+	val z: Float = 0f
 ) {
 	
 	// --- Operator overloading ---
@@ -137,9 +148,9 @@ data class Point(
  * See [Transformation.times] for details.
  */
 data class Normal(
-	val x: Float = 0.0f,
-	val y: Float = 0.0f,
-	val z: Float = 0.0f
+	val x: Float = 0f,
+	val y: Float = 0f,
+	val z: Float = 0f
 ) {
 	
 	// --- Operator overloading ---
@@ -163,21 +174,19 @@ data class Normal(
 		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	
 	/** Returns the dot product of this normal and [other] vector. */
-	infix fun dot(other: Normal): Float = x * other.x + y * other.y + z * other.z
+	infix fun dot(other: Vec): Float = x * other.x + y * other.y + z * other.z
 	
-	/** Returns the cross product of this normal and [other] normal. */
-	infix fun cross(other: Normal) = Vec(
-		y * other.z - z * other.y,
-		z * other.x - x * other.z,
-		x * other.y - y * other.x
-	)
+	/** Gives the squared norm of [Normal]. */
+	fun squaredNorm(): Float = x * x + y * y + z * z
 	
-	/** Returns the cross product of this normal and [other] vector. */
-	infix fun cross(other: Vec) = Vec(
-		y * other.z - z * other.y,
-		z * other.x - x * other.z,
-		x * other.y - y * other.x
-	)
+	/** Gives the norm of [Normal]. */
+	fun norm(): Float = sqrt(squaredNorm())
+	
+	/**
+	 * Returns a normalized (unit length) copy of this [Normal].
+	 * @throws ArithmeticException if the vector has zero length
+	 */
+	fun normalize(): Normal = times(1 / norm())
 	
 	
 	override fun toString(): String = "Normal($x, $y, $z)"
