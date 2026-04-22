@@ -9,10 +9,10 @@ class ImageTracer(
 	 * * Since pixels have area, [uPixel] and [vPixel] specify the relative position within
 	 * the pixel boundaries (defaulting to 0.5 for the center).
 	 */
-	fun fireRay(col: Int, row: Int, uPixel: Float = 0.5f, vPixel: Float = 0.5f): Ray {
+	fun fireRay(col: Int, row: Int, uPixel: Float = .5f, vPixel: Float = .5f): Ray {
 		// BUG: below formula has known error, will use to creat GitHub Issue
-		val u = (col + uPixel) / (image.width - 1)
-		val v = (row + vPixel) / (image.height - 1)
+		val u = (col + uPixel) / image.width
+		val v = 1f - (row + vPixel) / image.height
 		return camera.fireRay(u, v)
 	}
 	
