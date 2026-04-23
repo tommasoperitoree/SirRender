@@ -1,4 +1,3 @@
-
 class Ray(
 	var origin: Point = Point(),
 	var dir: Vec = Vec(),
