@@ -2,9 +2,8 @@ class World {
 	
 	val shapes = mutableListOf<Shape>()
 	
-	fun addShape(shape: Shape) {
+	fun addShape(shape: Shape) =
 		shapes.add(shape)
-	}
 	
 	fun rayIntersection(ray: Ray): HitRecord? {
 		var closest: HitRecord? = null
