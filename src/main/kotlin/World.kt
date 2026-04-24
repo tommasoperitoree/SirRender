@@ -1,6 +1,6 @@
 class World {
 	
-	val shapes = mutableListOf<Shape>()
+	val shapes = mutableListOf<Shape>() // shouldn't it be a class method?, also maybe we need type Set or List
 	
 	fun addShape(shape: Shape) =
 		shapes.add(shape)

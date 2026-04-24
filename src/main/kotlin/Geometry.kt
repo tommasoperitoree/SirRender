@@ -1,5 +1,3 @@
-import sun.jvm.hotspot.gc.shared.CollectedHeapName.EPSILON
-import kotlin.math.abs
 import kotlin.math.sqrt
 
 /**
