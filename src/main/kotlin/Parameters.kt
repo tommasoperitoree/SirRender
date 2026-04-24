@@ -1,3 +1,6 @@
+// Deprecated with CLI Clickt Library support?
+// if everything works after implementation we need to delete it
+
 /** Parse inputs for main.
  * [inputFileName] for the image location, [factor] and [gamma] for normalizing the images
  * and [outputFileName] to save the produced image.

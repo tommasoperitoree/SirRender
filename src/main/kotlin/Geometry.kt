@@ -77,6 +77,9 @@ data class Vec(
 	 */
 	fun normalize(): Vec = times(1 / norm())
 	
+	/** Returns the [Normal] with components of [Vec] */
+	fun toNormal(): Normal =
+		Normal(x, y, z)
 	
 	override fun toString(): String = "Vec($x, $y, $z)"
 	
