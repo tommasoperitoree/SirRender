@@ -50,8 +50,8 @@ class Sphere(
 	override fun rayIntersection(ray: Ray): HitRecord? {
 		
 		val invRay: Ray = ray.transform(transformation.inverse())
-		val o: Vec = ray.origin.toVec()
-		val d: Vec = ray.dir
+		val o: Vec = invRay.origin.toVec()
+		val d: Vec = invRay.dir
 		val delta4: Float = (o dot d).pow(2f) - d.squaredNorm().times(o.squaredNorm() - 1f)
 		val t1: Float = (-(o dot d) - sqrt(delta4)) / d.squaredNorm()
 		val t2: Float = (-(o dot d) + sqrt(delta4)) / d.squaredNorm()

@@ -28,11 +28,11 @@ class Pfm2Png : CliktCommand(
 	override fun help(context: Context) = "Convert a PFM HDR image to LDR format (PNG, JPEG, WebP, ...)"
 	
 	val inputFileName: String by argument(
-		"INPUT",
+		"--input",
 		"Input PFM file path"
 	).file(mustExist = true, canBeDir = false).convert { it.path }
 	val outputFileName: String by argument(
-		"OUTPUT",
+		"--output",
 		"Output image file path (extension determines format)"
 	)
 	val factor: Float by option(
@@ -76,14 +76,14 @@ class Demo : CliktCommand(
 	val camera: String by option(
 		"--camera", "-c",
 		help = "Camera type (projection): Orthogonal or Perspective"
-	).default("Orthogonal")
+	).choice("orthogonal", "perspective", ignoreCase = true).default("Orthogonal")
 	val observerAngle: Int by option(
 		"--observer-angle", "-i",
-	).int().default(0)
+	).int().default(30)
 	val outputFileName: String by option(
 		"--output", "-o",
 		help = "Output image file path (extension determines format)"
-	).choice("orthogonal", "perspective", ignoreCase = true).default("demo.png")
+	).default("demo.png")
 	val factor: Float by option(
 		"--factor", "-f",
 		help = "Luminosity scaling factor"
@@ -140,4 +140,4 @@ fun main(args: Array<String>) = SirRender()
 	.subcommands(Pfm2Png(), Demo())
 	.main(args)
 
-// ./gradlew run --args="demo --width=480 --height=480 --output demo.pfm"
+// ./gradlew run --args="demo --width=480 --height=480 --output demo.png"
