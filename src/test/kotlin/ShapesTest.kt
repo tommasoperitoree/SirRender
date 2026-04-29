@@ -46,6 +46,7 @@ class ShapesTest {
 	
 	/**
 	 * Verify [Sphere.rayIntersection] with a sphere that has been translated on one axis, the intersection is verified in z & x
+	 * NB uv are valuated in the coordinate sistem of the sphere
 	 */
 	@Test
 	fun `test rayIntersection with translation`() {
@@ -71,7 +72,6 @@ class ShapesTest {
 					hit2.surfacePoint.isClose(uv2) &&
 					areClose(hit2.t,2f)
 		)
-		
 		
 	}
 	
