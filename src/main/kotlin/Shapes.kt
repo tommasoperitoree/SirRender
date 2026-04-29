@@ -77,7 +77,7 @@ class Sphere(
 }
 
 
-/** A  */
+/** A 3D infinite plane parallel to the x and y axis and passing through the origin. */
 class Plane(
 	val transformation: Transformation = Transformation()
 ) : Shape {

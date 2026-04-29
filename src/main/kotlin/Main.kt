@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.convert
+import com.github.ajalt.clikt.parameters.arguments.default
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
@@ -34,7 +35,7 @@ class Pfm2Png : CliktCommand(
 	val outputFileName: String by argument(
 		"--output",
 		"Output image file path (extension determines format)"
-	)
+	).default("./src/main/kotlin/resources/image.png")
 	val factor: Float by option(
 		"--factor", "-f",
 		help = "Luminosity scaling factor"
@@ -82,7 +83,7 @@ class Demo : CliktCommand(
 	).int().default(30)
 	val outputFileName: String by option(
 		"--output", "-o",
-		help = "Output image file path (extension determines format)"
+		help = "Output image file name - extension determines format; default dir ./src/main/resources/"
 	).default("demo.png")
 	val factor: Float by option(
 		"--factor", "-f",
@@ -125,10 +126,11 @@ class Demo : CliktCommand(
 		
 		img.normalizeImage(factor)
 		img.clampImage()
-		val format = outputFileName.substringAfterLast(".").lowercase()
-		FileOutputStream(outputFileName).use { img.writeLDRImage(it, format, gamma) }
+		val outputFilePath = "./src/main/resources/$outputFileName"
+		val format = outputFilePath.substringAfterLast(".").lowercase()
+		FileOutputStream(outputFilePath).use { img.writeLDRImage(it, format, gamma) }
 		
-		println("Saved $outputFileName")
+		println("Saved $outputFilePath")
 		
 		// TODO: generate demo image content here
 	}
