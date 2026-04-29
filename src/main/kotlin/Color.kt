@@ -67,3 +67,6 @@ data class Color(
 	}
 	
 }
+
+fun white() = Color(255f, 255f, 255f)
+fun black() = Color(0f, 0f, 0f)

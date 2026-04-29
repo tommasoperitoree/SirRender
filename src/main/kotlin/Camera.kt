@@ -18,7 +18,7 @@ interface Camera {
  * preserving the relative size of objects regardless of their distance from the observer.
  *
  * @property aspectRatio Defines the width/height ratio (e.g., 1.77 for 16:9).
- * @property transformation Initial orientation and position in the world.
+ * @property transformation Initial orientation and position of the observer in the world.
  */
 class OrthogonalCamera(
 	val aspectRatio: Float = 1f,
@@ -39,7 +39,7 @@ class OrthogonalCamera(
  *
  * @property distance The distance between the observer's eye and the projection screen.
  * @property aspectRatio Defines the width/height ratio (e.g., 1.77 for 16:9).
- * @property transformation Initial orientation and position in the world.
+ * @property transformation Initial orientation and position of the observer in the world.
  */
 class PerspectiveCamera(
 	var distance: Float = 1f,
