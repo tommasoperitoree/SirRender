@@ -1,5 +1,5 @@
 class World(
-	var shapes: List<Shape> = listOf<Shape>()
+	var shapes: Array<Shape> = arrayOf<Shape>()
 ) {
 	
 	fun addShape(shape: Shape) {
