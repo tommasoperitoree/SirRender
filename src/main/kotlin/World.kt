@@ -1,9 +1,9 @@
-class World {
-	
-	val shapes = mutableListOf<Shape>() // shouldn't it be a class method?, also maybe we need type Set or List
-	
-	fun addShape(shape: Shape) =
-		shapes.add(shape)
+class World(
+	var shapes: List<Shape> = listOf<Shape>()
+) {
+	fun addShape(shape: Shape) {
+		shapes += shape
+	}
 	
 	fun rayIntersection(ray: Ray): HitRecord? {
 		var closest: HitRecord? = null
