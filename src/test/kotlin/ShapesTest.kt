@@ -3,6 +3,8 @@ import org.junit.jupiter.api.Test
 
 class ShapesTest {
 	val sphere = Sphere()
+	val t = Vec(10f, 0f, 0f)
+	val sphere1 = Sphere(translation(t))
 	
 	@Test
 	fun `test rayIntersectionDirZ`() {
@@ -40,11 +42,57 @@ class ShapesTest {
 		val hit3 = sphere.rayIntersection(ray3)
 		val uv3 = Vec2d(1 / 4f, 1 / 2f)
 		
+	}
+	
+	/**
+	 * Verify [rayIntersection] with a sphere that has been translated on one axis, the intersection is verified in z & x
+	 */
+	@Test
+	fun `test RItraslation`() {
+		val ray = Ray(Point(10f, 0f, 2f), -vecZ())
+		val hit = sphere1.rayIntersection(ray)
+		val uv = Vec2d(0f, 0f)
+		
+		val ray2 = Ray(Point(13f, 0f, 0f), -vecX())
+		val hit2 = sphere1.rayIntersection(ray2)
+		val uv2 = Vec2d(1 / 4f, 1 / 2f)
+		
+		
 		assertTrue(
-			hit3?.worldPoint?.isClose(Point(1f, 0f, 0f)) ?: false &&
-					hit3.normal.isClose(-vecX().toNormal()) &&
-					hit3.surfacePoint.isClose(uv3) &&
-					areClose(hit3.t, 1f)
+			hit?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
+					hit.normal.isClose(vecZ().toNormal()) &&
+					hit.surfacePoint.isClose(uv)&&
+					areClose(hit.t,1f)
+		)
+		
+		assertTrue(
+			hit2?.worldPoint?.isClose(Point(11f, 0f, 0f)) ?: false &&
+					hit2.normal.isClose(vecX().toNormal()) &&
+					hit2.surfacePoint.isClose(uv2) &&
+					areClose(hit2.t,2f)
+		)
+		
+		
+	}
+	
+	/**
+	 * Verify that the [ray] used in [`test rayIntersectionDirZ`] no longer hit [sphere1]
+	 */
+	@Test
+	fun `test noIntersection`() {
+		val ray1 = Ray(Point(0f, 0f, 2f), -vecZ())
+		val hit1 = sphere1.rayIntersection(ray1)
+		
+		val ray2 = Ray(Point(-10f, 0f, 0f), -vecZ())
+		val hit2 = sphere1.rayIntersection(ray2)
+		
+		assertFalse(
+			hit1?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
+					hit1.normal.isClose(vecZ().toNormal())
+		)
+		assertFalse(
+			hit2?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
+					hit2.normal.isClose(vecZ().toNormal())
 		)
 	}
 }
