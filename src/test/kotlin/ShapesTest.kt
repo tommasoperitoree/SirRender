@@ -7,7 +7,7 @@ class ShapesTest {
 	val sphere1 = Sphere(translation(t))
 	
 	@Test
-	fun `test rayIntersectionDirZ`() {
+	fun `test rayIntersection z direction`() {
 		val ray1 = Ray(Point(0f, 0f, 2f), -vecZ())
 		val uv1 = Vec2d(0f, 0f)
 		val hit1 = sphere.rayIntersection(ray1)
@@ -21,7 +21,7 @@ class ShapesTest {
 	}
 	
 	@Test
-	fun `test rayIntersectionDirX`() {
+	fun `test rayIntersection x direction`() {
 		
 		val ray2 = Ray(Point(3f, 0f, 0f), -vecX())
 		val hit2 = sphere.rayIntersection(ray2)
@@ -37,7 +37,7 @@ class ShapesTest {
 	}
 	
 	@Test
-	fun `test rayInsideSphereIntersection`() {
+	fun `test rayIntersection inside sphere`() {
 		val ray3 = Ray(Point(0f, 0f, 0f), vecX())
 		val hit3 = sphere.rayIntersection(ray3)
 		val uv3 = Vec2d(1 / 4f, 1 / 2f)
@@ -45,10 +45,10 @@ class ShapesTest {
 	}
 	
 	/**
-	 * Verify [rayIntersection] with a sphere that has been translated on one axis, the intersection is verified in z & x
+	 * Verify [Sphere.rayIntersection] with a sphere that has been translated on one axis, the intersection is verified in z & x
 	 */
 	@Test
-	fun `test RItraslation`() {
+	fun `test rayIntersection with translation`() {
 		val ray = Ray(Point(10f, 0f, 2f), -vecZ())
 		val hit = sphere1.rayIntersection(ray)
 		val uv = Vec2d(0f, 0f)
@@ -76,7 +76,7 @@ class ShapesTest {
 	}
 	
 	/**
-	 * Verify that the [ray] used in [`test rayIntersectionDirZ`] no longer hit [sphere1]
+	 * Verify that the [Ray] used in `test rayIntersection z direction` no longer hits [sphere1]
 	 */
 	@Test
 	fun `test noIntersection`() {
