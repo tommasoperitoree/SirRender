@@ -107,8 +107,6 @@ class Demo : CliktCommand(
 				for (z in coords) {
 					// spheres in every vertex of a cube centered in origin with edge 1, scaled 1/10
 					world.addShape(Sphere(translation(Vec(x, y, z)) * scaling))
-					//TODO: generate an animation with a rotation before translation (the first one is on the right),
-					//TODO: use observerAngle
 				}
 			}
 		}
@@ -119,6 +117,9 @@ class Demo : CliktCommand(
 		val img = HDRImage(width, height)
 		val screenCenter = Vec(-1f, 0f, 0f)
 		val cam = when (camera.lowercase()) {
+			//TODO: generate an animation with a rotation before translation (the first one is on the right),
+			//TODO: use observerAngle
+			
 			"orthogonal" -> OrthogonalCamera(transformation = translation(screenCenter))
 			"perspective" -> PerspectiveCamera(transformation = translation(screenCenter))
 			else -> throw IllegalStateException("No camera  found for $camera.")
