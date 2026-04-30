@@ -28,9 +28,6 @@ fun spherePointToUV(point: Point): Vec2d {
  * Interface. Each concrete [Shape] should override the [rayIntersection] method.
  */
 interface Shape {
-	// if we need to have shape already have method Transformation, then interface does not work
-	// maybe better abstract class type?
-	
 	/** Compute the intersection between a [ray] and this [Shape] */
 	fun rayIntersection(ray: Ray): HitRecord? =
 		throw NotImplementedError("Shape.rayIntersection() is abstract")
@@ -41,7 +38,6 @@ interface Shape {
 class Sphere(
 	val transformation: Transformation = Transformation()
 ) : Shape {
-	
 	
 	/**
 	 * Checks if the [ray] intersect the [Sphere].
@@ -73,7 +69,6 @@ class Sphere(
 			ray
 		)
 	}
-	
 }
 
 
@@ -108,6 +103,4 @@ class Plane(
 		)
 		
 	}
-	
-	
 }
