@@ -107,6 +107,8 @@ class Demo : CliktCommand(
 				for (z in coords) {
 					// spheres in every vertex of a cube centered in origin with edge 1, scaled 1/10
 					world.addShape(Sphere(translation(Vec(x, y, z)) * scaling))
+					//TODO: generate an animation with a rotation before translation (the first one is on the right),
+					//TODO: use observerAngle
 				}
 			}
 		}
