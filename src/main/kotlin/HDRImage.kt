@@ -73,15 +73,7 @@ data class HDRImage(
 		stream.write("$width $height\n".toByteArray())
 		val endiannessMarker = if (order == LITTLE_ENDIAN) "-1.0" else "1.0"
 		stream.write("$endiannessMarker\n".toByteArray())
-		/* old version
-		for (y in (height - 1) downTo 0) {
-			for (x in 0 until width) {
-				val c = getPixel(x, y)
-				writeFloat(stream, c.r, order)
-				writeFloat(stream, c.g, order)
-				writeFloat(stream, c.b, order)
-			}
-		} */
+		
 		val writePixel: (Int, Int) -> Unit = { x, y ->
 			val c = getPixel(x, y)
 			listOf(c.r, c.g, c.b).forEach { writeFloat(stream, it, order) }
@@ -147,8 +139,11 @@ data class HDRImage(
 	 *
 	 * @throws IOException if an error occurs during writing
 	 * @see [javax.imageio.ImageIO.write]
+	 *
+	 * return tyoe BufferedImage in order to create a gif
+	 * each time an image is been saved in bufferedImage, then this array is used in a loop to put together every frame
 	 */
-	fun writeLDRImage(stream: OutputStream, format: String, gamma: Float = 1.0f) {
+	fun writeLDRImage(stream: OutputStream, format: String, gamma: Float = 1.0f): BufferedImage {
 		val imageLDR = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
 		// TYPE_INT_RGB uses 8 bits per channel
 		
@@ -161,6 +156,7 @@ data class HDRImage(
 				
 				// colors need to be converted in this format with shl for TYPE_INT_RGB
 				imageLDR.setRGB(x, y, (curR shl 16) + (curG shl 8) + curB)
+				
 			}
 		}
 		try {
@@ -172,6 +168,7 @@ data class HDRImage(
 			// generic errors of input/output
 			throw IOException("Failed to write $format image to stream", e)
 		}
+		return imageLDR  // questa funzione ora ritorna un tipo bufferdimage per fare la gif
 	}
 	
 	
