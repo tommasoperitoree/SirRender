@@ -11,9 +11,9 @@ fun areClose(x: Float, y: Float, epsilon: Float = 1e-5f) =
  * @param b The level of blue
  */
 data class Color(
-	var r: Float = 0.0f,
-	var g: Float = 0.0f,
-	var b: Float = 0.0f
+	var r: Float = 0f,
+	var g: Float = 0f,
+	var b: Float = 0f
 ) {
 	
 	// --- Operator overloading ---
@@ -67,3 +67,9 @@ data class Color(
 	}
 	
 }
+
+/** Generate white [Color] */
+fun white() = Color(255f, 255f, 255f)
+
+/** Generate black [Color] */
+fun black() = Color(0f, 0f, 0f)

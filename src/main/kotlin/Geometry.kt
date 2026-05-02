@@ -77,6 +77,9 @@ data class Vec(
 	 */
 	fun normalize(): Vec = times(1 / norm())
 	
+	/** Returns the [Normal] with components of [Vec] */
+	fun toNormal(): Normal =
+		Normal(x, y, z)
 	
 	override fun toString(): String = "Vec($x, $y, $z)"
 	
@@ -191,4 +194,11 @@ data class Normal(
 	
 	override fun toString(): String = "Normal($x, $y, $z)"
 	
+}
+
+data class Vec2d(
+	var x: Float = 0f,
+	var y: Float = 0f,
+) {
+	fun isClose(other: Vec2d) = areClose(x, other.x) && areClose(y, other.y)
 }
