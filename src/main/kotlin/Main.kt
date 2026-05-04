@@ -133,7 +133,7 @@ class Demo : CliktCommand(
 			
 			// Per orbitare, prima trasliamo indietro la camera e poi la ruotiamo
 			//da capire come fare a ruotare la camera per non far si che le sfere si sovrappongano
-			val camTrans = rotationZ(currAngle) * translation(Vec(-2f, 0f, 0.5f))
+			val camTrans = rotationZ(currAngle) * translation(Vec(-2f, 0f, 0f))
 			val cam = when (camera.lowercase()) {
 				"orthogonal" -> OrthogonalCamera(transformation = camTrans)
 				//"orthogonal" -> OrthogonalCamera(transformation = translation(screenCenter))
@@ -182,7 +182,7 @@ class Demo : CliktCommand(
 			val gce =
 				root.getElementsByTagName("GraphicControlExtension").item(0) as? javax.imageio.metadata.IIOMetadataNode
 					?: javax.imageio.metadata.IIOMetadataNode("GraphicControlExtension")
-			gce.setAttribute("delayTime", "100")
+			gce.setAttribute("delayTime", "10")
 			if (root.getElementsByTagName("GraphicControlExtension").length == 0) {
 				root.appendChild(gce)
 			}
