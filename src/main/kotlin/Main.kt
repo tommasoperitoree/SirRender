@@ -54,13 +54,6 @@ class Pfm2Png : CliktCommand(
 	override fun help(context: Context) = "Convert a PFM HDR image to LDR format (PNG, JPEG, WebP, ...)"
 	
 	val inputFileName: String by argument(
-<<<<<<< Updated upstream
-		"--input", "Input PFM file path"
-	).file(mustExist = true, canBeDir = false).convert { it.path }
-	val outputFileName: String by argument(
-		"--output", "Output image file path (extension determines format)"
-	).default("./src/main/kotlin/resources/image.png")
-=======
 		"INPUT",
 		"Input PFM file path"
 	).file(mustExist = true, canBeDir = false).convert { it.path }
@@ -68,7 +61,6 @@ class Pfm2Png : CliktCommand(
 		"OUTPUT",
 		"Output image file path (extension determines format)"
 	)
->>>>>>> Stashed changes
 	val factor: Float by option(
 		"--factor", "-f", help = "Luminosity scaling factor"
 	).float().default(0.2f)
@@ -104,7 +96,6 @@ class Demo : CliktCommand(
 		"--height", "-H", help = "Image height in pixels"
 	).int().default(480)
 	val camera: String by option(
-<<<<<<< Updated upstream
 		"--camera", "-c", help = "Camera type (projection): Orthogonal or Perspective"
 	).choice("Orthogonal", "Perspective", ignoreCase = true).default("Perspective")
 	val numFrames: Int by option(
@@ -119,18 +110,6 @@ class Demo : CliktCommand(
 	val renderImage: Boolean by option(
 		"--render", "-r", help = "Also convert output to PNG"
 	).flag(default = false)
-=======
-		"--camera", "-c",
-		help = "Camera type (projection): Orthogonal or Perspective"
-	).choice("orthogonal", "perspective", ignoreCase = true).default("Orthogonal")
-	val observerAngle: Int by option(
-		"--observer-angle", "-i",
-	).int().default(0)
-	val outputFileName: String by option(
-		"--output", "-o",
-		help = "Output image file name - extension determines format; default dir ./src/main/resources/"
-	).default("demo.png")
->>>>>>> Stashed changes
 	val factor: Float by option(
 		"--factor", "-f", help = "Luminosity scaling factor"
 	).float().default(0.2f)
@@ -182,31 +161,6 @@ class Demo : CliktCommand(
 				println("Saved PNG → $pngPath")
 			}
 		}
-<<<<<<< Updated upstream
-=======
-		// two more spheres in middle of two faces, gives asymmetry to scene
-		world.addShape(Sphere(translation(Vec(0f, 0f, -0.5f)) * scaling))
-		world.addShape(Sphere(translation(Vec(0f, 0.5f, 0f)) * scaling))
-		
-		val img = HDRImage(width, height)
-		val screenCenter = Vec(-1f, 0f, 0f)
-		val cam = when (camera.lowercase()) {
-			"orthogonal" -> OrthogonalCamera(transformation = translation(screenCenter))
-			"perspective" -> PerspectiveCamera(transformation = translation(screenCenter))
-			else -> throw IllegalStateException("No camera  found for $camera.")
-		}
-		val tracer = ImageTracer(img, cam)
-		tracer.fireAllRays { ray -> world.rayIntersection(ray)?.let { white() } ?: black() }
-		
-		img.normalizeImage(factor)
-		img.clampImage()
-		val format = outputFileName.substringAfterLast(".").lowercase()
-		FileOutputStream(outputFileName).use { img.writeLDRImage(it, format, gamma) }
-		
-		println("Saved $outputFileName")
-		
-		// TODO: generate demo image content here
->>>>>>> Stashed changes
 	}
 }
 
