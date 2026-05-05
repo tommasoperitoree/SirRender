@@ -117,7 +117,7 @@ class Demo : CliktCommand(
 	
 	override fun run() {
 		
-		val cameraDir = "$outputDir/${camera.lowercase()}"
+		val cameraDir = "$outputDir/$camera"
 		File(cameraDir).mkdirs() // create output dir if it doesn't exist
 		
 		val world = buildDemoWorld()
