@@ -3,7 +3,7 @@ mkdir -p ./src/main/resources/animationBash
 
 ./gradlew installDist
 
-CAMERA="Orthogonal"
+CAMERA="Perspective"
 
 # Convert camera to lowercase for the folder path (macOS/Linux safe)
 CAMERA_LOWER=$(echo "$CAMERA" | tr '[:upper:]' '[:lower:]')
@@ -14,6 +14,7 @@ build/install/SirRender/bin/SirRender demo \
     -W 640 -H 480 \
     -c "$CAMERA" \
     -n 90 \
+    --render \
     -o ./src/main/resources/animationBash
 
 # 3. Create the video from the Kotlin-generated path
