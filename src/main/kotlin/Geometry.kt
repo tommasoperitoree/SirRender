@@ -73,10 +73,17 @@ data class Vec(
 	
 	/**
 	 * Returns a normalized (unit length) copy of this [Normal].
-	 * @throws ArithmeticException if the vector has zero length
+	 * @throws ArithmeticException if the vector has zero length.
 	 */
-	fun normalize(): Vec = times(1 / norm())
+	fun normalize(): Vec {
+		val currentNorm = norm()
+		if (currentNorm == 0f) throw ArithmeticException("Cannot normalize a vector with zero length")
+		return times(1f / currentNorm)
+	}
 	
+	/** Returns the [Normal] with components of [Vec] */
+	fun toNormal(): Normal =
+		Normal(x, y, z)
 	
 	override fun toString(): String = "Vec($x, $y, $z)"
 	
@@ -186,9 +193,19 @@ data class Normal(
 	 * Returns a normalized (unit length) copy of this [Normal].
 	 * @throws ArithmeticException if the vector has zero length
 	 */
-	fun normalize(): Normal = times(1 / norm())
-	
+	fun normalize(): Normal {
+		val currentNorm = norm()
+		if (currentNorm == 0f) throw ArithmeticException("Cannot normalize a normal with zero length")
+		return times(1f / currentNorm)
+	}
 	
 	override fun toString(): String = "Normal($x, $y, $z)"
 	
+}
+
+data class Vec2d(
+	var x: Float = 0f,
+	var y: Float = 0f,
+) {
+	fun isClose(other: Vec2d) = areClose(x, other.x) && areClose(y, other.y)
 }

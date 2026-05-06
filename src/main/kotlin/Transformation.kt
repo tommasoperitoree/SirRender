@@ -51,7 +51,7 @@ data class Transformation(
 	 */
 	operator fun times(other: Transformation) =
 		Transformation(
-			m * other.m,
+			m * other.m, // calling HomogeneousMatrix times operator
 			other.invm * invm  // inverse order for the inverse
 		)
 	

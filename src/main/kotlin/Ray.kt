@@ -1,4 +1,3 @@
-
 class Ray(
 	var origin: Point = Point(),
 	var dir: Vec = Vec(),
@@ -15,7 +14,7 @@ class Ray(
 		origin.isClose(other.origin) && dir.isClose(other.dir)
 	
 	/** Calculates the [Point] along the ray's path at some distance from the origin given by [t]. */
-	fun at(t: Float) =
+	fun at(t: Float): Point =
 		origin + dir * t
 	
 	/** Returns a new ray whose [origin] and [dir] are the transformation of the original [Ray]. */

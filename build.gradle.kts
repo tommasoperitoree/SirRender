@@ -22,10 +22,12 @@ repositories {
 	mavenCentral()
 }
 
+
 dependencies {
-	testImplementation(kotlin("test"))                              // adds kotlin test helpers
-	testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")   // aggregate: pulls api + engine together
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation(kotlin("test"))
+	testImplementation(libs.junit.jupiter)
+	testRuntimeOnly(libs.junit.launcher)
+	implementation(libs.clikt)
 }
 
 kotlin {
