@@ -57,13 +57,16 @@ class Pfm2Png : CliktCommand(
 		"INPUT",
 		"Input PFM file path"
 	).file(mustExist = true, canBeDir = false).convert { it.path }
+	
 	val outputFileName: String by argument(
 		"OUTPUT",
 		"Output image file path (extension determines format)"
 	)
+	
 	val factor: Float by option(
 		"--factor", "-f", help = "Luminosity scaling factor"
 	).float().default(0.2f)
+	
 	val gamma: Float by option(
 		"--gamma", "-g", help = "Gamma correction value"
 	).float().default(1f)
@@ -90,10 +93,10 @@ class Demo : CliktCommand(
 	override fun help(context: Context) = "Generate a demo image"
 	
 	val width: Int by option(
-		"--width", "-W", help = "Image width in pixels"
+		"--width", "-w", help = "Image width in pixels"
 	).int().default(640)
 	val height: Int by option(
-		"--height", "-H", help = "Image height in pixels"
+		"--height", "-h", help = "Image height in pixels"
 	).int().default(480)
 	val camera: String by option(
 		"--camera", "-c", help = "Camera type (projection): Orthogonal or Perspective"
@@ -142,7 +145,7 @@ class Demo : CliktCommand(
 			val cam = when (camera.lowercase()) {
 				"orthogonal" -> OrthogonalCamera(transformation = camTransformation)
 				"perspective" -> PerspectiveCamera(transformation = camTransformation)
-				else -> throw IllegalStateException("No camera  found for $camera.")
+				else -> throw IllegalStateException("No camera found for $camera.")
 			}
 			
 			ImageTracer(img, cam).fireAllRays { ray -> world.rayIntersection(ray)?.let { white() } ?: black() }
