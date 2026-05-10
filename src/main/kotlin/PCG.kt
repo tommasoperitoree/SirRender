@@ -16,6 +16,7 @@ data class PCG(
 		}
 	}
 	
+	/** Generate random 32-bit integer. */
 	fun random(): UInt {
 		val oldState = state
 		state = oldState * 6364136223846793005u + inc
@@ -24,6 +25,10 @@ data class PCG(
 		
 		return xorShifted.rotateRight(rot)
 	}
+	
+	/** Returns a normalized 32-bit integer, i.e. a [Float] ∈ [0, 1), by calling [random]. */
+	fun randomFloat(): Float = (random() / 0x100000000uL).toFloat()  // Result ∈ [0, 1)
+	
 }
 
 class PCGRegClass(
@@ -45,6 +50,7 @@ class PCGRegClass(
 		random()
 	}
 	
+	/** Generate random 32-bit integer. */
 	fun random(): UInt {
 		val oldState = state
 		state = oldState * 6364136223846793005uL + inc
