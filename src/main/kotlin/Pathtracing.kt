@@ -32,3 +32,30 @@ class checkeredPigment(
 		else return color2
 	}
 }
+
+/**
+ *This class is a texture picture
+ *The texture is given through a PFM image
+ */
+class ImagePigment(
+	val w: Int,
+	val h: Int,
+	val img: HDRImage = HDRImage(w, h)
+) : Pigment {
+	/**
+	 * [floor] approximate to the int below so col should be < img.w
+	 */
+	override fun getColor(u: Float, v: Float): Color {
+		var col = floor(u * img.width).toInt()
+		var row = floor(v * img.height).toInt()
+		
+		if (col >= img.width) {
+			col = img.width - 1
+		}
+		
+		if (row >= img.height) {
+			row = img.height - 1
+		}
+		return img.getPixel(col,row)
+	}
+}
