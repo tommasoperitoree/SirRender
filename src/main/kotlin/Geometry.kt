@@ -204,8 +204,8 @@ data class Normal(
 }
 
 data class Vec2d(
-	var x: Float = 0f,
-	var y: Float = 0f,
+	var u: Float = 0f,
+	var v: Float = 0f,
 ) {
-	fun isClose(other: Vec2d) = areClose(x, other.x) && areClose(y, other.y)
+	fun isClose(other: Vec2d) = areClose(u, other.u) && areClose(v, other.v)
 }
