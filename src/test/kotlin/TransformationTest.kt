@@ -1,10 +1,9 @@
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-import kotlin.math.pow
 import kotlin.math.sqrt
 
-class `Transormation Test` {
+class TransformationTest {
 	val t = Vec(10f, 1f, 2f)
 	val p = Point(1f, 2f, 3f)
 	val v = Vec(1f, 2f, 3f)

@@ -8,7 +8,7 @@ class OnOffRenderer(
 
 }
 
-class flatRenderer(
+class FlatRenderer(
 	override val world: World = World()
 ) : Renderer {
 

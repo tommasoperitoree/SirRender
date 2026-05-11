@@ -2,7 +2,8 @@ import kotlin.math.PI
 import kotlin.math.floor
 
 /**
- * The [Pigment] type is abstract and represents the color associated with a particular point on a surface ([u],[v])
+ * The [Pigment] type is abstract and represents the color associated with a particular
+ * point on a surface represented by a [Vec2d].
  */
 interface Pigment {
 	fun getColor(uv: Vec2d): Color {
@@ -10,7 +11,7 @@ interface Pigment {
 	}
 }
 
-class uniformPigment(
+class UniformPigment(
 	val color: Color = Color(),
 ) : Pigment {
 	override fun getColor(uv: Vec2d): Color = color
@@ -19,7 +20,7 @@ class uniformPigment(
 /**
  * A textured pigment, given through a `PFM Image`.
  */
-class imagePigment(
+class ImagePigment(
 	val image: HDRImage = HDRImage()
 ) : Pigment {
 	
@@ -59,7 +60,7 @@ class imagePigment(
 }
 
 
-class checkeredPigment(
+class CheckeredPigment(
 	val color1: Color,
 	val color2: Color,
 	val numSteps: Int // number of boxes for side
@@ -84,7 +85,7 @@ interface BRDF {
 }
 
 class DiffuseBRDF(
-	override val pigment: Pigment = uniformPigment(white()),
+	override val pigment: Pigment = UniformPigment(white()),
 	val reflectance: Float = 0.5f
 ) : BRDF {
 	
@@ -95,5 +96,5 @@ class DiffuseBRDF(
 
 data class Material(
 	val brdf: BRDF = DiffuseBRDF(),
-	val emittedRadiance: Pigment = uniformPigment(black())
+	val emittedRadiance: Pigment = UniformPigment(black())
 )
