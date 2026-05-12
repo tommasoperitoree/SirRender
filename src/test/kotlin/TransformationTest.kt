@@ -13,10 +13,10 @@ class TransformationTest {
 	val c = 180f
 	
 	@Test
-	fun `traslation test`() {
+	fun `translation test`() {
 		val p1 = Point(11f, 3f, 5f)
-		val trasl = translation(t)
-		assertTrue((trasl * p).isClose(p1))
+		val transl = translation(t)
+		assertTrue((transl * p).isClose(p1))
 	}
 	
 	@Test
