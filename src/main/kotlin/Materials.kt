@@ -82,7 +82,6 @@ class CheckeredPigment(
 	}
 }
 
-
 interface BRDF {
 	val pigment: Pigment
 	
