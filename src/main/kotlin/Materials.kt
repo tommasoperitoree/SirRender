@@ -1,7 +1,10 @@
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.acos
+import kotlin.math.cos
 import kotlin.math.floor
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 /**
  * The [Pigment] type is abstract and represents the color associated with a particular
@@ -97,9 +100,18 @@ class DiffuseBRDF(
 	override fun scatterRay(pcg: PCG, incomingDir: Vec, intPoint: Point, normal: Normal, depth: Int): Ray {
 		//createOnbFromZ
 		val (e1, e2, e3) = createOnbFromZ(normal)
-		val cosThetaSq: UInt = pcg.random()
+		val cosThetaSq = pcg.randomFloat()
+		val cosTheta = sqrt(cosThetaSq)
+		val sinTheta = sqrt(1f - cosThetaSq)
+		val phi = 2f * PI.toFloat() * pcg.randomFloat()
 		
-		return Ray()
+		return Ray(
+			intPoint,
+			e1 * cos(phi) * sinTheta + e2 * sin(phi) * sinTheta + e3 * cosTheta,
+			1e-3f,
+			Float.POSITIVE_INFINITY,
+			depth
+		)
 	}
 }
 
