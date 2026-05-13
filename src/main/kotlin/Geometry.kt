@@ -199,6 +199,10 @@ data class Normal(
 		return times(1f / currentNorm)
 	}
 	
+	/** Returns the [Vec] with components of [Normal] */
+	fun toVec(): Vec =
+		Vec(x, y, z)
+	
 	override fun toString(): String = "Normal($x, $y, $z)"
 	
 }

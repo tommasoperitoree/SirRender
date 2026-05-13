@@ -1,4 +1,6 @@
 import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.acos
 import kotlin.math.floor
 
 /**
@@ -81,6 +83,7 @@ interface BRDF {
 	
 	fun eval(normal: Normal, inDir: Vec, outDir: Vec, uv: Vec2d): Color
 	
+	fun scatterRay(pcg: PCG, incomingDir: Vec, intPoint: Point, normal: Normal, depth: Int): Ray
 }
 
 class DiffuseBRDF(
@@ -90,6 +93,31 @@ class DiffuseBRDF(
 	
 	override fun eval(normal: Normal, inDir: Vec, outDir: Vec, uv: Vec2d): Color =
 		pigment.getColor(uv) * (reflectance / PI.toFloat())
+	
+	override fun scatterRay(pcg: PCG, incomingDir: Vec, intPoint: Point, normal: Normal, depth: Int): Ray {
+		//createOnbFromZ
+		val e1; e2; e3 = createOnbFromZ(normal)
+		val cosThetaSq: UInt = pcg.random()
+		val cosTheta; sinTheta = sqrt
+		
+	}
+}
+
+class SpecularBRDF(
+	override val pigment: Pigment = UniformPigment(white()),
+	val thresholdAngle: Float = PI.toFloat() / 1800f,
+) : BRDF {
+	
+	override fun eval(normal: Normal, inDir: Vec, outDir: Vec, uv: Vec2d): Color {
+		val thetaIn = acos(normal.toVec().dot(inDir))
+		val thetaOut = acos(normal.toVec().dot(outDir))
+		
+		return if (abs(thetaIn - thetaOut) < thresholdAngle) pigment.getColor(uv) else Color(0f, 0f, 0f)
+	}
+	
+	override fun scatterRay(pcg: PCG, incomingDir: Vec, intPoint: Point, normal: Normal, depth: Int): Ray {
+		TODO("Not yet implemented")
+	}
 }
 
 
