@@ -96,10 +96,10 @@ class DiffuseBRDF(
 	
 	override fun scatterRay(pcg: PCG, incomingDir: Vec, intPoint: Point, normal: Normal, depth: Int): Ray {
 		//createOnbFromZ
-		val e1; e2; e3 = createOnbFromZ(normal)
+		val (e1, e2, e3) = createOnbFromZ(normal)
 		val cosThetaSq: UInt = pcg.random()
-		val cosTheta; sinTheta = sqrt
 		
+		return Ray()
 	}
 }
 
