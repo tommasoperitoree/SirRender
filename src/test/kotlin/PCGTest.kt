@@ -16,7 +16,8 @@ class PCGTest {
 		for (expected in uintArrayOf(
 			2707161783u, 2068313097u,
 			3122475824u, 2211639955u,
-			3215226955u, 3421331566u)
+			3215226955u, 3421331566u
+		)
 		) assertEquals(pcg.random(), expected)
 	}
 }
