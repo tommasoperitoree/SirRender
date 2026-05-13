@@ -31,7 +31,7 @@ class FlatRenderer(
 	override val backgroundColor: Color = Color()
 ) : Renderer {
 	override fun call(ray: Ray): Color {
-		var hit = world.rayIntersection(ray)
+		val hit = world.rayIntersection(ray)
 		if (hit == null) {
 			return backgroundColor
 		}
@@ -39,6 +39,29 @@ class FlatRenderer(
 		val material = hit.shape.material
 		
 		return (material.brdf.pigment.getColor(hit.surfacePoint) + material.emittedRadiance.getColor(hit.surfacePoint))
+		
+		
+	}
+}
+
+
+class PathTracer(
+	override val world: World = World(),
+	override val backgroundColor: Color = Color(),
+	val pcg: PCG = PCG(),
+	val N: Int, //number of ray generate for integral calculation
+	val maxRayDeph: Int,
+	val depthLimit: Int
+) : Renderer {
+	override fun call(ray: Ray): Color {
+		if (ray.depth > maxRayDeph) return black()
+		
+		var hitRecord = world.rayIntersection(ray)
+		if (hitRecord == null) 	return backgroundColor
+		
+		val hitMaterial=hitRecord.shape.material
+		val hitColor=hitMaterial.brdf.pigment.getColor(hitRecord.surfacePoint)
+		val Radiance=hitMaterial.emittedRadiance.getColor(hitRecord.surfacePoint)
 		
 		
 	}
