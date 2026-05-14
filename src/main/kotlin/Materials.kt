@@ -16,7 +16,6 @@ interface Pigment {
 	}
 }
 
-
 class UniformPigment(
 	val color: Color = Color(),
 ) : Pigment {
@@ -87,30 +86,18 @@ interface BRDF {
 	
 	fun eval(normal: Normal, inDir: Vec, outDir: Vec, uv: Vec2d): Color
 	
-	fun scatterRay(
-		pcg: PCG,
-		incomingDir: Vec,
-		intPoint: Point,
-		normal: Normal,
-		depth: Int
-	): Ray
+	fun scatterRay(pcg: PCG, incomingDir: Vec, intPoint: Point, normal: Normal, depth: Int): Ray
 }
 
 class DiffuseBRDF(
-	override val pigment: Pigment = UniformPigment(Color.white),
+	override val pigment: Pigment = UniformPigment(white()),
 	val reflectance: Float = 0.5f
 ) : BRDF {
 	
 	override fun eval(normal: Normal, inDir: Vec, outDir: Vec, uv: Vec2d): Color =
 		pigment.getColor(uv) * (reflectance / PI.toFloat())
 	
-	override fun scatterRay(
-		pcg: PCG,
-		incomingDir: Vec,
-		intPoint: Point,
-		normal: Normal,
-		depth: Int
-	): Ray {
+	override fun scatterRay(pcg: PCG, incomingDir: Vec, intPoint: Point, normal: Normal, depth: Int): Ray {
 		val (e1, e2, e3) = createOnbFromZ(normal)
 		val cosThetaSq = pcg.randomFloat()
 		val cosTheta = sqrt(cosThetaSq)
@@ -128,7 +115,7 @@ class DiffuseBRDF(
 }
 
 class SpecularBRDF(
-	override val pigment: Pigment = UniformPigment(Color.white),
+	override val pigment: Pigment = UniformPigment(white()),
 	val thresholdAngle: Float = PI.toFloat() / 1800f,
 ) : BRDF {
 	
@@ -136,22 +123,16 @@ class SpecularBRDF(
 		val thetaIn = acos(normal.toVec().dot(inDir))
 		val thetaOut = acos(normal.toVec().dot(outDir))
 		
-		return if (abs(thetaIn - thetaOut) < thresholdAngle) pigment.getColor(uv) else Color.black
+		return if (abs(thetaIn - thetaOut) < thresholdAngle) pigment.getColor(uv) else Color(0f, 0f, 0f)
 	}
 	
-	override fun scatterRay(
-		pcg: PCG,
-		incomingDir: Vec,
-		intPoint: Point,
-		normal: Normal,
-		depth: Int
-	): Ray {
+	override fun scatterRay(pcg: PCG, incomingDir: Vec, intPoint: Point, normal: Normal, depth: Int): Ray {
 		val rayDir = Vec(incomingDir.x, incomingDir.y, incomingDir.z).normalize()
 		val normal = normal.toVec().normalize()
 		
 		return Ray(
 			intPoint,
-			rayDir - normal * 2f * (normal dot rayDir),
+			rayDir - normal * 2f * normal.dot(rayDir),
 			1e-3f,
 			Float.POSITIVE_INFINITY,
 			depth
@@ -162,5 +143,5 @@ class SpecularBRDF(
 
 data class Material(
 	val brdf: BRDF = DiffuseBRDF(),
-	val emittedRadiance: Pigment = UniformPigment(Color.black)
+	val emittedRadiance: Pigment = UniformPigment(black())
 )
