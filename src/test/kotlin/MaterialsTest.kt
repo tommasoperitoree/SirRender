@@ -1,9 +1,9 @@
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class PigmentTest {
 	val uv: Vec2d = Vec2d()
-	
 	
 	@Test
 	fun `getColor UniformPigment test`() {
@@ -23,7 +23,6 @@ class PigmentTest {
 		assertEquals(color2, pigment.getColor(Vec2d(0.25f, 0.75f)))
 		assertEquals(color2, pigment.getColor(Vec2d(0.75f, 0.25f)))
 		assertEquals(color1, pigment.getColor(Vec2d(0.75f, 0.75f)))
-		
 	}
 	
 	@Test
@@ -39,4 +38,38 @@ class PigmentTest {
 	}
 }
 
+
+class BRDFTest {
+	val pcg = PCG()
+	val incomingDir = Vec(0f, 0f, -1f)
+	val normal = Normal(0f, 0f, 1f).normalize()
+	val intPoint = Point(0f, 0f, 0f)
+	val depth = 5
+	
+	@Test
+	fun `ScatterRay DiffuseBRDF test`() {
+		val diffuseBRDF = DiffuseBRDF()
+		val ray = diffuseBRDF.scatterRay(pcg, incomingDir, intPoint, normal, depth)
+		
+		assertEquals(intPoint, ray.origin)
+		assertTrue(areClose(ray.dir.squaredNorm(), 1f))
+		assertTrue(ray.dir.dot(normal.toVec()) >= 0f)
+		assertEquals(1e-3f, ray.tMin)
+		assertEquals(Float.POSITIVE_INFINITY, ray.tMax)
+		assertEquals(depth, ray.depth)
+	}
+	
+	@Test
+	fun `ScatterRay SpecularBRDF test`() {
+		val specularBRDF = SpecularBRDF()
+		val ray = specularBRDF.scatterRay(pcg, incomingDir, intPoint, normal, depth)
+		
+		assertEquals(intPoint, ray.origin)
+		assertTrue(areClose(ray.dir.squaredNorm(), 1f))
+		assertTrue(ray.dir.dot(normal.toVec()) >= 0f)
+		assertEquals(1e-3f, ray.tMin)
+		assertEquals(Float.POSITIVE_INFINITY, ray.tMax)
+		assertEquals(depth, ray.depth)
+	}
+}
 

@@ -98,7 +98,6 @@ class DiffuseBRDF(
 		pigment.getColor(uv) * (reflectance / PI.toFloat())
 	
 	override fun scatterRay(pcg: PCG, incomingDir: Vec, intPoint: Point, normal: Normal, depth: Int): Ray {
-		//createOnbFromZ
 		val (e1, e2, e3) = createOnbFromZ(normal)
 		val cosThetaSq = pcg.randomFloat()
 		val cosTheta = sqrt(cosThetaSq)
@@ -128,7 +127,16 @@ class SpecularBRDF(
 	}
 	
 	override fun scatterRay(pcg: PCG, incomingDir: Vec, intPoint: Point, normal: Normal, depth: Int): Ray {
-		TODO("Not yet implemented")
+		val rayDir = Vec(incomingDir.x, incomingDir.y, incomingDir.z).normalize()
+		val normal = normal.toVec().normalize()
+		
+		return Ray(
+			intPoint,
+			rayDir - normal * 2f * normal.dot(rayDir),
+			1e-3f,
+			Float.POSITIVE_INFINITY,
+			depth
+		)
 	}
 }
 

@@ -44,7 +44,7 @@ class FlatRenderer(
 	}
 }
 
-
+/*
 class PathTracer(
 	override val world: World = World(),
 	override val backgroundColor: Color = Color(),
@@ -57,12 +57,12 @@ class PathTracer(
 		if (ray.depth > maxRayDeph) return black()
 		
 		var hitRecord = world.rayIntersection(ray)
-		if (hitRecord == null) 	return backgroundColor
+		if (hitRecord == null) return backgroundColor
 		
-		val hitMaterial=hitRecord.shape.material
-		val hitColor=hitMaterial.brdf.pigment.getColor(hitRecord.surfacePoint)
-		val Radiance=hitMaterial.emittedRadiance.getColor(hitRecord.surfacePoint)
+		val hitMaterial = hitRecord.shape.material
+		val hitColor = hitMaterial.brdf.pigment.getColor(hitRecord.surfacePoint)
+		val Radiance = hitMaterial.emittedRadiance.getColor(hitRecord.surfacePoint)
 		
 		
 	}
-}
+}*/

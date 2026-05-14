@@ -222,7 +222,7 @@ data class Vec2d(
 fun createOnbFromZ(normal: Normal): Triple<Vec, Vec, Vec> {
 	val sign = sign(normal.z + Float.MIN_VALUE)
 	
-	val a = -1f / (sign + normal.x)
+	val a = -1f / (sign + normal.z)
 	val b = normal.x * normal.y * a
 	
 	val e1 = Vec(1f + sign * normal.x * normal.x * a, sign * b, -sign * normal.x)
