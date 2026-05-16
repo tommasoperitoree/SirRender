@@ -1,9 +1,11 @@
+import kotlin.math.max
+
 interface Renderer {
 	val world: World
 	val backgroundColor: Color
 	
 	//Estimate the radiance along a ray
-	fun call(ray: Ray): Color {
+	fun invoke(ray: Ray): Color {
 		throw NotImplementedError("Renderer.call($ray) is not implemented")
 	}
 }
@@ -16,7 +18,7 @@ class OnOffRenderer(
 	override val backgroundColor: Color = Color(),
 	val color: Color = white()
 ) : Renderer {
-	override fun call(ray: Ray): Color {
+	override fun invoke(ray: Ray): Color {
 		if (world.rayIntersection(ray) != null) return color
 		else return backgroundColor
 	}
@@ -30,7 +32,7 @@ class FlatRenderer(
 	override val world: World = World(),
 	override val backgroundColor: Color = Color()
 ) : Renderer {
-	override fun call(ray: Ray): Color {
+	override fun invoke(ray: Ray): Color {
 		val hit = world.rayIntersection(ray)
 		if (hit == null) {
 			return backgroundColor
@@ -44,25 +46,63 @@ class FlatRenderer(
 	}
 }
 
-/*
+/**
+ * Renderer based on path tracing with Monte Carlo integration.
+ * Recursively solves the rendering equation by sampling [N] rays per intersection point.
+ * Recursion is bounded by [maxRayDepth] and optimized via Russian Roulette beyond [depthLimit].
+ */
+
 class PathTracer(
 	override val world: World = World(),
 	override val backgroundColor: Color = Color(),
 	val pcg: PCG = PCG(),
 	val N: Int, //number of ray generate for integral calculation
 	val maxRayDeph: Int,
-	val depthLimit: Int
+	val depthLimit: Int, //limit of the Russian Roulette
+	var q: Float
 ) : Renderer {
-	override fun call(ray: Ray): Color {
+	override operator fun invoke(ray: Ray): Color { // operator is necessary to use the recursion
 		if (ray.depth > maxRayDeph) return black()
 		
-		var hitRecord = world.rayIntersection(ray)
-		if (hitRecord == null) return backgroundColor
+		var hitRecord = world.rayIntersection(ray) ?: return backgroundColor
 		
+		//extract from the point of intersection the color reflected and the emitted radiance
 		val hitMaterial = hitRecord.shape.material
-		val hitColor = hitMaterial.brdf.pigment.getColor(hitRecord.surfacePoint)
-		val Radiance = hitMaterial.emittedRadiance.getColor(hitRecord.surfacePoint)
+		var hitColor = hitMaterial.brdf.pigment.getColor(hitRecord.surfacePoint)
+		val radiance = hitMaterial.emittedRadiance.getColor(hitRecord.surfacePoint)
 		
+		val cumLum = maxOf(
+			hitColor.r,
+			hitColor.g,
+			hitColor.b
+		)
 		
+		//Russian Roulette
+		if (ray.depth >= depthLimit) {
+			q = max(0.05f, 1 - cumLum)
+			if (pcg.randomFloat() > q) {
+				hitColor *= 1 / (1 - q)
+			} else return radiance
+		}
+		
+		//MonteCarlo
+		var cumRadiance = black()
+		//if cumLum is 0 it means that the surface is completely black, so is useless MonteCarlo
+		if (cumLum > 0F) {
+			for (rayindex in 0 until N) {
+				val newRay = hitMaterial.brdf.scatterRay(
+					pcg,
+					hitRecord.ray.dir,
+					hitRecord.worldPoint,
+					hitRecord.normal,
+					ray.depth + 1
+				) //depth has to be incremented, otherwise the new ray won't pass the first if
+				cumRadiance += hitColor * this(newRay)
+			}
+			
+		}
+		//Rendering equation
+		return radiance + cumRadiance * (1.0f / N)
+		//return the emitted radiance ( ex from a light ball) + mean value of radiance reflected
 	}
-}*/
+}

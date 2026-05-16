@@ -38,8 +38,12 @@ data class Color(
 	 * `L = ( max(r,g,b) + min(r,g,b) ) / 2`
 	 */
 	fun luminosity(): Float {
+		val max=maxOf(r,g,b)
+		val min=minOf(r,g,b)
+		/*
 		val max = listOf(r, g, b).max()
 		val min = listOf(r, g, b).min()
+		 */
 		return (max + min) / 2
 	}
 	
