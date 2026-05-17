@@ -31,19 +31,15 @@ data class Color(
 	// --- Utility functions ---
 	
 	/** Checks whether two [Color] are equal through [areClose] fun. */
-	fun isClose(other: Color) =
-		areClose(this.r, other.r) && areClose(this.g, other.g) && areClose(this.b, other.b)
+	fun isClose(other: Color, epsilon: Float = 1e-5f) =
+		areClose(this.r, other.r, epsilon) && areClose(this.g, other.g, epsilon) && areClose(this.b, other.b, epsilon)
 	
 	/** Computes the luminosity of a color as
 	 * `L = ( max(r,g,b) + min(r,g,b) ) / 2`
 	 */
 	fun luminosity(): Float {
-		val max=maxOf(r,g,b)
-		val min=minOf(r,g,b)
-		/*
-		val max = listOf(r, g, b).max()
-		val min = listOf(r, g, b).min()
-		 */
+		val max = maxOf(r, g, b)
+		val min = minOf(r, g, b)
 		return (max + min) / 2
 	}
 	
@@ -70,10 +66,13 @@ data class Color(
 		return result
 	}
 	
+	companion object {
+		
+		/** Generate white [Color] */
+		val white = Color(255f, 255f, 255f)
+		
+		/** Generate black [Color] */
+		val black = Color(0f, 0f, 0f)
+	}
+	
 }
-
-/** Generate white [Color] */
-fun white() = Color(255f, 255f, 255f)
-
-/** Generate black [Color] */
-fun black() = Color(0f, 0f, 0f)

@@ -135,8 +135,7 @@ class ONBTest() {
 	
 	@Test
 	fun `random testing PCG`() {
-		for (i in 0..1000) {
-			print(i)
+		repeat(1000) {
 			val (x, y, z) = List(3) { pcg.randomFloat() }
 			val normal = Normal(x, y, z).normalize()
 			val (e1, e2, e3) = createOnbFromZ(normal)

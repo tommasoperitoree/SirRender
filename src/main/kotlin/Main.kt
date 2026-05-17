@@ -147,7 +147,7 @@ class Demo : CliktCommand(
 				else -> throw IllegalStateException("No camera found for $camera.")
 			}
 			
-			ImageTracer(img, cam).fireAllRays { ray -> world.rayIntersection(ray)?.let { white() } ?: black() }
+			ImageTracer(img, cam).fireAllRays { ray -> world.rayIntersection(ray)?.let { Color.white } ?: Color.black }
 			
 			img.normalizeImage(factor)
 			img.clampImage()
