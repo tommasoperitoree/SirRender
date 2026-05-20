@@ -11,29 +11,48 @@ import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.float
 import com.github.ajalt.clikt.parameters.types.int
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import javax.imageio.ImageIO
 import javax.imageio.IIOImage
 import javax.imageio.stream.FileImageOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import javax.imageio.ImageTypeSpecifier
+import javax.imageio.metadata.IIOMetadataNode
 
 
 /** Create elements of the demo scene. */
 private fun buildDemoWorld(): World {
 	
 	val world = World()
-	val scale = 1 / 10f
-	val scaling = scaling(Vec(scale, scale, scale))
-	val coords = listOf(-0.5f, 0.5f)
 	
-	// spheres in every vertex of a cube centered in origin with edge 1, scaled 1/10
-	for (x in coords) for (y in coords) for (z in coords)
-		world.addShape(Sphere(translation(Vec(x, y, z)) * scaling))
+	val skyMaterial = Material(brdf = DiffuseBRDF(), emittedRadiance = UniformPigment(Color(1f, 1f, 0f)))
+	val groundMaterial = Material(
+		brdf = DiffuseBRDF(
+			pigment = CheckeredPigment(
+				Color(0f, 0f, 1f), Color(1f, 0f, 1f),
+				numSteps = 10
+			)
+		)
+	)
 	
-	// two more spheres in middle of two faces, gives asymmetry to scene
-	world.addShape(Sphere(translation(Vec(0f, 0f, -0.5f)) * scaling))
-	world.addShape(Sphere(translation(Vec(0f, 0.5f, 0f)) * scaling))
+	//Pavement
+	world.addShape(Plane(Transformation(), groundMaterial))
+	//Sun in the sky in z=5
+	world.addShape(Sphere(translation(Vec(0f, 0f, 5f)), skyMaterial))
+	
+	//first sphere in (1,0,0) red, second sphere in (1,1,0) silver that reflect the first sphere
+	world.addShape(Sphere(translation(Vec(1f, 0f, 0f)), Material(DiffuseBRDF(UniformPigment(Color(1f, 0f, 0f))))))
+	world.addShape(
+		Sphere(
+			translation(Vec(1f, 1f, 0f)),
+			Material(
+				SpecularBRDF(UniformPigment(Color.white)), UniformPigment(Color(0.753f, 0.753f, 0.753f))
+			)
+		)
+	)
 	
 	return world
 }
@@ -217,21 +236,21 @@ class Animation : CliktCommand(
 				img.clampImage()
 				
 				// 2. Safely capture the byte stream and convert to a BufferedImage
-				val byteOut = java.io.ByteArrayOutputStream()
+				val byteOut = ByteArrayOutputStream()
 				img.writeLDRImage(byteOut, "png", gamma)
-				val bImg = ImageIO.read(java.io.ByteArrayInputStream(byteOut.toByteArray()))
+				val bImg = ImageIO.read(ByteArrayInputStream(byteOut.toByteArray()))
 				
 				// 3. Setup GIF metadata
 				val imageWriteParam = writer.defaultWriteParam
 				val metadata = writer.getDefaultImageMetadata(
-					javax.imageio.ImageTypeSpecifier.createFromRenderedImage(bImg),
+					ImageTypeSpecifier.createFromRenderedImage(bImg),
 					imageWriteParam
 				)
 				val formatName = "javax_imageio_gif_image_1.0"
-				val root = metadata.getAsTree(formatName) as javax.imageio.metadata.IIOMetadataNode
+				val root = metadata.getAsTree(formatName) as IIOMetadataNode
 				val gce = root.getElementsByTagName("GraphicControlExtension").item(0)
-						as? javax.imageio.metadata.IIOMetadataNode
-					?: javax.imageio.metadata.IIOMetadataNode("GraphicControlExtension").also {
+						as? IIOMetadataNode
+					?: IIOMetadataNode("GraphicControlExtension").also {
 						root.appendChild(it)
 					}
 				

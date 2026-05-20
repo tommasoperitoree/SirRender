@@ -69,7 +69,7 @@ data class Color(
 	companion object {
 		
 		/** Generate white [Color] */
-		val white = Color(255f, 255f, 255f)
+		val white = Color(1f, 1f, 1f)
 		
 		/** Generate black [Color] */
 		val black = Color(0f, 0f, 0f)
