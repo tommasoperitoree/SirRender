@@ -1,6 +1,8 @@
-val WHITESPACE = " \t\n\r"
-val SYMBOLS = "()<>[],*"
+import java.io.InputStream
 
+// ------------------------------
+//  Source Location
+// ------------------------------
 
 class SourceLocation(
 	val fileName: String = "",
@@ -8,8 +10,13 @@ class SourceLocation(
 	val column: Int = 0
 )
 
-// --- TOKEN DECLARATION ---
 
+// ------------------------------
+//  Constants, enum Keywords
+// ------------------------------
+
+val WHITESPACE = " \t\n\r"
+val SYMBOLS = "()<>[],*"
 
 enum class Keyword(val lexeme: String) {
 	NEW("new"),
@@ -42,11 +49,15 @@ enum class Keyword(val lexeme: String) {
 	}
 }
 
+
+// ------------------------------
+//  Tokens
+// ------------------------------
+
 /** A lexical token, used when parsing a scene file. */
 sealed class Token {
 	abstract val location: SourceLocation
 }
-
 
 /** A [Token] containing a symbol (i.e., a variable name). */
 data class SymbolToken(val symbol: Char, override val location: SourceLocation) : Token() {
@@ -77,16 +88,38 @@ data class IdentifierToken(val identifier: String, override val location: Source
 data class StopToken(override val location: SourceLocation) : Token()
 
 
-/**
- * If it is a symbol (comma, parenthesis, etc.), it returns a SymbolToken;
- * If it is a digit, it returns a LiteralNumberToken;
- * If it is "", it returns a LiteralStringToken;
- * If it is a sequence of characters a…z, it returns a KeywordToken if the sequence is a keyword, IdentifierToken otherwise;
- * If the file is finished, it returns StopToken.
- */
-fun readToken() {
+// ------------------------------
+//      Input Stream wrapper
+// ------------------------------
 
+class inputStream(
+	val stream: InputStream,
+	fileName: String = "",
+	val tabulations: Int = 4,
+) {
+	val location: SourceLocation = SourceLocation()
+	var savedChar: Char? = null
+	var savedLocation: SourceLocation? = null
+	var savedToken: Token? = null
+	
+	init {
+		var location = SourceLocation(fileName, line = 1, column = 1)
+	}
+	
+	/**
+	 * If it is a symbol (comma, parenthesis, etc.), it returns a SymbolToken;
+	 * If it is a digit, it returns a LiteralNumberToken;
+	 * If it is "", it returns a LiteralStringToken;
+	 * If it is a sequence of characters a…z, it returns a KeywordToken if the sequence is a keyword, IdentifierToken otherwise;
+	 * If the file is finished, it returns StopToken.
+	 */
+	fun readToken() {
+	
+	}
 }
 
-var loc = SourceLocation()
-var sym = SymbolToken('k', loc)
+
+var str = InputStream.nullInputStream()
+var inp = inputStream(fileName = "", stream = str, tabulations = 1)
+
+var loc = inp.location
