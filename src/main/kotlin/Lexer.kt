@@ -1,13 +1,13 @@
-import java.io.InputStream
+import java.io.Reader
 
 // ------------------------------
 //  Source Location
 // ------------------------------
 
-class SourceLocation(
+data class SourceLocation(
 	val fileName: String = "",
-	val line: Int = 0,
-	val column: Int = 0
+	var lineNum: Int = 0,
+	var colNum: Int = 0
 )
 
 
@@ -93,17 +93,61 @@ data class StopToken(override val location: SourceLocation) : Token()
 // ------------------------------
 
 class inputStream(
-	val stream: InputStream,
+	private val stream: Reader,
 	fileName: String = "",
 	val tabulations: Int = 4,
 ) {
-	val location: SourceLocation = SourceLocation()
-	var savedChar: Char? = null
-	var savedLocation: SourceLocation? = null
-	var savedToken: Token? = null
+	var location = SourceLocation(fileName, lineNum = 1, colNum = 1)
+	private var savedLocation = location.copy()
 	
-	init {
-		var location = SourceLocation(fileName, line = 1, column = 1)
+	private var savedChar: Char? = null
+	private var savedToken: Token? = null
+	
+	/** Update [location] after having read [ch] from the stream. */
+	fun updatePos(ch: Char?) {
+		if (ch == null) return
+		
+		when (ch) {
+			'\n' -> {
+				location.lineNum += 1
+				location.colNum = 1
+			}
+			
+			'\t' -> {
+				location.colNum += tabulations
+			}
+			
+			else -> {
+				location.colNum += 1
+			}
+		}
+	}
+	
+	/** Read a bew character from the stream. */
+	fun readChar(): Char? {
+		var ch: Char?
+		if (savedChar != null) { // recover the unread character and return it
+			ch = savedChar
+			savedChar = null
+		} else { // read a new character from the stream
+			ch = stream.read().toChar()
+		}
+		
+		savedLocation = location
+		updatePos(ch)
+		return ch
+	}
+	
+	/** Push a character back to the stream. */
+	fun unreadChar(ch: Char?) {
+		assert(savedChar == null)
+		savedChar = ch
+		location = savedLocation.copy()
+	}
+	
+	/** Keep reading characters until a non-whitespace/non-comment character is found. */
+	fun skipWhitespacesAndComments() {
+		TODO()
 	}
 	
 	/**
@@ -114,12 +158,6 @@ class inputStream(
 	 * If the file is finished, it returns StopToken.
 	 */
 	fun readToken() {
-	
+		TODO()
 	}
 }
-
-
-var str = InputStream.nullInputStream()
-var inp = inputStream(fileName = "", stream = str, tabulations = 1)
-
-var loc = inp.location
