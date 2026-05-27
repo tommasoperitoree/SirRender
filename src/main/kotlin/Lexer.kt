@@ -98,10 +98,10 @@ class inputStream(
 	val tabulations: Int = 4,
 ) {
 	var location = SourceLocation(fileName, lineNum = 1, colNum = 1)
-	private var savedLocation = location.copy()
+	var savedLocation = location.copy()
 	
-	private var savedChar: Char? = null
-	private var savedToken: Token? = null
+	var savedChar: Char? = null
+	var savedToken: Token? = null
 	
 	/** Update [location] after having read [ch] from the stream. */
 	fun updatePos(ch: Char?) {
