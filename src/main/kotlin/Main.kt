@@ -30,6 +30,12 @@ private fun buildDemoWorld(): World {
 	
 	val world = World()
 	
+	val skyMaterial = Material(
+		brdf = DiffuseBRDF(
+			pigment = UniformPigment(Color(0f, 0f, 1f))
+		)
+	)
+	
 	val groundMaterial = Material(
 		brdf = DiffuseBRDF(
 			pigment = CheckeredPigment(
@@ -58,16 +64,23 @@ private fun buildDemoWorld(): World {
 	val mirrorMaterial = Material(
 		brdf = SpecularBRDF(
 			UniformPigment(Color(0.753f, 0.753f, 0.753f))
-		),
-		UniformPigment(Color.black)
+		)
 	)
 	
 	//Pavement
 	world.addShape(Plane(transformation = Transformation(), groundMaterial))
 	
-	//Sky blu: use the background color of the path tracer
+	//Sky blu, rotate it to prevent the sky and the ground overlapping
+	world.addShape(
+		Plane(
+			transformation = translation(
+				Vec(8f, 0f, 0f)
+			) * rotationY(90f),
+			skyMaterial
+		)
+	)
 	
-	//Sun in the sky in (0,0,5)
+	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
 		Sphere(
 			transformation = scaling(
@@ -77,7 +90,7 @@ private fun buildDemoWorld(): World {
 		)
 	)
 	
-	//first sphere in (-2,0,-2) red
+	//first sphere in (-2,1,1) red
 	world.addShape(
 		Sphere(
 			transformation = scaling(
@@ -87,7 +100,7 @@ private fun buildDemoWorld(): World {
 		)
 	)
 	
-	//second sphere in (1,1,0) silver that reflect the first sphere
+	//second sphere in (-1,-1,0) silver that reflect the first sphere
 	world.addShape(
 		Sphere(
 			scaling(
@@ -222,11 +235,11 @@ class Demo : CliktCommand(
 			
 			val renderer = PathTracer(
 				world,
-				Color(0f, 0f, 1.0f),
+				Color(),
 				PCG(initState, initSeq),
-				numRays = 7,
-				maxRayDepth = 8,
-				russianRouletteLimit = 7
+				numRays = 3,
+				maxRayDepth = 5,
+				russianRouletteLimit = 4
 			)
 			
 			// Run the ray-tracer with ProgressBar
