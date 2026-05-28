@@ -27,6 +27,6 @@ class PCG(
 		return xorShifted.rotateRight(rot)
 	}
 	
-	/** Generate random float uniformly distributed over [0,1]. */
+	/** Generate random float uniformly distributed over [0,1). */
 	fun randomFloat(): Float = random().toFloat() / 0x100000000f
 }

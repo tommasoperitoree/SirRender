@@ -63,7 +63,11 @@ class PathTracer(
 	override operator fun invoke(ray: Ray): Color { // operator is necessary to use the recursion
 		if (ray.depth > maxRayDepth) return Color.black
 		
-		val hitRecord = world.rayIntersection(ray) ?: return backgroundColor
+		val hitRecord = world.rayIntersection(ray) ?: return if (ray.depth == 0) {
+			backgroundColor
+		} else {
+			Color(0.1f, 0.1f, 0.1f)
+		}
 		
 		// extract from the point of intersection the color reflected and the emitted radiance
 		val hitMaterial = hitRecord.shape.material
