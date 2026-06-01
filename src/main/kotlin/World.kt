@@ -9,7 +9,7 @@ class World(
 		var closest: HitRecord? = null
 		
 		for (shape in shapes) {
-			val intersection: HitRecord = shape.rayIntersection(ray) ?: continue //if(intersection==null) continue
+			val intersection: HitRecord = shape.rayIntersection(ray) ?: continue
 			
 			if (closest == null || intersection.t < closest.t) {
 				closest = intersection

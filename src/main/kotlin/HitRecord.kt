@@ -4,6 +4,7 @@ data class HitRecord(
 	val surfacePoint: Vec2d = Vec2d(),
 	val t: Float = 1e-5f,
 	val ray: Ray = Ray(),
+	val shape: Shape
 ) {
 	fun isClose(other: HitRecord) =
 		worldPoint.isClose(other.worldPoint) &&

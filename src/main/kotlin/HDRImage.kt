@@ -140,8 +140,8 @@ data class HDRImage(
 	 * @throws IOException if an error occurs during writing
 	 * @see [javax.imageio.ImageIO.write]
 	 *
-	 * return tyoe BufferedImage in order to create a gif
-	 * each time an image is been saved in bufferedImage, then this array is used in a loop to put together every frame
+	 * return type BufferedImage in order to create a GIF
+	 * each time an image is saved in bufferedImage, then this array is used in a loop to put together every frame
 	 */
 	fun writeLDRImage(stream: OutputStream, format: String, gamma: Float = 1.0f): BufferedImage {
 		val imageLDR = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
@@ -168,9 +168,8 @@ data class HDRImage(
 			// generic errors of input/output
 			throw IOException("Failed to write $format image to stream", e)
 		}
-		return imageLDR  // questa funzione ora ritorna un tipo bufferdimage per fare la gif
+		return imageLDR  // this function now returns a BufferedImage to make the GIF
 	}
-	
 	
 	companion object {
 		

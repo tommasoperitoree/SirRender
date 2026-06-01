@@ -18,8 +18,7 @@ fun spherePointToUV(point: Point): Vec2d {
 	val u = atan2(point.x, point.y) / (2f * PI.toFloat())
 	val v = acos(point.z) / PI.toFloat()
 	return Vec2d(
-		if (u >= 0f) u else u + 1f,
-		v
+		if (u >= 0f) u else u + 1f, v
 	)
 }
 
@@ -28,15 +27,18 @@ fun spherePointToUV(point: Point): Vec2d {
  * Interface. Each concrete [Shape] should override the [rayIntersection] method.
  */
 interface Shape {
+	
+	val transformation: Transformation
+	val material: Material
+	
 	/** Compute the intersection between a [ray] and this [Shape] */
-	fun rayIntersection(ray: Ray): HitRecord? =
-		throw NotImplementedError("Shape.rayIntersection() is abstract")
+	fun rayIntersection(ray: Ray): HitRecord? = throw NotImplementedError("Shape.rayIntersection() is abstract")
 }
 
 
 /** A 3D unitary sphere centered at the origin. */
 class Sphere(
-	val transformation: Transformation = Transformation()
+	override val transformation: Transformation = Transformation(), override val material: Material = Material()
 ) : Shape {
 	
 	/**
@@ -66,7 +68,8 @@ class Sphere(
 			transformation * sphereNormal(hitPoint, rayDir = ray.dir),
 			spherePointToUV(hitPoint),
 			tFirstHit,
-			ray
+			ray,
+			this
 		)
 	}
 }
@@ -74,7 +77,8 @@ class Sphere(
 
 /** A 3D infinite plane parallel to the x and y axes and passing through the origin. */
 class Plane(
-	val transformation: Transformation = Transformation()
+	override val transformation: Transformation = Transformation(),
+	override val material: Material = Material()
 ) : Shape {
 	
 	/**
@@ -99,7 +103,8 @@ class Plane(
 			transformation * Normal(0f, 0f, if (invRay.dir.z < 0f) 1f else -1f),
 			Vec2d(hitPoint.x - floor(hitPoint.x), hitPoint.y - floor(hitPoint.y)),
 			t,
-			ray
+			ray,
+			this
 		)
 		
 	}
