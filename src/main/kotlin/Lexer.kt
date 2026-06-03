@@ -6,8 +6,8 @@ import java.io.Reader
 
 data class SourceLocation(
 	val fileName: String = "",
-	var lineNum: Int = 0,
-	var colNum: Int = 0
+	var lineNum: Int = 1,
+	var colNum: Int = 1
 )
 
 
@@ -103,8 +103,8 @@ class GrammarError(
 // ------------------------------
 //      Input Stream wrapper
 // ------------------------------
-
-class inputStream(
+//Inputstream can be confused with a library of Kotlin
+class SceneInputStream(
 	private val stream: Reader,
 	fileName: String = "",
 	val tabulations: Int = 4,
@@ -145,7 +145,7 @@ class inputStream(
 			ch = stream.read().toChar()
 		}
 		
-		savedLocation = location
+		savedLocation = location.copy()
 		updatePos(ch)
 		return ch
 	}
@@ -159,7 +159,30 @@ class inputStream(
 	
 	/** Keep reading characters until a non-whitespace/non-comment character is found. */
 	fun skipWhitespacesAndComments() {
-		TODO()
+		var ch = readChar()
+		while (ch != null) {
+			when (ch) {
+				in WHITESPACE -> {}
+				'/' -> {
+					//if the next character is / it means that there is // so it is a comment, skip until /n
+					val next = readChar()
+					if (next == '/') {
+						var c = readChar()
+						while (c != '\n' && c != null) c = readChar()
+						if (c == '\n') unreadChar(c) //replace '\n' in the buffer, and it will be seen as a character of WHITESPACE
+					} else {
+						unreadChar(next)
+						return
+						//it wasn't a comment, and it has to be put back
+					}
+				}
+				else -> {
+					unreadChar(ch)
+					return
+				}
+			}
+			ch=readChar()
+		}
 	}
 	
 	/**
