@@ -103,10 +103,9 @@ private fun buildDemoWorld(): World {
 	//second sphere in (-1,-1,0) silver that reflect the first sphere
 	world.addShape(
 		Sphere(
-			scaling(
-				Vec(0.3f, 0.3f, 0.3f)
-			) * translation(Vec(-4f, -1f, 0f)),
-			mirrorMaterial
+			transformation = scaling(Vec(0.3f, 0.3f, 0.3f))
+					* translation(Vec(-4f, -1f, 0f)),
+			material = mirrorMaterial
 		)
 	)
 	return world

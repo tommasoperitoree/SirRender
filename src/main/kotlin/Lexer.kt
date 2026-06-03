@@ -87,24 +87,25 @@ data class IdentifierToken(val identifier: String, override val location: Source
 /** A [Token] signaling the end of a file. */
 data class StopToken(override val location: SourceLocation) : Token()
 
-/** An [Exception] found by the lexer/parser while reading a scene file
 
-The fields of this type are the following:
-
-- [SourceLocation.fileName]: the name of the file, or the empty string if there is no real file
-- [SourceLocation.line] the line number where the error was discovered (starting from 1)
-- [SourceLocation.column]: the column number where the error was discovered (starting from 1)
-- `message`: a user-frendly error message**/
+/** An [Exception] found by the lexer/parser while reading a scene file.
+ * The fields of this type are the following:
+ * - [SourceLocation.fileName] the name of the file, or the empty string if there is no real file
+ * - [SourceLocation.lineNum] the line number where the error was discovered (starting from 1)
+ * - [SourceLocation.colNum] the column number where the error was discovered (starting from 1)
+ * - `message`: a user-friendly error message
+ */
 class GrammarError(
 	val location: SourceLocation,
 	override val message: String
 ) : Exception(message)
 
+
 // ------------------------------
 //      Input Stream wrapper
 // ------------------------------
-//Inputstream can be confused with a library of Kotlin
-class SceneInputStream(
+//Input stream can be confused with a library of Kotlin
+class sceneInputStream(
 	private val stream: Reader,
 	fileName: String = "",
 	val tabulations: Int = 4,
@@ -164,24 +165,85 @@ class SceneInputStream(
 			when (ch) {
 				in WHITESPACE -> {}
 				'/' -> {
-					//if the next character is / it means that there is // so it is a comment, skip until /n
+					// if the next character is / it means that there is // so it is a comment, skip until /n
 					val next = readChar()
 					if (next == '/') {
 						var c = readChar()
 						while (c != '\n' && c != null) c = readChar()
-						if (c == '\n') unreadChar(c) //replace '\n' in the buffer, and it will be seen as a character of WHITESPACE
+						if (c == '\n') unreadChar(c) // replace '\n' in the buffer, and it will be seen as a character of WHITESPACE
 					} else {
 						unreadChar(next)
 						return
-						//it wasn't a comment, and it has to be put back
+						// it wasn't a comment, and it has to be put back
 					}
 				}
+				
 				else -> {
 					unreadChar(ch)
 					return
 				}
 			}
-			ch=readChar()
+			ch = readChar()
+		}
+	}
+	
+	/** Interprets a series of [Char]s as a [String]. Returns corresponding [Token]. */
+	fun parseStringToken(tokenLoc: SourceLocation): StringToken {
+		val token = buildString {
+			while (true) {
+				val ch = readChar() ?: throw GrammarError(tokenLoc, "Undetermined string")
+				if (ch == '"') break
+				append(ch)
+			}
+		}
+		return StringToken(value = token, location = tokenLoc)
+	}
+	
+	/** Interprets a series of [Char]s as a literal number, type [Float]. Returns corresponding [Token]. */
+	fun parseFloatToken(firstChar: Char, tokenLoc: SourceLocation): NumberToken {
+		val token = buildString {
+			append(firstChar)
+			while (true) {
+				val ch = readChar() ?: break // if readChar() returns null (EOF) break
+				
+				if (ch.isDigit() || ch == '.' || ch == 'e' || ch == 'E') {
+					append(ch)
+				} else {
+					unreadChar(ch)
+					break
+				}
+			}
+		}
+		val value = token.toFloatOrNull()
+			?: throw GrammarError(tokenLoc, "'$token' is an invalid floating-point number")
+		return NumberToken(value, tokenLoc)
+	}
+	
+	/**
+	 * Interpret a series of [Char] as either a [KeywordToken], if the [String] is found in the [Keyword] dictionary,
+	 * or as an [IdentifierToken] otherwise. The corresponding [Token] is then returned.
+	 */
+	fun parseKeywordOrIdentifierToken(firstChar: Char, tokenLoc: SourceLocation): Token {
+		val token = buildString {
+			append(firstChar)
+			
+			while (true) {
+				val ch = readChar() ?: break
+				
+				if (ch.isLetterOrDigit() || ch == '_') {
+					append(ch)
+				} else {
+					unreadChar(ch)
+					break
+				}
+			}
+		}
+		
+		val keyword = Keyword.fromString(token)
+		return if (keyword != null) {
+			KeywordToken(keyword, tokenLoc)
+		} else {
+			IdentifierToken(token, tokenLoc)
 		}
 	}
 	
@@ -194,5 +256,12 @@ class SceneInputStream(
 	 */
 	fun readToken() {
 		TODO()
+	}
+	
+	/** Makes as if [token] were never read from the stream. */
+	fun unreadToken(token: Token) {
+		// throw IllegalStateException if no savedToken to be unread
+		check(savedToken == null) { "Cannot unread a token when one is already saved!" }
+		savedToken = token
 	}
 }
