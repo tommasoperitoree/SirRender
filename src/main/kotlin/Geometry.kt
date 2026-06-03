@@ -1,3 +1,4 @@
+import kotlin.math.sign
 import kotlin.math.sqrt
 
 /**
@@ -199,13 +200,33 @@ data class Normal(
 		return times(1f / currentNorm)
 	}
 	
+	/** Returns the [Vec] with components of [Normal] */
+	fun toVec(): Vec =
+		Vec(x, y, z)
+	
 	override fun toString(): String = "Normal($x, $y, $z)"
 	
 }
 
 data class Vec2d(
-	var x: Float = 0f,
-	var y: Float = 0f,
+	var u: Float = 0f,
+	var v: Float = 0f,
 ) {
-	fun isClose(other: Vec2d) = areClose(x, other.x) && areClose(y, other.y)
+	fun isClose(other: Vec2d) = areClose(u, other.u) && areClose(v, other.v)
+}
+
+/**
+ * Create Orthonormal basis from given [normal] taken as the `ez` versor.
+ * [normal] has to be normalized!
+ */
+fun createOnbFromZ(normal: Normal): Triple<Vec, Vec, Vec> {
+	val sign = sign(normal.z + Float.MIN_VALUE)
+	
+	val a = -1f / (sign + normal.z)
+	val b = normal.x * normal.y * a
+	
+	val e1 = Vec(1f + sign * normal.x * normal.x * a, sign * b, -sign * normal.x)
+	val e2 = Vec(b, sign + normal.y * normal.y * a, -normal.y)
+	
+	return Triple(e1, e2, Vec(normal.x, normal.y, normal.z))
 }

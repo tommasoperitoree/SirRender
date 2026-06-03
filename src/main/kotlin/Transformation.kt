@@ -7,9 +7,6 @@ import kotlin.math.PI
 /** Converts this angle from degrees to radians. */
 fun Float.toRadians(): Float = (this * PI / 180.0).toFloat()
 
-/** Converts this angle from radians to degrees. */
-fun Float.toDegrees(): Float = (this * 180.0 / PI).toFloat()
-
 /** Simple function to return a [Pair] of `(cos(angleDeg), sin(angleDeg))` of the given [angleDeg] in degrees.
  * Converts to radians internally.
  * Used by rotation factory functions to avoid computing [toRadians] twice.
@@ -28,7 +25,7 @@ fun angleCosSin(angleDeg: Float): Pair<Float, Float> {
  * @property m the transformation matrix
  * @property invm the inverse of [m]
  *
- * Always construct via the [companion object][Transformation.Companion] factory functions:
+ * Always construct via the [Transformation] factory functions:
  * [translation], [scaling], [rotationX], [rotationY], [rotationZ].
  */
 data class Transformation(
