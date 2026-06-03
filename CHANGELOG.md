@@ -1,3 +1,6 @@
+#Version 0.3.0
+-*Breaking change*: Implement path tracing algorithm class with different type of BRDF
+
 # Version 0.2.0
 
 - *Breaking change*: Implement the `demo` and the `animation` command with CLI Interface through `Clickt` Kotlin Library [#4](https://github.com/tommasoperitoree/SirRender/pull/4)

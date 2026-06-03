@@ -11,6 +11,7 @@ import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.float
 import com.github.ajalt.clikt.parameters.types.int
+import com.github.ajalt.clikt.parameters.types.ulong
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
