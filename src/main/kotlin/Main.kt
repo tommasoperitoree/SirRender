@@ -21,6 +21,7 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.imageio.ImageTypeSpecifier
 import javax.imageio.metadata.IIOMetadataNode
+import kotlin.math.sqrt
 
 
 /** Create elements of the demo scene. */
@@ -28,32 +29,85 @@ private fun buildDemoWorld(): World {
 	
 	val world = World()
 	
-	val skyMaterial = Material(brdf = DiffuseBRDF(), emittedRadiance = UniformPigment(Color(1f, 1f, 0f)))
+	val skyMaterial = Material(
+		brdf = DiffuseBRDF(
+			pigment = UniformPigment(Color(0f, 0f, 1f))
+		)
+	)
+	
 	val groundMaterial = Material(
 		brdf = DiffuseBRDF(
 			pigment = CheckeredPigment(
-				Color(0f, 0f, 1f), Color(1f, 0f, 1f),
+				color1 = Color(0.8f, 0.05f, 0.2f),
+				color2 = Color.black,
 				numSteps = 10
 			)
 		)
 	)
 	
-	//Pavement
-	world.addShape(Plane(Transformation(), groundMaterial))
-	//Sun in the sky in z=5
-	world.addShape(Sphere(translation(Vec(0f, 0f, 5f)), skyMaterial))
+	val sunMaterial = Material(
+		brdf = DiffuseBRDF(
+			pigment = UniformPigment(Color(1.0f, 0.4f, 0f))
+		),
+		emittedRadiance = UniformPigment(Color(1.0f, 0.4f, 0f))
+	)
 	
-	//first sphere in (1,0,0) red, second sphere in (1,1,0) silver that reflect the first sphere
-	world.addShape(Sphere(translation(Vec(1f, 0f, 0f)), Material(DiffuseBRDF(UniformPigment(Color(1f, 0f, 0f))))))
-	world.addShape(
-		Sphere(
-			translation(Vec(1f, 1f, 0f)),
-			Material(
-				SpecularBRDF(UniformPigment(Color.white)), UniformPigment(Color(0.753f, 0.753f, 0.753f))
-			)
+	//RED
+	val sphereMaterial = Material(
+		brdf = DiffuseBRDF(
+			pigment = UniformPigment(Color(1f, 0f, 0f))
+		),
+		emittedRadiance = UniformPigment(Color(1f, 0f, 0f))
+	)
+	
+	val mirrorMaterial = Material(
+		brdf = SpecularBRDF(
+			UniformPigment(Color(0.753f, 0.753f, 0.753f))
 		)
 	)
 	
+	//Pavement
+	world.addShape(Plane(transformation = Transformation(), groundMaterial))
+	
+	//Sky blu, rotate it to prevent the sky and the ground overlapping
+	world.addShape(
+		Plane(
+			transformation = translation(
+				Vec(8f, 0f, 0f)
+			) * rotationY(90f),
+			skyMaterial
+		)
+	)
+	
+	//Sun in the sky in (-0.5,-3,6)
+	world.addShape(
+		Sphere(
+			transformation = scaling(
+				Vec(0.2f, 0.2f, 0.2f)
+			) * translation(Vec(-0.5f, -3f, 6f)),
+			material = sunMaterial
+		)
+	)
+	
+	//first sphere in (-2,1,1) red
+	world.addShape(
+		Sphere(
+			transformation = scaling(
+				Vec(0.4f, 0.4f, 0.4f)
+			) * translation(Vec(-2f, 1f, 1f)),
+			material = sphereMaterial
+		)
+	)
+	
+	//second sphere in (-1,-1,0) silver that reflect the first sphere
+	world.addShape(
+		Sphere(
+			scaling(
+				Vec(0.3f, 0.3f, 0.3f)
+			) * translation(Vec(-4f, -1f, 0f)),
+			mirrorMaterial
+		)
+	)
 	return world
 }
 
@@ -137,6 +191,12 @@ class Demo : CliktCommand(
 	val gamma: Float by option(
 		"--gamma", "-g", help = "Gamma correction value"
 	).float().default(1f)
+	val initState: ULong by option(
+		"--initState", help = "Initial state number for random generation"
+	).ulong().default(42uL)
+	val initSeq: ULong by option(
+		"--initSeq", help = "Initial sequence number for random generation"
+	).ulong().default(54uL)
 	
 	override fun run() {
 		
@@ -153,7 +213,7 @@ class Demo : CliktCommand(
 			val img = HDRImage(width, height)
 			
 			val screenCenter = Vec(-1f, 0f, 0f)
-			val verticalAngle = 15f // angle to rotate above plane (around y-axis)
+			val verticalAngle = 10f // angle to rotate above plane (around y-axis)
 			// concatenation of transformations: first move away from scene,
 			// then rotate upwards around y-axis, and finally gradually move around the scene (z-axis)
 			val camTransformation = rotationZ(angle) *
@@ -166,17 +226,47 @@ class Demo : CliktCommand(
 				else -> throw IllegalStateException("No camera found for $camera.")
 			}
 			
-			ImageTracer(img, cam).fireAllRays { ray -> world.rayIntersection(ray)?.let { Color.white } ?: Color.black }
+			//Run the ray-tracer
 			
-			img.normalizeImage(factor)
-			img.clampImage()
+			val pathTracer = ImageTracer(img, cam)
+			
+			print("Using a path tracer")
+			
+			val renderer = PathTracer(
+				world,
+				Color(),
+				PCG(initState, initSeq),
+				numRays = 3,
+				maxRayDepth = 5,
+				russianRouletteLimit = 4
+			)
+			
+			// Run the ray-tracer with ProgressBar
+			val totalPixels = img.width.toLong() * img.height.toLong()
+			val progressBar = ProgressBar(totalPixels)
+			
+			var done = 0L
+			
+			pathTracer.fireAllRays { ray ->
+				val color = renderer(ray)
+				
+				done++
+				progressBar.update(done)
+				
+				color
+			}
+			progressBar.update(totalPixels, force = true)
 			
 			val baseName = "frame_$angleNNN"
 			val pfmPath = "$cameraDir/$baseName.pfm"
 			img.writePFMFile(pfmPath)
 			println("Saved PFM → $pfmPath")
 			
+			
 			if (renderImage) {
+				img.normalizeImage(factor)
+				img.clampImage()
+				
 				val pngPath = "$cameraDir/$baseName.png"
 				FileOutputStream(pngPath).use { img.writeLDRImage(it, "png", gamma) }
 				println("Saved PNG → $pngPath")
@@ -283,5 +373,5 @@ fun main(args: Array<String>) =
 		Pfm2Png(), Demo(), Animation()
 	).main(args)
 
-// ./gradlew run --args="demo -W 640 -H 480 -c "Orthogonal" -o demo.png"
+// ./gradlew run --args="demo -w 640 -h 480 -c "Orthogonal" -o demo.png"
 // ./gradlew run --args="animation --width=480 --height=480 --output demo.png --num-frames=72"
