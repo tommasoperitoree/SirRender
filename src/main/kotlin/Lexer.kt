@@ -176,6 +176,7 @@ class SceneInputStream(
 						if (c == '\n') unreadChar(c) // replace '\n' in the buffer, and it will be seen as a character of WHITESPACE
 					} else { // it wasn't a comment, and it has to be put back
 						if (next != null) unreadChar(next)
+						// do we need to put this back?
 						unreadChar('/') // put back original '/'
 						return
 					}
