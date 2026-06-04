@@ -8,7 +8,7 @@ class LexerTest {
 	@Test
 	fun `test sceneInputStream`() {
 		//need reader() in order to read a char
-		val stream = SceneInputStream("abc \nd //comment// \ne".reader())
+		val stream = SceneInputStream("abc \nd //comment \ne\tf".reader())
 		
 		assertEquals(1, stream.location.lineNum)
 		assertEquals(1, stream.location.colNum)
@@ -38,7 +38,7 @@ class LexerTest {
 		// *** TEST skipeWhitespaceAndComments (whitespace)*** //
 		stream.skipWhitespacesAndComments()
 		
-		//*** TEST updatePos()***//
+		//*** TEST updatePos() after \n ***//
 		assertEquals(2, stream.location.lineNum)
 		assertEquals(1, stream.location.colNum)
 		
@@ -54,6 +54,15 @@ class LexerTest {
 		assertEquals('e', stream.readChar())
 		assertEquals(3, stream.location.lineNum)
 		assertEquals(2, stream.location.colNum)
+		
+		stream.skipWhitespacesAndComments() //test \t//
+		//*** TEST updatePos() after \t ***//
+		assertEquals(3, stream.location.lineNum)
+		assertEquals(6, stream.location.colNum)
+		
+		assertEquals('f', stream.readChar())
+		assertEquals(3, stream.location.lineNum)
+		assertEquals(7, stream.location.colNum)
 		
 		assertEquals(expected = null, actual = stream.readChar())
 	}
