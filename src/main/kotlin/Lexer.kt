@@ -87,6 +87,7 @@ data class IdentifierToken(val identifier: String, override val location: Source
 /** A [Token] signaling the end of a file. */
 data class StopToken(override val location: SourceLocation) : Token()
 
+/** An [Exception] found by the lexer/parser while reading a scene file*/
 
 /** An [Exception] found by the lexer/parser while reading a scene file.
  * The fields of this type are the following:
@@ -94,7 +95,8 @@ data class StopToken(override val location: SourceLocation) : Token()
  * - [SourceLocation.lineNum] the line number where the error was discovered (starting from 1)
  * - [SourceLocation.colNum] the column number where the error was discovered (starting from 1)
  * - `message`: a user-friendly error message
- */
+ **/
+
 class GrammarError(
 	val location: SourceLocation,
 	override val message: String
@@ -142,8 +144,10 @@ class sceneInputStream(
 		if (savedChar != null) { // recover the unread character and return it
 			ch = savedChar
 			savedChar = null
-		} else { // read a new character from the stream
-			ch = stream.read().toChar()
+		} else { // byte=-1 is when char is null, at the end of the stream,
+			val byte = stream.read()
+			if (byte == -1) return null
+			ch = byte.toChar()// read a new character from the stream
 		}
 		
 		savedLocation = location.copy()
@@ -174,7 +178,7 @@ class sceneInputStream(
 					} else {
 						unreadChar(next)
 						return
-						// it wasn't a comment, and it has to be put back
+						/* it wasn't a comment, and it has to be put back */
 					}
 				}
 				
