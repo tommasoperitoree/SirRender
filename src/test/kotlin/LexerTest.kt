@@ -6,7 +6,7 @@ class LexerTest {
 	
 	/** Set of test of [SceneInputStream] **/
 	@Test
-	fun `test sceneInputStream`() {
+	fun `test SceneInputStream`() {
 		//need reader() in order to read a char
 		val stream = SceneInputStream("abc \nd //comment \ne\tf".reader())
 		

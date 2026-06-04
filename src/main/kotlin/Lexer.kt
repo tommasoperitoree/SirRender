@@ -74,12 +74,12 @@ data class StringToken(val value: String, override val location: SourceLocation)
 	override fun toString() = value
 }
 
-/** A [Token] containing an identifier. */
+/** A [Token] containing a keyword. */
 data class KeywordToken(val keyword: Keyword, override val location: SourceLocation) : Token() {
 	override fun toString() = keyword.name
 }
 
-/** A [Token] containing a keyword. */
+/** A [Token] containing an identifier */
 data class IdentifierToken(val identifier: String, override val location: SourceLocation) : Token() {
 	override fun toString() = identifier
 }
@@ -258,7 +258,7 @@ class SceneInputStream(
 	 * If it is a sequence of characters a…z, it returns a KeywordToken if the sequence is a keyword, IdentifierToken otherwise;
 	 * If the file is finished, it returns StopToken.
 	 */
-	fun readToken() {
+	fun readToken(): Token? {
 		TODO()
 	}
 	
