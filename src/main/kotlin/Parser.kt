@@ -17,8 +17,11 @@ data class Scene(
 		}
 	}
 	/**Read a [Token] from [s]  and check that it is one of the keywords in [Keyword]*/
-	fun expectKeyword(s: SceneInputStream, keyword: String) {
-	
+	fun expectKeyword(s: SceneInputStream, keyword: String): String{
+		val token=s.readToken()
+		if (token !is KeywordToken) throw GrammarError(token.location, "got $token instead of $keyword" )
+		if (token.keyword.toString() != keyword) throw GrammarError(token.location, "expected on of keywords in $Keyword instead of $token")
+		return token.keyword.toString()
 	}
 	
 	fun expectNumber(s: SceneInputStream, scene: Scene): Float {
