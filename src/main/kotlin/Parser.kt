@@ -11,11 +11,14 @@ data class Scene(
 	
 	/** Read a [Token] from [s] and check that it matches the given [symbol]. */
 	fun expectSymbol(s: SceneInputStream, symbol: String) {
-		TODO()
+		val token=s.readToken()
+		if (token !is SymbolToken || token.symbol.toString() != symbol) {
+			throw GrammarError(token.location, "got $token instead of $symbol" )
+		}
 	}
-	
+	/**Read a [Token] from [s]  and check that it is one of the keywords in [Keyword]*/
 	fun expectKeyword(s: SceneInputStream, keyword: String) {
-		TODO()
+	
 	}
 	
 	fun expectNumber(s: SceneInputStream, scene: Scene): Float {

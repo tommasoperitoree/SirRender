@@ -35,7 +35,7 @@ class LexerTest {
 		assertEquals(1, stream.location.lineNum)
 		assertEquals(4, stream.location.colNum)
 		
-		// *** TEST skipeWhitespaceAndComments (whitespace)*** //
+		// *** TEST skipWhitespaceAndComments (whitespace)*** //
 		stream.skipWhitespacesAndComments()
 		
 		//*** TEST updatePos() after \n ***//
