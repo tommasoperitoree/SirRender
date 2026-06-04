@@ -107,7 +107,7 @@ class GrammarError(
 //      Input Stream wrapper
 // ------------------------------
 //Input stream can be confused with a library of Kotlin
-class sceneInputStream(
+class SceneInputStream(
 	private val stream: Reader,
 	fileName: String = "",
 	val tabulations: Int = 4,
@@ -144,10 +144,9 @@ class sceneInputStream(
 		if (savedChar != null) { // recover the unread character and return it
 			ch = savedChar
 			savedChar = null
-		} else { // byte=-1 is when char is null, at the end of the stream,
+		} else { // byte = -1 is when char is null, at the end of the stream
 			val byte = stream.read()
-			if (byte == -1) return null
-			ch = byte.toChar()// read a new character from the stream
+			ch = if (byte == -1) null else byte.toChar()
 		}
 		
 		savedLocation = location.copy()
@@ -156,7 +155,7 @@ class sceneInputStream(
 	}
 	
 	/** Push a character back to the stream. */
-	fun unreadChar(ch: Char?) {
+	fun unreadChar(ch: Char) {
 		assert(savedChar == null)
 		savedChar = ch
 		location = savedLocation.copy()
@@ -175,10 +174,10 @@ class sceneInputStream(
 						var c = readChar()
 						while (c != '\n' && c != null) c = readChar()
 						if (c == '\n') unreadChar(c) // replace '\n' in the buffer, and it will be seen as a character of WHITESPACE
-					} else {
-						unreadChar(next)
+					} else { // it wasn't a comment, and it has to be put back
+						if (next != null) unreadChar(next)
+						unreadChar('/') // put back original '/'
 						return
-						/* it wasn't a comment, and it has to be put back */
 					}
 				}
 				

@@ -1,17 +1,14 @@
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-import java.io.Reader
-import java.util.stream.Stream
 
 
 class LexerTest {
 	
-	/** Set of test of [sceneInputStream] **/
+	/** Set of test of [SceneInputStream] **/
 	@Test
 	fun `test sceneInputStream`() {
 		//need reader() in order to read a char
-		val stream = sceneInputStream("abc \nd //comment// \ne".reader())
+		val stream = SceneInputStream("abc \nd //comment// \ne".reader())
 		
 		assertEquals(1, stream.location.lineNum)
 		assertEquals(1, stream.location.colNum)
