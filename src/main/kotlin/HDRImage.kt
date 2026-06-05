@@ -140,6 +140,8 @@ data class HDRImage(
 	 * @throws IOException if an error occurs during writing
 	 * @see [javax.imageio.ImageIO.write]
 	 *
+	 * [writeLDRImage] convert an image from HDRI to LDRI and save it in a .png /.jpeg format
+	 *
 	 * return type BufferedImage in order to create a GIF
 	 * each time an image is saved in bufferedImage, then this array is used in a loop to put together every frame
 	 */
