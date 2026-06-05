@@ -1,3 +1,5 @@
+import java.io.File
+
 /** A scene read from a scene file */
 data class Scene(
 	val materials: MutableMap<String, Material> = mutableMapOf(),
@@ -21,15 +23,16 @@ data class Scene(
 	}
 	
 	/**Read a [Token] from [s]  and check that it is one of the keywords in [Keyword]*/
-	fun expectKeyword(s: SceneInputStream, keyword: String): String {
+	fun expectKeyword(s: SceneInputStream, keyword: List<Keyword>): Keyword {
 		val token = s.readToken() ?: throw GrammarError(s.location, "unexpected end of file")
 		
 		if (token !is KeywordToken) throw GrammarError(token.location, "got $token instead of $keyword")
-		if (token.keyword.toString() != keyword) throw GrammarError(
+		//use !in if keyword now is a list of Keywords
+		if (token.keyword !in keyword) throw GrammarError(
 			token.location,
 			"expected on of keywords in $Keyword instead of $token"
 		)
-		return token.keyword.toString()
+		return token.keyword
 	}
 	
 	fun expectNumber(s: SceneInputStream, scene: Scene): Float {
@@ -65,7 +68,7 @@ data class Scene(
 		
 		expectSymbol(s, "(")
 		val r = expectNumber(s, scene)
-		expectKeyword(s, ",")
+		expectSymbol(s, ",")
 		val g = expectNumber(s, scene)
 		expectSymbol(s, ",")
 		val b = expectNumber(s, scene)
@@ -75,11 +78,48 @@ data class Scene(
 	}
 	
 	fun parseVec(s: SceneInputStream, scene: Scene): Vec {
-		TODO()
+		
+		expectSymbol(s, "(")
+		val x = expectNumber(s, scene)
+		expectSymbol(s, ",")
+		val y = expectNumber(s, scene)
+		expectSymbol(s, ",")
+		val z = expectNumber(s, scene)
+		expectSymbol(s, ")")
+		
+		return Vec(x, y, z)
 	}
 	
-	fun parsePigment(s: SceneInputStream, secene: Scene): Pigment {
-		TODO()
+	fun parsePigment(s: SceneInputStream, scene: Scene): Pigment? {
+		var keyword = expectKeyword(s, listOf(Keyword.UNIFORM, Keyword.CHECKERED, Keyword.IMAGE))
+		var pigment: Pigment? = null
+		
+		expectSymbol(s, "(")
+		
+		if (keyword == Keyword.UNIFORM) {
+			val color = parseColor(s, scene)
+			pigment = UniformPigment(color)
+		}
+		
+		if (keyword == Keyword.CHECKERED) {
+			val color1 = parseColor(s, scene)
+			expectSymbol(s, ",")
+			val color2 = parseColor(s, scene)
+			expectSymbol(s, ",")
+			val numStep = (expectNumber(s, scene)).toInt()
+			pigment = CheckeredPigment(color1, color2, numStep)
+		}
+		
+		//instead of give a HDRImage, from Scene, the compiler read the name of the PFM file,
+		// then parser will open it e and close right after (.use)
+		if (keyword == Keyword.IMAGE) {
+			val fileName = expectString(s)
+			val image = File(fileName).inputStream().use { HDRImage.fromPFMStream(it) }
+			pigment = ImagePigment(image)
+		}
+		
+		expectSymbol(s, ")")
+		return pigment
 	}
 	
 	fun parseBRDF(s: SceneInputStream, scene: Scene): BRDF {
@@ -102,7 +142,7 @@ data class Scene(
 		TODO()
 	}
 	
-	fun parseCamera(s:SceneInputStream,scene: Scene):Camera{
+	fun parseCamera(s: SceneInputStream, scene: Scene): Camera {
 		TODO()
 	}
 	
