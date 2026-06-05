@@ -1,6 +1,7 @@
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -61,8 +62,8 @@ class HDRImageTest {
 	fun `test get-set-Pixel`() {
 		val img = HDRImage(width, height)
 		val refColor = Color(0.5f, 0.1f, 0.2f)
-		img.setPixel(x, y, refColor)
-		assertTrue(refColor.isClose(img.getPixel(x, y)))
+		img.setPixel(4, 5, refColor)
+		assertTrue(refColor.isClose(img.getPixel(4, 5)))
 	}
 	
 	@Test
@@ -77,11 +78,32 @@ class HDRImageTest {
 		}
 	}
 	
-	/*@Test
-	fun `test WritePFMFile`(){
-	TODO()
-	 }
-	*/
+	@Test
+	fun `test writePFMFile`() {
+		
+		val img = HDRImage(2, 2)
+		img.setPixel(0, 0, Color(1f, 0f, 0f))
+		img.setPixel(1, 0, Color(0f, 1f, 0f))
+		img.setPixel(0, 1, Color(0f, 0f, 1f))
+		img.setPixel(1, 1, Color(1f, 1f, 1f))
+		
+		// Write the image to a temporary file, then read it back to verify that each pixel's color matches
+		val tempFile = File.createTempFile("temp", ".pfm")
+		//use try & finally to open and close the temporary file at the end of test even if there are some exception
+		try {
+			img.writePFMFile(tempFile.path) //path extract from file the path of File that is a String
+			val imgRead = tempFile.inputStream().use { HDRImage.fromPFMStream(it) }
+			assertEquals(img.width, imgRead.width)
+			assertEquals(img.height, imgRead.height)
+			for (y in 0 until 2) {
+				for (x in 0 until 2) {
+					assertTrue { imgRead.getPixel(x, y).isClose(img.getPixel(x, y)) }
+				}
+			}
+		} finally {
+			tempFile.delete()
+		}
+	}
 	
 	@Test
 	fun `test averageLuminosity`() {
