@@ -140,8 +140,6 @@ data class HDRImage(
 	 * @throws IOException if an error occurs during writing
 	 * @see [javax.imageio.ImageIO.write]
 	 *
-	 * [writeLDRImage] convert an image from HDRI to LDRI and save it in a .png /.jpeg format
-	 *
 	 * return type BufferedImage in order to create a GIF
 	 * each time an image is saved in bufferedImage, then this array is used in a loop to put together every frame
 	 */
@@ -182,32 +180,32 @@ data class HDRImage(
 		 * Stops at the newline character (0x0a) without over-reading into binary data.
 		 * @throws InvalidPFMImageFormat if the end of file (EOF) is reached unexpectedly.
 		 */
-	internal fun readLine(stream: InputStream): String =
-		buildString {
-			while (true) {
-				val byte = stream.read() // reads a single Byte (e.g. 0x50)
-				if (byte == 0x0a || byte == -1) {
-					if (isEmpty()) throw InvalidPFMImageFormat("Unexpected End of File")
-					break
+		internal fun readLine(stream: InputStream): String =
+			buildString {
+				while (true) {
+					val byte = stream.read() // reads a single Byte (e.g. 0x50)
+					if (byte == 0x0a || byte == -1) {
+						if (isEmpty()) throw InvalidPFMImageFormat("Unexpected End of File")
+						break
+					}
+					append(byte.toChar()) // append the byte as a character (e.g. 0x50->'P')
 				}
-				append(byte.toChar()) // append the byte as a character (e.g. 0x50->'P')
-			}
-		}.trim() // trim to handle potential \r (0x0d) characters in Windows-encoded files
-	
-	/**
-	 * Reads 4 bytes from the [stream] and decodes them as a [Float] with the given [endianness].
-	 * Uses [ByteBuffer] to wrap the [ByteArray] and decode the bits.
-	 * @throws InvalidPFMImageFormat if fewer than 4 bytes are available
-	 */
-	internal fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
-		// Read exactly 4 bytes
-		val bytes = stream.readNBytes(4)
-		// Check if we actually got 4 bytes
-		if (bytes.size < 4) throw InvalidPFMImageFormat("Insufficient data: expected 4 bytes for float, but found ${bytes.size}")
+			}.trim() // trim to handle potential \r (0x0d) characters in Windows-encoded files
 		
-		// Wrap, set order, and decode
-		return ByteBuffer.wrap(bytes).order(endianness).float
-	}
+		/**
+		 * Reads 4 bytes from the [stream] and decodes them as a [Float] with the given [endianness].
+		 * Uses [ByteBuffer] to wrap the [ByteArray] and decode the bits.
+		 * @throws InvalidPFMImageFormat if fewer than 4 bytes are available
+		 */
+		internal fun readFloat(stream: InputStream, endianness: ByteOrder): Float {
+			// Read exactly 4 bytes
+			val bytes = stream.readNBytes(4)
+			// Check if we actually got 4 bytes
+			if (bytes.size < 4) throw InvalidPFMImageFormat("Insufficient data: expected 4 bytes for float, but found ${bytes.size}")
+			
+			// Wrap, set order, and decode
+			return ByteBuffer.wrap(bytes).order(endianness).float
+		}
 		
 		/** Encodes [value] as a 4-byte float with the given [order] and writes it to [stream]. */
 		internal fun writeFloat(stream: OutputStream, value: Float, order: ByteOrder) {

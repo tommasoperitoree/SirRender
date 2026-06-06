@@ -268,4 +268,30 @@ class HDRImageTest {
 		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.fromPFMStream(p.byteInputStream()) }
 	}
 	
+	@Test
+	fun `test equals`() {
+		val img1 = HDRImage(2, 2)
+		val img2 = HDRImage(2, 2)
+		
+		img1.setPixel(0, 0, Color(1f, 0f, 0f))
+		img1.setPixel(1, 0, Color(0f, 1f, 0f))
+		img1.setPixel(0, 1, Color(0f, 0f, 1f))
+		img1.setPixel(1, 1, Color(1f, 1f, 1f))
+		
+		img2.setPixel(0, 0, Color(1f, 0f, 0f))
+		img2.setPixel(1, 0, Color(0f, 1f, 0f))
+		img2.setPixel(0, 1, Color(0f, 0f, 1f))
+		img2.setPixel(1, 1, Color(1f, 1f, 1f))
+		
+		// immagini uguali
+		assertEquals(img1, img2)
+		
+		// dimensioni diverse
+		assertNotEquals(img1, HDRImage(3, 2))
+		
+		// pixel diversi
+		val img3 = HDRImage(2, 2)
+		img3.setPixel(0, 0, Color(0f, 0f, 0f))
+		assertNotEquals(img1, img3)
+	}
 }
