@@ -283,13 +283,13 @@ class HDRImageTest {
 		img2.setPixel(0, 1, Color(0f, 0f, 1f))
 		img2.setPixel(1, 1, Color(1f, 1f, 1f))
 		
-		// immagini uguali
+		// same image
 		assertEquals(img1, img2)
 		
-		// dimensioni diverse
+		// different dimension
 		assertNotEquals(img1, HDRImage(3, 2))
 		
-		// pixel diversi
+		// different pixels
 		val img3 = HDRImage(2, 2)
 		img3.setPixel(0, 0, Color(0f, 0f, 0f))
 		assertNotEquals(img1, img3)
