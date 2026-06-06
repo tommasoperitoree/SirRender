@@ -1,16 +1,22 @@
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
+//da decidere isClose lo teniamo sempre in alto
+// oppure lo inseriamo nelle utulity functions?
 class VecTest() {
 	
 	val vecA = Vec(1f, 2f, 3f)
 	val vecB = Vec(1f, 1f, 1f)
+	val eps = 10e-5f
 	
 	@Test
 	fun `test isClose`() {
 		assertTrue(vecA.isClose(Vec(1f, 2f, 3f)))
 		assertFalse(vecB.isClose(Vec(1f, 2f, 3f)))
 	}
+	
+	// --- Operator overloading ---
 	
 	@Test
 	fun `test operator plus`() {
@@ -25,10 +31,19 @@ class VecTest() {
 	}
 	
 	@Test
+	fun `test operator unaryMinus`() {
+		val vecC = vecA.unaryMinus()
+		assertTrue(vecC.isClose(Vec(-1f, -2f, -3f)))
+	}
+	
+	@Test
 	fun `test operator times Scalar`() {
 		val vecC = vecA * 2f
 		assertTrue(vecC.isClose(Vec(2f, 4f, 6f)))
 	}
+	
+	
+	// --- Utility functions ---
 	
 	@Test
 	fun `test squaredNorm function`() {
@@ -47,6 +62,20 @@ class VecTest() {
 		val cross: Normal = vecA cross vecB
 		assertTrue(cross.isClose(Normal(-1f, 2f, -1f)))
 	}
+	
+	@Test
+	fun `test normalize`() {
+		val vecC = vecA.normalize()
+		assertEquals(vecC.norm(), 1f, eps)
+	}
+	
+	@Test
+	fun `test toNormal`() {
+		val nA = vecA.toNormal()
+		assertEquals(vecA.x, nA.x, eps)
+		assertEquals(vecA.y, nA.y, eps)
+		assertEquals(vecA.z, nA.z, eps)
+	}
 }
 
 class PointTest() {
@@ -61,13 +90,7 @@ class PointTest() {
 		assertFalse(pointB.isClose(Point(1f, 2f, 3f)))
 	}
 	
-	/** With vector and floats it is convenient to use the fun isClose instead of ==. */
-	@Test
-	fun `test point toVec`() {
-		val vecRes = pointB.toVec()
-		assertTrue(vecRes.isClose(vecB))
-	}
-	
+	// --- Operator overloading ---
 	@Test
 	fun `test operator plus Vec`() {
 		val c = pointA + vecB
@@ -88,18 +111,37 @@ class PointTest() {
 		assertTrue(e.isClose(Point(0f, 0f, 0f)))
 		assertFalse(e.isClose(pointA))
 	}
+	
+	// --- Utility functions ---
+	
+	/** With vector and floats it is convenient to use the fun isClose instead of ==. */
+	@Test
+	fun `test point toVec`() {
+		val vecRes = pointB.toVec()
+		assertTrue(vecRes.isClose(vecB))
+	}
 }
 
 class NormalTest() {
 	val nA = Normal(1f, 1f, 1f)
 	val nB = Normal(1f, 2f, 3f)
 	val vecB = Vec(1f, 1f, 1f)
+	val eps = 10e-5f
 	
 	@Test
 	fun `test isClose`() {
 		assertTrue(nB.isClose(Normal(1f, 2f, 3f)))
 		assertFalse(nA.isClose(Normal(1f, 2f, 3f)))
 	}
+	
+	// --- Operator overloading --- 
+	
+	@Test
+	fun `test unaryMinus`() {
+		val nN = -nA
+		assertTrue(nN.isClose(Normal(-1f, -1f, -1f)))
+	}
+	
 	
 	@Test
 	fun `test times Scalar`() {
@@ -108,11 +150,7 @@ class NormalTest() {
 		assertFalse(nC.isClose(Normal(3f, 1f, 3f)))
 	}
 	
-	@Test
-	fun `test unaryMinus`() {
-		val nN = -nA
-		assertTrue(nN.isClose(Normal(-1f, -1f, -1f)))
-	}
+	// ---Utility functions ---
 	
 	@Test
 	fun `test dot`() {
@@ -126,6 +164,19 @@ class NormalTest() {
 		assertTrue(areClose(squaredNormA, 14f))
 	}
 	
+	@Test
+	fun `test normalize`() {
+		val nC = nA.normalize()
+		assertEquals(nC.norm(), 1f, eps)
+	}
+	
+	@Test
+	fun `test toVec`() {
+		val vecA = nA.toVec()
+		assertEquals(vecA.x, nA.x, eps)
+		assertEquals(vecA.y, nA.y, eps)
+		assertEquals(vecA.z, nA.z, eps)
+	}
 }
 
 class ONBTest() {
