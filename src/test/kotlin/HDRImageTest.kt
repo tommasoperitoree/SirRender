@@ -1,15 +1,22 @@
+import HDRImage.Companion.readFloat
+import HDRImage.Companion.writeFloat
+import HDRImage.Companion.readLine
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.io.OutputStream
 import java.nio.ByteOrder.BIG_ENDIAN
 import java.nio.ByteOrder.LITTLE_ENDIAN
 import javax.imageio.ImageIO
 import kotlin.test.assertEquals
+import kotlin.test.assertContentEquals
+
 
 class HDRImageTest {
 	
@@ -20,6 +27,7 @@ class HDRImageTest {
 	// generic Height and Width for testing
 	val x: Int = 2
 	val y: Int = 6
+	val eps: Float = 10e-5f
 	
 	// pfm reference files val declaration
 	val referenceBE = byteArrayOfInts(
@@ -186,22 +194,34 @@ class HDRImageTest {
 	fun `test readLine`() {
 		val sb = "Hello\nWorld"
 		val line: InputStream = sb.byteInputStream()
-		assertEquals("Hello", HDRImage.readLine(line))
-		assertEquals("World", HDRImage.readLine(line))
-		// assertEquals("", HDRImage.readLine(line))  // gives error, should we allow reading EOF
+		assertEquals("Hello", readLine(line))
+		assertEquals("World", readLine(line))
+		val exception = assertThrows<InvalidPFMImageFormat> { readLine(line) }
+		assertEquals("Unexpected End of File", exception.message)
 	}
 	
-	/*@Test
-	fun `test readFloat`(){
-	TODO()
-	 }
-	*/
+	@Test
+	fun `test readFloat`() {
+		// 1.0f in little endian = 0x00 0x00 0x80 0x3F
+		//Kotlin use signed byte so 0x80=128, and it is out of range (-128/127), 0x80.toByte()=-128 that is permitted,
+		//ByteArray doesn't look at the sign so -128 & 128 are equals
+		val bytesLE = byteArrayOf(0x00, 0x00, 0x80.toByte(), 0x3F)
+		val streamLE = ByteArrayInputStream(bytesLE)
+		assertEquals(1f, readFloat(streamLE, LITTLE_ENDIAN), eps)
+		
+		// 1.0f in big endian = 0x3F 0x80 0x00 0x00
+		val bytesBE = byteArrayOf(0x3F, 0x80.toByte(), 0x00, 0x00)
+		val streamBE = ByteArrayInputStream(bytesBE)
+		assertEquals(1f, readFloat(streamBE, BIG_ENDIAN), eps)
+	}
 	
-	/*@Test
-	fun `test WriteFloat`(){
-	TODO()
-	 }
-	*/
+	@Test
+	fun `test writeFloat`() {
+		val byteOutLE = ByteArrayOutputStream()
+		writeFloat(byteOutLE, 1f, LITTLE_ENDIAN)
+		assertContentEquals(byteArrayOf(0x00, 0x00, 0x80.toByte(), 0x3F), byteOutLE.toByteArray())
+	}
+	
 	
 	@Test
 	fun `test parseImgSize`() {
