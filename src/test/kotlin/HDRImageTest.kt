@@ -156,7 +156,7 @@ class HDRImageTest {
 	}
 	
 	@Test
-	fun `test WriteLDRImage`() {
+	fun `test writeLDRImage`() {
 		val img = HDRImage(2, 2)
 		img.setPixel(0, 0, Color(1f, 0f, 0f))
 		img.setPixel(1, 0, Color(0f, 1f, 0f))
@@ -172,7 +172,7 @@ class HDRImageTest {
 		
 		assertEquals(img.width, imgRead.width)
 		assertEquals(img.height, imgRead.height)
-		//and is operation bit-bit (1 if are the same else 0) is useful for getRGB format
+		//and is operation bit-bit (1 if they are the same else 0) is useful for getRGB format
 		assertEquals(0xFF0000, imgRead.getRGB(0, 0) and 0xFFFFFF)
 		assertEquals(0x00FF00, imgRead.getRGB(1, 0) and 0xFFFFFF)
 		assertEquals(0x0000FF, imgRead.getRGB(0, 1) and 0xFFFFFF)
