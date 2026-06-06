@@ -1,12 +1,10 @@
-package math
-
-import materials.areClose
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-
-class VecTest {
+//da decidere isClose lo teniamo sempre in alto
+// oppure lo inseriamo nelle utulity functions?
+class VecTest() {
 	
 	val vecA = Vec(1f, 2f, 3f)
 	val vecB = Vec(1f, 1f, 1f)
@@ -80,7 +78,7 @@ class VecTest {
 	}
 }
 
-class PointTest {
+class PointTest() {
 	
 	val pointA = Point(1f, 2f, 3f)
 	val pointB = Point(1f, 1f, 1f)
@@ -124,7 +122,7 @@ class PointTest {
 	}
 }
 
-class NormalTest {
+class NormalTest() {
 	val nA = Normal(1f, 1f, 1f)
 	val nB = Normal(1f, 2f, 3f)
 	val vecB = Vec(1f, 1f, 1f)
@@ -181,7 +179,7 @@ class NormalTest {
 	}
 }
 
-class ONBTest {
+class ONBTest() {
 	
 	val pcg = PCG()
 	val eps = 1e-5f
