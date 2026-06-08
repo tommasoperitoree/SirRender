@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "org.example"
-version = "v0.2.0"
+version = "v0.3.0"
 
 // --- SECURITY FIX ---
 // This block intercepts all dependencies across all configurations (including Dokka)

@@ -259,7 +259,49 @@ class SceneInputStream(
 	 * If the file is finished, it returns StopToken.
 	 */
 	fun readToken(): Token? {
-		TODO()
+		
+		//Se c'è già una variabile savedToken la restituisce subito invece di leggerne un'altra
+		if (savedToken != null) {
+			val result = savedToken
+			savedToken = null
+			return result
+		}
+		
+		skipWhitespacesAndComments()
+		
+		//At this point we're sure that ch does *not* contain a whitespace character
+		val ch = readChar() ?: return StopToken(location = location.copy())
+		
+		//No more characters in the file, so return a StopToken
+		
+		//the position in the stream
+		val tokenLoc = location.copy()
+		
+		return when {
+			//One-character symbol, like '(' or ','
+			ch in SYMBOLS -> {
+				SymbolToken(ch, tokenLoc)
+			}
+			
+			// A literal string (used for file names)
+			ch == '"' -> {
+				parseStringToken(tokenLoc)
+			}
+			
+			// A floating-point number
+			ch.isDigit() || ch == '+' || ch == '-' || ch == '.' -> {
+				parseFloatToken(ch, tokenLoc)
+			}
+			
+			//Since it begins with an alphabetic character, it must either be a keyword or a identifier
+			ch.isLetter() || ch == '_' -> {
+				parseKeywordOrIdentifierToken(ch, tokenLoc)
+			}
+			
+			// We got some weird character, like '@` or `&`
+			else -> throw GrammarError(tokenLoc, "Invalid character '$ch'")
+		}
+		
 	}
 	
 	/** Makes as if [token] were never read from the stream. */
