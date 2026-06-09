@@ -62,11 +62,11 @@ class PathTracer(
 	
 	override operator fun invoke(ray: Ray): Color { // operator is necessary to use the recursion
 		if (ray.depth > maxRayDepth) return Color.black
-		
-		val hitRecord = world.rayIntersection(ray) ?: return if (ray.depth == 0) {
+		//only if isSpecular is true return background, so in case o depth=0 or depth=1 (reflection on mirror)
+		val hitRecord = world.rayIntersection(ray) ?: return if (ray.isSpecular) {
 			backgroundColor
 		} else {
-			Color(0.1f, 0.1f, 0.1f)
+			Color(0.05f,0.05f,0.05f)
 		}
 		
 		// extract from the point of intersection the color reflected and the emitted radiance
@@ -90,6 +90,7 @@ class PathTracer(
 		
 		// MonteCarlo
 		var cumRadiance = Color.black
+		
 		// if hitColorLum is 0 it means that the surface is completely black, so MonteCarlo is useless
 		if (hitColorLum > 0f) {
 			repeat(numRays) {

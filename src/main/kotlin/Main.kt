@@ -29,19 +29,20 @@ import kotlin.math.sqrt
 private fun buildDemoWorld(): World {
 	
 	val world = World()
-	
+	/*
 	val skyMaterial = Material(
-		brdf = DiffuseBRDF(
-			pigment = UniformPigment(Color(0f, 0f, 1f))
-		)
+		//brdf = DiffuseBRDF(pigment = UniformPigment(Color(0f, 0f, 1f))),
+		emittedRadiance = UniformPigment(Color(1f, 1f, 1f))
 	)
-	
+	*/
 	val groundMaterial = Material(
 		brdf = DiffuseBRDF(
 			pigment = CheckeredPigment(
-				color1 = Color(0.8f, 0.05f, 0.2f),
+				//color1 = Color.white,
+				color1 = Color(1f, 0.3f, 0f), //arancio
+				//color1 = Color(0.8f, 0.05f, 0.2f),
 				color2 = Color.black,
-				numSteps = 10
+				numSteps = 5
 			)
 		)
 	)
@@ -57,8 +58,7 @@ private fun buildDemoWorld(): World {
 	val sphereMaterial = Material(
 		brdf = DiffuseBRDF(
 			pigment = UniformPigment(Color(1f, 0f, 0f))
-		),
-		emittedRadiance = UniformPigment(Color(1f, 0f, 0f))
+		)//,emittedRadiance = UniformPigment(Color(1f, 0f, 0f))
 	)
 	
 	val mirrorMaterial = Material(
@@ -69,16 +69,17 @@ private fun buildDemoWorld(): World {
 	
 	//Pavement
 	world.addShape(Plane(transformation = Transformation(), groundMaterial))
-	
+	/*
 	//Sky blu, rotate it to prevent the sky and the ground overlapping
 	world.addShape(
 		Plane(
 			transformation = translation(
-				Vec(8f, 0f, 0f)
+				Vec(1f, 0f, 0f)
 			) * rotationY(90f),
 			skyMaterial
 		)
 	)
+	*/
 	
 	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
@@ -100,12 +101,12 @@ private fun buildDemoWorld(): World {
 		)
 	)
 	
-	//second sphere in (-1,-1,0) silver that reflect the first sphere
+	//second sphere in (-4,-1,1) silver that reflect the first sphere
 	world.addShape(
 		Sphere(
 			scaling(
-				Vec(0.3f, 0.3f, 0.3f)
-			) * translation(Vec(-4f, -1f, 0f)),
+				Vec(0.2f, 0.2f, 0.2f)
+			) * translation(Vec(-6f, -1f, 1f)),
 			mirrorMaterial
 		)
 	)
@@ -235,7 +236,7 @@ class Demo : CliktCommand(
 			
 			val renderer = PathTracer(
 				world,
-				Color(),
+				Color(0.05f,0.1f,0.3f),
 				PCG(initState, initSeq),
 				numRays = 3,
 				maxRayDepth = 5,
