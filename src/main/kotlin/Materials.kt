@@ -122,7 +122,7 @@ class DiffuseBRDF(
 		return Ray(
 			intPoint,
 			e1 * cos(phi) * sinTheta + e2 * sin(phi) * sinTheta + e3 * cosTheta,
-			1e-3f,
+			1e-5f,
 			Float.POSITIVE_INFINITY,
 			depth,
 			false
@@ -155,7 +155,7 @@ class SpecularBRDF(
 		return Ray(
 			intPoint,
 			rayDir - normal * 2f * (normal dot rayDir),
-			1e-3f,
+			1e-5f,
 			Float.POSITIVE_INFINITY,
 			depth,
 			true

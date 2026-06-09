@@ -29,12 +29,12 @@ import kotlin.math.sqrt
 private fun buildDemoWorld(): World {
 	
 	val world = World()
-	/*
+	
 	val skyMaterial = Material(
-		//brdf = DiffuseBRDF(pigment = UniformPigment(Color(0f, 0f, 1f))),
-		emittedRadiance = UniformPigment(Color(1f, 1f, 1f))
+		brdf = DiffuseBRDF(pigment = UniformPigment(Color())),
+		emittedRadiance = UniformPigment(Color(0.35f, 0.75f, 1.0f))
 	)
-	*/
+	
 	val groundMaterial = Material(
 		brdf = DiffuseBRDF(
 			pigment = CheckeredPigment(
@@ -42,23 +42,24 @@ private fun buildDemoWorld(): World {
 				color1 = Color(1f, 0.3f, 0f), //arancio
 				//color1 = Color(0.8f, 0.05f, 0.2f),
 				color2 = Color.black,
-				numSteps = 5
-			)
+				numSteps = 5)
+			//pigment = UniformPigment(Color(1f, 0.3f, 0f))
 		)
 	)
+	
 	
 	val sunMaterial = Material(
 		brdf = DiffuseBRDF(
 			pigment = UniformPigment(Color(1.0f, 0.4f, 0f))
 		),
-		emittedRadiance = UniformPigment(Color(1.0f, 0.4f, 0f))
+		emittedRadiance = UniformPigment(Color(10.0f, 4f, 0f))
 	)
 	
 	//RED
 	val sphereMaterial = Material(
 		brdf = DiffuseBRDF(
-			pigment = UniformPigment(Color(1f, 0f, 0f))
-		)//,emittedRadiance = UniformPigment(Color(1f, 0f, 0f))
+			pigment = UniformPigment(Color(0.8f, 0f, 0f))
+		)
 	)
 	
 	val mirrorMaterial = Material(
@@ -69,24 +70,32 @@ private fun buildDemoWorld(): World {
 	
 	//Pavement
 	world.addShape(Plane(transformation = Transformation(), groundMaterial))
-	/*
-	//Sky blu, rotate it to prevent the sky and the ground overlapping
+	
+	//Sky blu, rotate it to prevent the sky and the ground overlapping, the second plane is put in order to cover all the angles
 	world.addShape(
 		Plane(
 			transformation = translation(
-				Vec(1f, 0f, 0f)
+				Vec(10f, 0f, 0f)
 			) * rotationY(90f),
 			skyMaterial
 		)
 	)
-	*/
+	world.addShape(
+		Plane(
+			transformation = translation(
+				Vec(-10f, 0f, 0f)
+			) * rotationY(90f),
+			skyMaterial
+		)
+	)
+	
 	
 	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
 		Sphere(
 			transformation = scaling(
-				Vec(0.2f, 0.2f, 0.2f)
-			) * translation(Vec(-0.5f, -3f, 6f)),
+				Vec(0.3f, 0.3f, 0.3f)
+			) * translation(Vec(-0.4f, 0f, 5f)),
 			material = sunMaterial
 		)
 	)
@@ -236,9 +245,9 @@ class Demo : CliktCommand(
 			
 			val renderer = PathTracer(
 				world,
-				Color(0.05f,0.1f,0.3f),
+				Color(),
 				PCG(initState, initSeq),
-				numRays = 3,
+				numRays = 10,
 				maxRayDepth = 5,
 				russianRouletteLimit = 4
 			)
@@ -266,7 +275,7 @@ class Demo : CliktCommand(
 			
 			
 			if (renderImage) {
-				img.normalizeImage(factor)
+				//img.normalizeImage(factor)
 				img.clampImage()
 				
 				val pngPath = "$cameraDir/$baseName.png"

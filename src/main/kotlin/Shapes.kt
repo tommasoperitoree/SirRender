@@ -100,8 +100,8 @@ class Plane(
 		val hitPoint = invRay.at(t)
 		return HitRecord(
 			transformation * hitPoint,
-			transformation * Normal(0f, 0f, if (invRay.dir.z < 0f) 1f else -1f),
-			Vec2d(hitPoint.x - floor(hitPoint.x), hitPoint.y - floor(hitPoint.y)),
+			transformation * Normal(0f, 0f, 1f),//single face plane
+			Vec2d(hitPoint.x, hitPoint.y),//floor was already in checkered
 			t,
 			ray,
 			this

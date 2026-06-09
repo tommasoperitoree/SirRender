@@ -66,7 +66,7 @@ class PathTracer(
 		val hitRecord = world.rayIntersection(ray) ?: return if (ray.isSpecular) {
 			backgroundColor
 		} else {
-			Color(0.05f,0.05f,0.05f)
+			Color.black
 		}
 		
 		// extract from the point of intersection the color reflected and the emitted radiance
