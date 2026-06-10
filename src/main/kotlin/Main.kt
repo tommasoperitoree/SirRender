@@ -236,7 +236,7 @@ class Demo : CliktCommand(
 				world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 3,
+				numRays = 10,
 				maxRayDepth = 5,
 				russianRouletteLimit = 4
 			)

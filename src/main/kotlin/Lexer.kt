@@ -15,8 +15,8 @@ data class SourceLocation(
 //  Constants, enum Keywords
 // ------------------------------
 
-val WHITESPACE = " \t\n\r"
-val SYMBOLS = "()<>[],*"
+const val WHITESPACE = " \t\n\r"
+const val SYMBOLS = "()<>[],*"
 
 enum class Keyword(val lexeme: String) {
 	NEW("new"),
@@ -37,8 +37,7 @@ enum class Keyword(val lexeme: String) {
 	CAMERA("camera"),
 	ORTHOGONAL("orthogonal"),
 	PERSPECTIVE("perspective"),
-	FLOAT("float"),
-	POINT_LIGHT("point_light");
+	FLOAT("float");
 	
 	companion object {
 		// Builds the dictionary automatically at startup: {"new": NEW, "material": MATERIAL, ...}
