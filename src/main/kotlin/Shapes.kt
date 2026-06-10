@@ -102,7 +102,7 @@ class Plane(
 			transformation * Normal(0f, 0f, if (invRay.dir.z < 0f) 1f else -1f),
 			Vec2d(
 				hitPoint.x - (hitPoint.x).toInt(),
-				hitPoint.y - (hitPoint.y).toInt()
+				hitPoint.y - (hitPoint.y).toInt(),
 			),
 			t,
 			ray,
