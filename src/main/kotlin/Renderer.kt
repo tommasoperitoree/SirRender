@@ -40,8 +40,6 @@ class FlatRenderer(
 		val material = hit.shape.material
 		
 		return (material.brdf.pigment.getColor(hit.surfacePoint) + material.emittedRadiance.getColor(hit.surfacePoint))
-		
-		
 	}
 }
 
@@ -63,11 +61,7 @@ class PathTracer(
 	override operator fun invoke(ray: Ray): Color { // operator is necessary to use the recursion
 		if (ray.depth > maxRayDepth) return Color.black
 		//only if isSpecular is true return background, so in case o depth=0 or depth=1 (reflection on mirror)
-		val hitRecord = world.rayIntersection(ray) ?: return if (ray.isSpecular) {
-			backgroundColor
-		} else {
-			Color.black
-		}
+		val hitRecord = world.rayIntersection(ray) ?: return backgroundColor
 		
 		// extract from the point of intersection the color reflected and the emitted radiance
 		val hitMaterial = hitRecord.shape.material

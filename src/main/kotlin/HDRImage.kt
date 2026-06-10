@@ -100,9 +100,7 @@ data class HDRImage(
 		for (pix in pixels) {
 			sum += log10(delta + pix.luminosity())
 		}
-		val avagLum=10.0.pow(sum / pixels.size).toFloat()
-		println("avarageLuminosity: $avagLum")
-		return avagLum
+		return (sum / pixels.size).pow(10.0).toFloat()
 	}
 	
 	/**

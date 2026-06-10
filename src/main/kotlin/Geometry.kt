@@ -1,11 +1,10 @@
-import kotlin.math.sign
 import kotlin.math.sqrt
 
 /**
  * Represents a 3D vector with components ([x], [y], [z]).
  *
  * Supports standard vector arithmetic: addition, subtraction, scalar multiplication,
- * dot product, cross product, and nization.
+ * dot product, cross product, and normalization.
  */
 data class Vec(
 	val x: Float = 0f,

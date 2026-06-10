@@ -2,7 +2,6 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.atan2
-import kotlin.math.floor
 
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -15,7 +14,7 @@ fun sphereNormal(point: Point, rayDir: Vec): Normal {
 
 /** Calculation of intersection [point] on the Sphere's surface, in (u,v) coordinates*/
 fun spherePointToUV(point: Point): Vec2d {
-	val u = atan2(point.x, point.y) / (2f * PI.toFloat())
+	val u = atan2(point.y, point.x) / (2f * PI.toFloat())
 	val v = acos(point.z) / PI.toFloat()
 	return Vec2d(
 		if (u >= 0f) u else u + 1f, v
@@ -65,7 +64,7 @@ class Sphere(
 		
 		return HitRecord(
 			transformation * hitPoint,
-			transformation * sphereNormal(hitPoint, rayDir = ray.dir),
+			transformation * sphereNormal(hitPoint, rayDir = invRay.dir),
 			spherePointToUV(hitPoint),
 			tFirstHit,
 			ray,
@@ -100,8 +99,11 @@ class Plane(
 		val hitPoint = invRay.at(t)
 		return HitRecord(
 			transformation * hitPoint,
-			transformation * Normal(0f, 0f, 1f),//single face plane
-			Vec2d(hitPoint.x, hitPoint.y),//floor was already in checkered
+			transformation * Normal(0f, 0f, if (invRay.dir.z < 0f) 1f else -1f),
+			Vec2d(
+				hitPoint.x - (hitPoint.x).toInt(),
+				hitPoint.y - (hitPoint.y).toInt()
+			),
 			t,
 			ray,
 			this
