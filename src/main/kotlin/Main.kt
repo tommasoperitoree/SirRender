@@ -247,7 +247,7 @@ class Demo : CliktCommand(
 				world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 10,
+				numRays = 15,
 				maxRayDepth = 5,
 				russianRouletteLimit = 4
 			)
@@ -386,3 +386,5 @@ fun main(args: Array<String>) =
 
 // ./gradlew run --args="demo -w 640 -h 480 -c "Orthogonal" -o demo.png"
 // ./gradlew run --args="animation --width=480 --height=480 --output demo.png --num-frames=72"
+
+//per aumentare le nitidezza aumentare w e h
