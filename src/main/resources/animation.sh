@@ -21,6 +21,6 @@ ffmpeg -r 25 -f image2 -s 640x480 \
     -i ./src/main/resources/animationBash/"$CAMERA"/frame_%03d.png \
     -vcodec libx264 -pix_fmt yuv420p \
     ./src/main/resources/spheres"$CAMERA".mp4 \
-    && rm -rf ./src/main/resources/animationBash
+    && rm -rf ./src/main/resources/animationBashg
 
 echo "Done! Video saved to ./src/main/resources/spheres${CAMERA}.mp4"
