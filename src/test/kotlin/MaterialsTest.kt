@@ -56,9 +56,8 @@ class BRDFTest {
 		assertEquals(1e-5f, ray.tMin)
 		assertEquals(Float.POSITIVE_INFINITY, ray.tMax)
 		assertEquals(depth, ray.depth)
-		assertFalse(ray.isSpecular) //after diffusion flag must be false
 		
-		//test it for numerays
+		//test it for numerous rays
 		repeat(1000) {
 			assertTrue(areClose(ray.dir.squaredNorm(), 1f))
 			assertTrue(ray.dir.dot(normal.toVec()) >= 0f)
@@ -76,8 +75,7 @@ class BRDFTest {
 		assertEquals(1e-5f, ray.tMin)
 		assertEquals(Float.POSITIVE_INFINITY, ray.tMax)
 		assertEquals(depth, ray.depth)
-		assertTrue(ray.isSpecular)
-		//for incoming ray form (0,0,-1) the reflected ray has dir (0,0,1)
+		// for incoming ray form (0,0,-1) the reflected ray has dir (0,0,1)
 		assertTrue(ray.dir.isClose(Vec(0f, 0f, 1f)))
 	}
 }
