@@ -124,8 +124,7 @@ class DiffuseBRDF(
 			e1 * cos(phi) * sinTheta + e2 * sin(phi) * sinTheta + e3 * cosTheta,
 			1e-5f,
 			Float.POSITIVE_INFINITY,
-			depth,
-			false
+			depth
 		)
 	}
 }
@@ -157,8 +156,7 @@ class SpecularBRDF(
 			rayDir - normal * 2f * (normal dot rayDir),
 			1e-5f,
 			Float.POSITIVE_INFINITY,
-			depth,
-			true
+			depth
 		)
 	}
 }
