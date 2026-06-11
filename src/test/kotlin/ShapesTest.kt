@@ -25,7 +25,7 @@ class ShapesTest {
 		
 		val ray2 = Ray(Point(3f, 0f, 0f), -vecX())
 		val hit2 = sphere.rayIntersection(ray2)
-		val uv2 = Vec2d(1 / 4f, 1 / 2f)
+		val uv2 = Vec2d(0f, 1 / 2f)
 		
 		assertTrue(
 			hit2?.worldPoint?.isClose(Point(1f, 0f, 0f)) ?: false &&
@@ -56,23 +56,22 @@ class ShapesTest {
 		
 		val ray2 = Ray(Point(13f, 0f, 0f), -vecX())
 		val hit2 = sphere1.rayIntersection(ray2)
-		val uv2 = Vec2d(1 / 4f, 1 / 2f)
+		val uv2 = Vec2d(0f, 1 / 2f)
 		
 		
 		assertTrue(
 			hit?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
 					hit.normal.isClose(vecZ().toNormal()) &&
-					hit.surfacePoint.isClose(uv)&&
-					areClose(hit.t,1f)
+					hit.surfacePoint.isClose(uv) &&
+					areClose(hit.t, 1f)
 		)
 		
 		assertTrue(
 			hit2?.worldPoint?.isClose(Point(11f, 0f, 0f)) ?: false &&
 					hit2.normal.isClose(vecX().toNormal()) &&
 					hit2.surfacePoint.isClose(uv2) &&
-					areClose(hit2.t,2f)
+					areClose(hit2.t, 2f)
 		)
-		
 	}
 	
 	/**
