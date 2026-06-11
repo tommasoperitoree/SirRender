@@ -219,8 +219,8 @@ data class Vec2d(
  * [normal] has to be normalized!
  */
 fun createOnbFromZ(normal: Normal): Triple<Vec, Vec, Vec> {
-	//the vec should be normalized, if the shape has been rescaled the vectors are no longer normal
-	val n = normal.toVec().normalize()
+	
+	val n = normal.toVec()
 	val sign = if (n.z >= 0f) 1f else -1f
 	
 	val a = -1f / (sign + n.z)

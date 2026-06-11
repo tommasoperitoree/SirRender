@@ -2,6 +2,7 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.atan2
+import kotlin.math.floor
 
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -100,10 +101,7 @@ class Plane(
 		return HitRecord(
 			transformation * hitPoint,
 			transformation * Normal(0f, 0f, if (invRay.dir.z < 0f) 1f else -1f),
-			Vec2d(
-				hitPoint.x - (hitPoint.x).toInt(),
-				hitPoint.y - (hitPoint.y).toInt()
-			),
+			Vec2d(hitPoint.x, hitPoint.y),//floor was already in checkered
 			t,
 			ray,
 			this
