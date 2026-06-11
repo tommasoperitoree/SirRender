@@ -61,6 +61,7 @@ class BRDFTest {
 		repeat(1000) {
 			assertTrue(areClose(ray.dir.squaredNorm(), 1f))
 			assertTrue(ray.dir.dot(normal.toVec()) >= 0f)
+			assertTrue(incomingDir.dot(normal.toVec()) <= 0f)
 		}
 	}
 	
