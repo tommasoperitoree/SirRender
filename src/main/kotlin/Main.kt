@@ -22,7 +22,6 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.imageio.ImageTypeSpecifier
 import javax.imageio.metadata.IIOMetadataNode
-import kotlin.math.sqrt
 
 
 /** Create elements of the demo scene. */
@@ -39,7 +38,7 @@ private fun buildDemoWorld(): World {
 		brdf = DiffuseBRDF(
 			pigment = CheckeredPigment(
 				//color1 = Color.white,
-				color1 = Color(1f, 0.3f, 0f), //arancio
+				color1 = Color(1f, 0.3f, 0f), // orange
 				//color1 = Color(0.8f, 0.05f, 0.2f),
 				color2 = Color.black,
 				numSteps = 5
@@ -53,7 +52,7 @@ private fun buildDemoWorld(): World {
 		brdf = DiffuseBRDF(
 			pigment = UniformPigment(Color(1.0f, 0.4f, 0f))
 		),
-		emittedRadiance = UniformPigment(Color(10.0f, 4f, 0f))
+		emittedRadiance = UniformPigment(Color(1.0f, 0.4f,0f))
 	)
 	
 	//RED
@@ -71,15 +70,7 @@ private fun buildDemoWorld(): World {
 	
 	//Pavement
 	world.addShape(Plane(transformation = Transformation(), groundMaterial))
-	//use a sphere instead of two plane for the sky
-	world.addShape(
-		Sphere(
-			transformation = scaling(Vec(50f, 50f, 50f)),
-			material = skyMaterial
-		)
-	)
 	
-	/*
 	//Sky blu, rotate it to prevent the sky and the ground overlapping, the second plane is put in order to cover all the angles
 	world.addShape(
 		Plane(
@@ -97,7 +88,7 @@ private fun buildDemoWorld(): World {
 			skyMaterial
 		)
 	)
-	*/
+	
 	
 	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
@@ -227,14 +218,13 @@ class Demo : CliktCommand(
 		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
 		
 		for (frameIndex in 0 until numFrames) {
-			val angle = 90f
-			//val angle = observerAngle + (frameIndex * angleStep)
+			val angle = observerAngle + (frameIndex * angleStep)
 			val angleNNN = "%03d".format(frameIndex)
 			
 			val img = HDRImage(width, height)
 			
 			val screenCenter = Vec(-1f, 0f, 0f)
-			val verticalAngle = 35f // angle to rotate above plane (around y-axis)
+			val verticalAngle = 30f // angle to rotate above plane (around y-axis)
 			// concatenation of transformations: first move away from scene,
 			// then rotate upwards around y-axis, and finally gradually move around the scene (z-axis)
 			val camTransformation = rotationZ(angle) *
@@ -247,7 +237,7 @@ class Demo : CliktCommand(
 				else -> throw IllegalStateException("No camera found for $camera.")
 			}
 			
-			//Run the ray-tracer
+			// Run the ray-tracer
 			
 			val pathTracer = ImageTracer(img, cam)
 			
@@ -257,10 +247,11 @@ class Demo : CliktCommand(
 				world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 10,
-				maxRayDepth = 6,
+				numRays = 15,
+				maxRayDepth = 10,
 				russianRouletteLimit = 4
 			)
+			
 			
 			// Run the ray-tracer with ProgressBar
 			val totalPixels = img.width.toLong() * img.height.toLong()
@@ -285,7 +276,7 @@ class Demo : CliktCommand(
 			
 			
 			if (renderImage) {
-				//img.normalizeImage(factor)
+				img.normalizeImage(factor)
 				img.clampImage()
 				
 				val pngPath = "$cameraDir/$baseName.png"
@@ -396,5 +387,3 @@ fun main(args: Array<String>) =
 
 // ./gradlew run --args="demo -w 640 -h 480 -c "Orthogonal" -o demo.png"
 // ./gradlew run --args="animation --width=480 --height=480 --output demo.png --num-frames=72"
-
-// ./gradlew run --args="demo -r -c "Orthogonal" "-f0.01" -w 1280 -h 720 -o src/main/resources/Ortho_demo"
