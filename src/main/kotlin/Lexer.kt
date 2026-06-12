@@ -213,7 +213,7 @@ class SceneInputStream(
 			while (true) {
 				val ch = readChar() ?: break // if readChar() returns null (EOF) break
 				
-				if (ch.isDigit() || ch == '.' || ch == 'e' || ch == 'E') {
+				if (ch.isDigit() || ch in "+-.eE") {
 					append(ch)
 				} else {
 					unreadChar(ch)
@@ -288,7 +288,7 @@ class SceneInputStream(
 			}
 			
 			// a floating-point number
-			ch.isDigit() || ch == '+' || ch == '-' || ch == '.' -> {
+			ch.isDigit() || ch in "+-." -> {
 				parseFloatToken(ch, tokenLoc)
 			}
 			

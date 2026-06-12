@@ -24,16 +24,16 @@ fun expectSymbol(s: SceneInputStream, symbol: Char) {
 }
 
 /** Read a [Token] from [s] input file  and check that it is one of the keywords in [Keyword]. */
-fun expectKeyword(s: SceneInputStream, keyword: List<Keyword>): Keyword {
+fun expectKeyword(s: SceneInputStream, keywords: List<Keyword>): Keyword {
 	val token = s.readToken()
 	if (token is StopToken) throw GrammarError(token.location, "Unexpected EOF reached")
 	
 	
-	if (token !is KeywordToken) throw GrammarError(token.location, "got $token instead of $keyword")
+	if (token !is KeywordToken) throw GrammarError(token.location, "got $token instead of $keywords")
 	//use !in if keyword now is a list of Keywords
-	if (token.keyword !in keyword) throw GrammarError(
+	if (token.keyword !in keywords) throw GrammarError(
 		token.location,
-		"expected on of keywords in $keyword instead of $token"
+		"expected one of keywords in $keywords instead of $token"
 	)
 	return token.keyword
 }
@@ -63,7 +63,7 @@ fun expectString(s: SceneInputStream): String {
 	if (token is StopToken) throw GrammarError(token.location, "Unexpected EOF reached")
 	
 	if (token !is StringToken) throw GrammarError(token.location, "Got $token instead of string")
-	return token.toString()
+	return token.value
 }
 
 /**
