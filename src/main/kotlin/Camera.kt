@@ -21,7 +21,7 @@ interface Camera {
  * @property transformation Initial orientation and position in the world.
  */
 class OrthogonalCamera(
-	val aspectRatio: Float = 1f,
+	val aspectRatio: Float = 1.7777778f, //16/9
 	val transformation: Transformation = Transformation()
 ) : Camera {
 	
@@ -43,7 +43,7 @@ class OrthogonalCamera(
  */
 class PerspectiveCamera(
 	var distance: Float = 1f,
-	var aspectRatio: Float = 1f,
+	var aspectRatio: Float = 1.7777778f,
 	var transformation: Transformation = Transformation()
 ) : Camera {
 	

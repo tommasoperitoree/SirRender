@@ -20,4 +20,13 @@ class PCGTest {
 		)
 		) assertEquals(pcg.random(), expected)
 	}
+	
+	@Test
+	fun `test randomFloat`() {
+		val pcg = PCG()
+		val n = pcg.randomFloat()
+		val boolean = true
+		if (n in 0.0..1.0) boolean==false
+		assertTrue(boolean)
+	}
 }
