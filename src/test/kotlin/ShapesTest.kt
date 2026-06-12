@@ -41,8 +41,6 @@ class ShapesTest {
 		val ray3 = Ray(Point(0f, 0f, 0f), vecX())
 		val hit3 = sphere.rayIntersection(ray3)
 		val uv3 = Vec2d(1 / 4f, 1 / 2f)
-		
-		TODO()
 	}
 	
 	/**
