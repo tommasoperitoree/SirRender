@@ -31,34 +31,36 @@ private fun buildDemoWorld(): World {
 	val world = World()
 	
 	val skyMaterial = Material(
-		brdf = DiffuseBRDF(
-			pigment = UniformPigment(Color(0f, 0f, 1f))
-		)
+		brdf = DiffuseBRDF(pigment = UniformPigment(Color())),
+		emittedRadiance = UniformPigment(Color(0.35f, 0.75f, 1.0f))
 	)
 	
 	val groundMaterial = Material(
 		brdf = DiffuseBRDF(
 			pigment = CheckeredPigment(
-				color1 = Color(0.8f, 0.05f, 0.2f),
+				//color1 = Color.white,
+				color1 = Color(1f, 0.3f, 0f), //arancio
+				//color1 = Color(0.8f, 0.05f, 0.2f),
 				color2 = Color.black,
-				numSteps = 10
+				numSteps = 5
 			)
+			//pigment = UniformPigment(Color(1f, 0.3f, 0f))
 		)
 	)
+	
 	
 	val sunMaterial = Material(
 		brdf = DiffuseBRDF(
 			pigment = UniformPigment(Color(1.0f, 0.4f, 0f))
 		),
-		emittedRadiance = UniformPigment(Color(1.0f, 0.4f, 0f))
+		emittedRadiance = UniformPigment(Color(10.0f, 4f, 0f))
 	)
 	
 	//RED
 	val sphereMaterial = Material(
 		brdf = DiffuseBRDF(
-			pigment = UniformPigment(Color(1f, 0f, 0f))
-		),
-		emittedRadiance = UniformPigment(Color(1f, 0f, 0f))
+			pigment = UniformPigment(Color(0.8f, 0f, 0f))
+		)
 	)
 	
 	val mirrorMaterial = Material(
@@ -69,23 +71,40 @@ private fun buildDemoWorld(): World {
 	
 	//Pavement
 	world.addShape(Plane(transformation = Transformation(), groundMaterial))
+	//use a sphere instead of two plane for the sky
+	world.addShape(
+		Sphere(
+			transformation = scaling(Vec(50f, 50f, 50f)),
+			material = skyMaterial
+		)
+	)
 	
-	//Sky blu, rotate it to prevent the sky and the ground overlapping
+	/*
+	//Sky blu, rotate it to prevent the sky and the ground overlapping, the second plane is put in order to cover all the angles
 	world.addShape(
 		Plane(
 			transformation = translation(
-				Vec(8f, 0f, 0f)
+				Vec(10f, 0f, 0f)
 			) * rotationY(90f),
 			skyMaterial
 		)
 	)
+	world.addShape(
+		Plane(
+			transformation = translation(
+				Vec(-10f, 0f, 0f)
+			) * rotationY(90f),
+			skyMaterial
+		)
+	)
+	*/
 	
 	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
 		Sphere(
 			transformation = scaling(
-				Vec(0.2f, 0.2f, 0.2f)
-			) * translation(Vec(-0.5f, -3f, 6f)),
+				Vec(0.3f, 0.3f, 0.3f)
+			) * translation(Vec(-0.4f, 0f, 5f)),
 			material = sunMaterial
 		)
 	)
@@ -100,7 +119,7 @@ private fun buildDemoWorld(): World {
 		)
 	)
 	
-	//second sphere in (-1,-1,0) silver that reflect the first sphere
+	//second sphere in (-4,-1,1) silver that reflect the first sphere
 	world.addShape(
 		Sphere(
 			transformation = scaling(Vec(0.3f, 0.3f, 0.3f))
@@ -207,13 +226,14 @@ class Demo : CliktCommand(
 		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
 		
 		for (frameIndex in 0 until numFrames) {
-			val angle = observerAngle + (frameIndex * angleStep)
+			val angle = 90f
+			//val angle = observerAngle + (frameIndex * angleStep)
 			val angleNNN = "%03d".format(frameIndex)
 			
 			val img = HDRImage(width, height)
 			
 			val screenCenter = Vec(-1f, 0f, 0f)
-			val verticalAngle = 10f // angle to rotate above plane (around y-axis)
+			val verticalAngle = 35f // angle to rotate above plane (around y-axis)
 			// concatenation of transformations: first move away from scene,
 			// then rotate upwards around y-axis, and finally gradually move around the scene (z-axis)
 			val camTransformation = rotationZ(angle) *
@@ -238,6 +258,7 @@ class Demo : CliktCommand(
 				PCG(initState, initSeq),
 				numRays = 10,
 				maxRayDepth = 5,
+
 				russianRouletteLimit = 4
 			)
 			
@@ -257,14 +278,14 @@ class Demo : CliktCommand(
 			}
 			progressBar.update(totalPixels, force = true)
 			
-			val baseName = "frame_$angleNNN"
+			val baseName = "demo"
 			val pfmPath = "$cameraDir/$baseName.pfm"
 			img.writePFMFile(pfmPath)
 			println("Saved PFM → $pfmPath")
 			
 			
 			if (renderImage) {
-				img.normalizeImage(factor)
+				//img.normalizeImage(factor)
 				img.clampImage()
 				
 				val pngPath = "$cameraDir/$baseName.png"
@@ -375,3 +396,5 @@ fun main(args: Array<String>) =
 
 // ./gradlew run --args="demo -w 640 -h 480 -c "Orthogonal" -o demo.png"
 // ./gradlew run --args="animation --width=480 --height=480 --output demo.png --num-frames=72"
+
+// ./gradlew run --args="demo -r -c "Orthogonal" "-f0.01" -w 1280 -h 720 -o src/main/resources/Ortho_demo"
