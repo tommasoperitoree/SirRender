@@ -43,7 +43,7 @@ data class Scene(
 			val name = token.identifier
 			//use !in instead of !is because it works only on object not map
 			if (name !in scene.floatVariables) throw GrammarError(token.location, "unknown variable $token")
-			return scene.floatVariables[name]!!
+			return scene.floatVariables[name]!! // !! is a NoNull Assert, the variable can't be null
 		}
 		throw GrammarError(token.location, "got $token instead of number")
 	}

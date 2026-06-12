@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 
 
 class LexerTest {
@@ -65,5 +66,52 @@ class LexerTest {
 		assertEquals(7, stream.location.colNum)
 		
 		assertEquals(expected = null, actual = stream.readChar())
+	}
+	
+	@Test
+	fun `test Lexer`() {
+		val stream = ("// comment\n new material skyMaterial(" +
+				"diffuse(image('myfile.pfm')),<5.0, 500, 300> ").reader()
+		
+		val inputFile = SceneInputStream(stream)
+		
+		assertEquals(1, inputFile.location.lineNum)
+		assertEquals(1, inputFile.location.colNum)
+		
+		inputFile.skipWhitespacesAndComments()
+		
+		var rT = inputFile.readToken()
+		
+		assertIs<KeywordToken>(rT)
+		assertEquals(Keyword.NEW, rT.keyword)
+		
+		rT = inputFile.readToken()
+		
+		assertIs<KeywordToken>(rT)
+		assertEquals(rT.keyword, Keyword.MATERIAL)
+		
+		rT = inputFile.readToken()
+		assertIs<IdentifierToken>(rT.toString(), "skyMaterial")
+		rT = inputFile.readToken()
+		assertIs<SymbolToken>(rT.toString(), "(")
+		
+		rT = inputFile.readToken()
+		assertIs<KeywordToken>(rT)
+		assertEquals(rT.keyword, Keyword.DIFFUSE)
+		
+		rT = inputFile.readToken()
+		assertIs<SymbolToken>(rT.toString(), "(")
+		
+		rT = inputFile.readToken()
+		assertIs<KeywordToken>(rT)
+		assertEquals(rT.keyword, Keyword.IMAGE)
+		
+		rT = inputFile.readToken()
+		assertIs<SymbolToken>(rT.toString(), "(")
+		
+		rT = inputFile.readToken()
+		assertIs<StringToken>(rT.toString(), "myfile.pfm")
+		rT = inputFile.readToken()
+		assertIs<SymbolToken>(rT.toString(), ")")
 	}
 }

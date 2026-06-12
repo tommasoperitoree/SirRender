@@ -20,6 +20,8 @@ const val SYMBOLS = "()<>[],*"
 
 enum class Keyword(val lexeme: String) {
 	NEW("new"),
+	SKY("sky"),
+	GROUND("ground"),
 	MATERIAL("material"),
 	PLANE("plane"),
 	SPHERE("sphere"),
@@ -55,7 +57,7 @@ enum class Keyword(val lexeme: String) {
 
 /** A lexical token, used when parsing a scene file. */
 sealed class Token {
-	abstract val location: SourceLocation
+		abstract val location: SourceLocation
 }
 
 /** A [Token] containing a symbol (i.e., a variable name). */
