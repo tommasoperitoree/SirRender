@@ -4,6 +4,7 @@ class Ray(
 	var tMin: Float = 1e-5f,
 	var tMax: Float = Float.POSITIVE_INFINITY,
 	var depth: Int = 0,
+	var isSpecular: Boolean = true
 ) {
 	
 	/**
@@ -25,5 +26,6 @@ class Ray(
 			tMin,
 			tMax,
 			depth,
+			isSpecular
 		)
 }

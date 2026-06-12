@@ -85,19 +85,17 @@ data class IdentifierToken(val identifier: String, override val location: Source
 	override fun toString() = identifier
 }
 
-/** A [Token] signaling the end of a file. */
+/** A [Token] signaling the end of a file EOF. */
 data class StopToken(override val location: SourceLocation) : Token()
 
-/** An [Exception] found by the lexer/parser while reading a scene file*/
 
 /** An [Exception] found by the lexer/parser while reading a scene file.
  * The fields of this type are the following:
  * - [SourceLocation.fileName] the name of the file, or the empty string if there is no real file
  * - [SourceLocation.lineNum] the line number where the error was discovered (starting from 1)
  * - [SourceLocation.colNum] the column number where the error was discovered (starting from 1)
- * - `message`: a user-friendly error message
- **/
-
+ * - [message]: a user-friendly error message
+ */
 class GrammarError(
 	val location: SourceLocation,
 	override val message: String
@@ -107,7 +105,13 @@ class GrammarError(
 // ------------------------------
 //      Input Stream wrapper
 // ------------------------------
-//Input stream can be confused with a library of Kotlin
+
+/**
+ * A high-level wrapper around a stream, used to parse scene files
+ * This class implements a wrapper around a stream, with the following additional capabilities:
+ * - It tracks the line number and column number;
+ * - It permits to "un-read" characters and tokens.
+ */
 class SceneInputStream(
 	private val stream: Reader,
 	fileName: String = "",
@@ -157,7 +161,7 @@ class SceneInputStream(
 	
 	/** Push a character back to the stream. */
 	fun unreadChar(ch: Char) {
-		assert(savedChar == null)
+		check(savedChar == null) { "Cannot unread a char when one is already saved!" }
 		savedChar = ch
 		location = savedLocation.copy()
 	}
@@ -211,7 +215,7 @@ class SceneInputStream(
 			while (true) {
 				val ch = readChar() ?: break // if readChar() returns null (EOF) break
 				
-				if (ch.isDigit() || ch == '.' || ch == 'e' || ch == 'E') {
+				if (ch.isDigit() || ch in "+-.eE") {
 					append(ch)
 				} else {
 					unreadChar(ch)
@@ -253,53 +257,49 @@ class SceneInputStream(
 	}
 	
 	/**
-	 * If it is a symbol (comma, parenthesis, etc.), it returns a SymbolToken;
-	 * If it is a digit, it returns a LiteralNumberToken;
-	 * If it is "", it returns a LiteralStringToken;
-	 * If it is a sequence of characters a…z, it returns a KeywordToken if the sequence is a keyword, IdentifierToken otherwise;
-	 * If the file is finished, it returns StopToken.
+	 * Read a [Token] within the [SceneInputStream]
+	 * - If it is a symbol (comma, parenthesis, etc.), it returns a [SymbolToken];
+	 * - If it is a digit, it returns a [NumberToken];
+	 * - If it is "", it returns a [StringToken];
+	 * - If it is a sequence of characters a…z, it returns a [KeywordToken] if the sequence is a keyword, [IdentifierToken] otherwise;
+	 * - If the file is finished, it returns [StopToken].
 	 */
-	fun readToken(): Token? {
+	fun readToken(): Token {
 		
-		//Se c'è già una variabile savedToken la restituisce subito invece di leggerne un'altra
-		if (savedToken != null) {
-			val result = savedToken
+		// if savedToken is not null, call it 'token', clear the saved state, and return it
+		savedToken?.let { token ->
 			savedToken = null
-			return result
+			return token
 		}
 		
-		skipWhitespacesAndComments()
+		skipWhitespacesAndComments() // at this point we're sure that ch does *not* contain a whitespace character
 		
-		//At this point we're sure that ch does *not* contain a whitespace character
-		val ch = readChar() ?: return StopToken(location = location.copy())
+		val ch = readChar() ?: return StopToken(location = location.copy())  // no more characters in the file, so return a StopToken
 		
-		//No more characters in the file, so return a StopToken
-		
-		//the position in the stream
-		val tokenLoc = location.copy()
+		val tokenLoc = location.copy() // the position in the stream
 		
 		return when {
-			//One-character symbol, like '(' or ','
+			// one-character symbol, like '(' or ','
 			ch in SYMBOLS -> {
 				SymbolToken(ch, tokenLoc)
 			}
 			
-			// A literal string (used for file names)
+			// a literal string (used for file names)
 			ch == '"' -> {
 				parseStringToken(tokenLoc)
 			}
 			
-			// A floating-point number
-			ch.isDigit() || ch == '+' || ch == '-' || ch == '.' -> {
+			// a floating-point number
+			ch.isDigit() || ch in "+-." -> {
 				parseFloatToken(ch, tokenLoc)
 			}
 			
-			//Since it begins with an alphabetic character, it must either be a keyword or a identifier
+			// since it begins with an alphabetic character, it must either be a keyword or an identifier
 			ch.isLetter() || ch == '_' -> {
 				parseKeywordOrIdentifierToken(ch, tokenLoc)
 			}
 			
-			// We got some weird character, like '@` or `&`
+			// we got some weird character, like '@' or '&'
 			else -> throw GrammarError(tokenLoc, "Invalid character '$ch'")
 		}
 		

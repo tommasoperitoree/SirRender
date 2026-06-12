@@ -40,8 +40,6 @@ class FlatRenderer(
 		val material = hit.shape.material
 		
 		return (material.brdf.pigment.getColor(hit.surfacePoint) + material.emittedRadiance.getColor(hit.surfacePoint))
-		
-		
 	}
 }
 
@@ -86,6 +84,7 @@ class PathTracer(
 		
 		// MonteCarlo
 		var cumRadiance = Color.black
+		
 		// if hitColorLum is 0 it means that the surface is completely black, so MonteCarlo is useless
 		if (hitColorLum > 0f) {
 			repeat(numRays) {
