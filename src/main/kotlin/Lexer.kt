@@ -257,47 +257,42 @@ class SceneInputStream(
 	 * If it is a sequence of characters a…z, it returns a KeywordToken if the sequence is a keyword, IdentifierToken otherwise;
 	 * If the file is finished, it returns StopToken.
 	 */
-	fun readToken(): Token? {
+	fun readToken(): Token {
 		
-		//Se c'è già una variabile savedToken la restituisce subito invece di leggerne un'altra
-		if (savedToken != null) {
-			val result = savedToken
+		// if savedToken is not null, call it 'token', clear the saved state, and return it
+		savedToken?.let { token ->
 			savedToken = null
-			return result
+			return token
 		}
 		
-		skipWhitespacesAndComments()
+		skipWhitespacesAndComments() // at this point we're sure that ch does *not* contain a whitespace character
 		
-		//At this point we're sure that ch does *not* contain a whitespace character
-		val ch = readChar() ?: return StopToken(location = location.copy())
+		val ch = readChar() ?: return StopToken(location = location.copy())  // no more characters in the file, so return a StopToken
 		
-		//No more characters in the file, so return a StopToken
-		
-		//the position in the stream
-		val tokenLoc = location.copy()
+		val tokenLoc = location.copy() // the position in the stream
 		
 		return when {
-			//One-character symbol, like '(' or ','
+			// one-character symbol, like '(' or ','
 			ch in SYMBOLS -> {
 				SymbolToken(ch, tokenLoc)
 			}
 			
-			// A literal string (used for file names)
+			// a literal string (used for file names)
 			ch == '"' -> {
 				parseStringToken(tokenLoc)
 			}
 			
-			// A floating-point number
+			// a floating-point number
 			ch.isDigit() || ch == '+' || ch == '-' || ch == '.' -> {
 				parseFloatToken(ch, tokenLoc)
 			}
 			
-			//Since it begins with an alphabetic character, it must either be a keyword or a identifier
+			// since it begins with an alphabetic character, it must either be a keyword or an identifier
 			ch.isLetter() || ch == '_' -> {
 				parseKeywordOrIdentifierToken(ch, tokenLoc)
 			}
 			
-			// We got some weird character, like '@` or `&`
+			// we got some weird character, like '@' or '&'
 			else -> throw GrammarError(tokenLoc, "Invalid character '$ch'")
 		}
 		

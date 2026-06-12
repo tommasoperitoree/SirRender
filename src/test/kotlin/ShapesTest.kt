@@ -42,11 +42,12 @@ class ShapesTest {
 		val hit3 = sphere.rayIntersection(ray3)
 		val uv3 = Vec2d(1 / 4f, 1 / 2f)
 		
+		TODO()
 	}
 	
 	/**
 	 * Verify [Sphere.rayIntersection] with a sphere that has been translated on one axis, the intersection is verified in z & x
-	 * NB uv are valuated in the coordinate sistem of the sphere
+	 * NB uv are valuated in the coordinate system of the sphere
 	 */
 	@Test
 	fun `test rayIntersection with translation`() {
@@ -62,15 +63,15 @@ class ShapesTest {
 		assertTrue(
 			hit?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
 					hit.normal.isClose(vecZ().toNormal()) &&
-					hit.surfacePoint.isClose(uv)&&
-					areClose(hit.t,1f)
+					hit.surfacePoint.isClose(uv) &&
+					areClose(hit.t, 1f)
 		)
 		
 		assertTrue(
 			hit2?.worldPoint?.isClose(Point(11f, 0f, 0f)) ?: false &&
 					hit2.normal.isClose(vecX().toNormal()) &&
 					hit2.surfacePoint.isClose(uv2) &&
-					areClose(hit2.t,2f)
+					areClose(hit2.t, 2f)
 		)
 		
 	}
