@@ -91,27 +91,36 @@ class LexerTest {
 		assertEquals(rT.keyword, Keyword.MATERIAL)
 		
 		rT = inputFile.readToken()
-		assertIs<IdentifierToken>(rT.toString(), "skyMaterial")
+		
+		assertIs<IdentifierToken>(rT)
+		assertEquals(rT.identifier, "skyMaterial")
+		
 		rT = inputFile.readToken()
-		assertIs<SymbolToken>(rT.toString(), "(")
+		assertIs<SymbolToken>(rT)
+		assertEquals(expected = "(", actual = rT.toString())
 		
 		rT = inputFile.readToken()
 		assertIs<KeywordToken>(rT)
 		assertEquals(rT.keyword, Keyword.DIFFUSE)
 		
 		rT = inputFile.readToken()
-		assertIs<SymbolToken>(rT.toString(), "(")
+		assertIs<SymbolToken>(rT)
+		assertEquals(expected = "(", actual = rT.toString())
 		
 		rT = inputFile.readToken()
 		assertIs<KeywordToken>(rT)
 		assertEquals(rT.keyword, Keyword.IMAGE)
 		
 		rT = inputFile.readToken()
-		assertIs<SymbolToken>(rT.toString(), "(")
+		assertIs<SymbolToken>(rT)
+		assertEquals(expected = "(", actual = rT.toString())
 		
 		rT = inputFile.readToken()
-		assertIs<StringToken>(rT.toString(), "myfile.pfm")
+		
+		assertIs<StringToken>(rT)
+		assertEquals(rT.toString(), "myfile.pfm")
 		rT = inputFile.readToken()
-		assertIs<SymbolToken>(rT.toString(), ")")
+		assertIs<SymbolToken>(rT)
+		assertEquals(expected = ")", actual = rT.toString())
 	}
 }

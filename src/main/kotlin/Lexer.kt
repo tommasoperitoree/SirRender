@@ -201,7 +201,7 @@ class SceneInputStream(
 		val token = buildString {
 			while (true) {
 				val ch = readChar() ?: throw GrammarError(tokenLoc, "Undetermined string")
-				if (ch == '"') break
+				if (ch == '"'|| ch == '\'') break
 				append(ch)
 			}
 		}
@@ -285,7 +285,7 @@ class SceneInputStream(
 			}
 			
 			// a literal string (used for file names)
-			ch == '"' -> {
+			ch == '"' || ch == '\'' -> {
 				parseStringToken(tokenLoc)
 			}
 			
