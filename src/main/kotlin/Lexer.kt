@@ -83,19 +83,17 @@ data class IdentifierToken(val identifier: String, override val location: Source
 	override fun toString() = identifier
 }
 
-/** A [Token] signaling the end of a file. */
+/** A [Token] signaling the end of a file EOF. */
 data class StopToken(override val location: SourceLocation) : Token()
 
-/** An [Exception] found by the lexer/parser while reading a scene file*/
 
 /** An [Exception] found by the lexer/parser while reading a scene file.
  * The fields of this type are the following:
  * - [SourceLocation.fileName] the name of the file, or the empty string if there is no real file
  * - [SourceLocation.lineNum] the line number where the error was discovered (starting from 1)
  * - [SourceLocation.colNum] the column number where the error was discovered (starting from 1)
- * - `message`: a user-friendly error message
- **/
-
+ * - [message]: a user-friendly error message
+ */
 class GrammarError(
 	val location: SourceLocation,
 	override val message: String
@@ -105,7 +103,13 @@ class GrammarError(
 // ------------------------------
 //      Input Stream wrapper
 // ------------------------------
-//Input stream can be confused with a library of Kotlin
+
+/**
+ * A high-level wrapper around a stream, used to parse scene files
+ * This class implements a wrapper around a stream, with the following additional capabilities:
+ * - It tracks the line number and column number;
+ * - It permits to "un-read" characters and tokens.
+ */
 class SceneInputStream(
 	private val stream: Reader,
 	fileName: String = "",
@@ -155,7 +159,7 @@ class SceneInputStream(
 	
 	/** Push a character back to the stream. */
 	fun unreadChar(ch: Char) {
-		assert(savedChar == null)
+		check(savedChar == null) { "Cannot unread a char when one is already saved!" }
 		savedChar = ch
 		location = savedLocation.copy()
 	}
@@ -251,11 +255,12 @@ class SceneInputStream(
 	}
 	
 	/**
-	 * If it is a symbol (comma, parenthesis, etc.), it returns a SymbolToken;
-	 * If it is a digit, it returns a LiteralNumberToken;
-	 * If it is "", it returns a LiteralStringToken;
-	 * If it is a sequence of characters a…z, it returns a KeywordToken if the sequence is a keyword, IdentifierToken otherwise;
-	 * If the file is finished, it returns StopToken.
+	 * Read a [Token] within the [SceneInputStream]
+	 * - If it is a symbol (comma, parenthesis, etc.), it returns a [SymbolToken];
+	 * - If it is a digit, it returns a [NumberToken];
+	 * - If it is "", it returns a [StringToken];
+	 * - If it is a sequence of characters a…z, it returns a [KeywordToken] if the sequence is a keyword, [IdentifierToken] otherwise;
+	 * - If the file is finished, it returns [StopToken].
 	 */
 	fun readToken(): Token {
 		
