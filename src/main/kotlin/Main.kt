@@ -48,13 +48,13 @@ private fun buildDemoWorld(): World {
 		)
 	)
 	
-	
+	/*
 	val sunMaterial = Material(
 		brdf = DiffuseBRDF(
 			pigment = UniformPigment(Color(1.0f, 0.4f, 0f))
 		),
 		emittedRadiance = UniformPigment(Color(10.0f, 4f, 0f))
-	)
+	)*/
 	
 	//RED
 	val sphereMaterial = Material(
@@ -97,7 +97,7 @@ private fun buildDemoWorld(): World {
 			skyMaterial
 		)
 	)
-	*/
+	
 	
 	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
@@ -108,7 +108,7 @@ private fun buildDemoWorld(): World {
 			material = sunMaterial
 		)
 	)
-	
+	*/
 	//first sphere in (-2,1,1) red
 	world.addShape(
 		Sphere(
@@ -258,7 +258,6 @@ class Demo : CliktCommand(
 				PCG(initState, initSeq),
 				numRays = 10,
 				maxRayDepth = 5,
-
 				russianRouletteLimit = 4
 			)
 			
