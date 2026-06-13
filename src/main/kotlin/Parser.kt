@@ -18,7 +18,7 @@ fun expectSymbol(s: SceneInputStream, symbol: Char) {
 	
 	if ((token !is SymbolToken) || (token.symbol != symbol)) throw GrammarError(
 		token.location,
-		"got $token instead of $symbol"
+		"got $token instead of $symbol in ${token.location}"
 	)
 	
 }
@@ -271,7 +271,7 @@ fun parsePlane(s: SceneInputStream, scene: Scene): Plane {
 	val transformation = parseTransformation(s, scene)
 	expectSymbol(s, ')')
 	
-	return Plane(transformation=transformation, material=material)
+	return Plane(transformation = transformation, material = material)
 	
 }
 

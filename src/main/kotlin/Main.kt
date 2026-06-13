@@ -22,7 +22,6 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.imageio.ImageTypeSpecifier
 import javax.imageio.metadata.IIOMetadataNode
-import kotlin.math.sqrt
 
 
 /** Create elements of the demo scene. */

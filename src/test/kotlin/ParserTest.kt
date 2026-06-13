@@ -1,5 +1,4 @@
 import org.junit.jupiter.api.Test
-import java.io.InputStream
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -26,12 +25,12 @@ class ParserTest {
 				"            uniform((0, 0, 0))\n" +
 				"        )\n" +
 				"    \n" +
-				"        plane (sky_material, translation([0, 0, 100]) * rotation_y(clock))\n" +
+				"        plane (sky_material, translation((0, 0, 100)) * rotation_y(clock))\n" +
 				"        plane (ground_material, identity)\n" +
 				"    \n" +
-				"        sphere(sphere_material, translation([0, 0, 1]))\n" +
+				"        sphere(sphere_material, translation((0, 0, 1)))\n" +
 				"    \n" +
-				"        camera(perspective, rotation_z(30) * translation([-4, 0, 1]), 1.0, 2.0)").reader()
+				"        camera(perspective, rotation_z(30) * translation((-4, 0, 1)), 1.0, 2.0)").reader()
 		
 		
 		val inputFile = SceneInputStream(stream)
@@ -39,6 +38,7 @@ class ParserTest {
 		
 		//check float variables
 		assertEquals(1, scene.floatVariables.size)
+		val clock = scene.floatVariables["clock"]
 		assert("clock" in scene.floatVariables)
 		assertEquals(150.0f, scene.floatVariables["clock"])
 		
@@ -84,15 +84,15 @@ class ParserTest {
 		
 		val plane = scene.world.shapes[0]
 		assertNotNull(plane)
-		//assertTrue(plane.transformation == translation(Vec(0f, 0f, 100f)) * rotationY(clock))
+		assertTrue(plane.transformation.isClose(translation(Vec(0f, 0f, 100f)) * rotationY(angleDeg = clock!!)))
 		
 		val planeground = scene.world.shapes[1]
 		assertNotNull(planeground)
-		//assertTrue(planeground.transformation == identity)
+		assertTrue(planeground.transformation.isClose(Transformation(HomogMatr4x4.identity())))
 		
 		val sphere = scene.world.shapes[2]
 		assertNotNull(sphere)
-		//assertTrue(sphere.transformation == translation(0f, 0f, 1f))
+		assertTrue(sphere.transformation.isClose(translation(Vec(0f, 0f, 1f))))
 		
 		//Check camera
 		val cameraP = scene.camera
