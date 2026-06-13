@@ -10,7 +10,7 @@ import kotlin.math.sqrt
 /** Calculation of [Sphere]'s [Normal] at intersection [point] */
 fun sphereNormal(point: Point, rayDir: Vec): Normal {
 	val result = Normal(point.x, point.y, point.z)
-	return if ((point.toVec() dot rayDir) < 0f) result else -result
+	return if ((point.toVec() dot rayDir) < 0f) result else result.unaryMinus()
 }
 
 /** Calculation of intersection [point] on the Sphere's surface, in (u,v) coordinates*/

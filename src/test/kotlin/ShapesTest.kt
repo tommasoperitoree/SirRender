@@ -1,10 +1,32 @@
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 class ShapesTest {
+	
+	//Test sphere
 	val sphere = Sphere()
 	val t = Vec(10f, 0f, 0f)
 	val sphere1 = Sphere(translation(t))
+	
+	@Test
+	fun `test sphereNormal`() {
+		val normal = Normal(1f, 0f, 0f)
+		val ray = Ray(Point(5f, 0f, 0f), -vecX())
+		assertEquals(sphereNormal(Point(1f, 0f, 0f), ray.dir), normal)
+		assertTrue(sphereNormal(Point(-1f, 0f, 0f), ray.dir).isClose(normal))
+	}
+	
+	@Test
+	fun `test spherePointToUV`() {
+		val point1 = Point(1f, 0f, 0f)
+		val uv1=Vec2d(0f, 0.5f)
+		val point2 = Point(0.577f, 0.577f, 0.577f) //punto sulla diagonale primo quadrante
+		val uv2=Vec2d(0.125f, 0.30422f)
+		
+		assertTrue(spherePointToUV(point1).isClose(uv1))
+		assertTrue(spherePointToUV(point2).isClose(uv2))
+	}
 	
 	@Test
 	fun `test rayIntersection z direction`() {
@@ -62,17 +84,22 @@ class ShapesTest {
 		assertTrue(
 			hit?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
 					hit.normal.isClose(vecZ().toNormal()) &&
-					hit.surfacePoint.isClose(uv)&&
-					areClose(hit.t,1f)
+					hit.surfacePoint.isClose(uv) &&
+					areClose(hit.t, 1f)
 		)
 		
 		assertTrue(
 			hit2?.worldPoint?.isClose(Point(11f, 0f, 0f)) ?: false &&
 					hit2.normal.isClose(vecX().toNormal()) &&
 					hit2.surfacePoint.isClose(uv2) &&
-					areClose(hit2.t,2f)
+					areClose(hit2.t, 2f)
 		)
 		
+	}
+	
+	@Test
+	fun `test scaling rayIntersection`() {
+		TODO()
 	}
 	
 	/**
@@ -94,5 +121,15 @@ class ShapesTest {
 			hit2?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
 					hit2.normal.isClose(vecZ().toNormal())
 		)
+	}
+	
+	
+	//test Plane
+	val plane = Plane()
+	
+	//è interessante ruotare il piano checkered e vedere se i colori sono scambiati
+	@Test
+	fun `test intersaction`() {
+		TODO()
 	}
 }
