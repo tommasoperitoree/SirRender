@@ -242,19 +242,61 @@ fun parseTransformation(s: SceneInputStream, scene: Scene): Transformation {
 	return result
 }
 
-/** ... */
+/** Parse a [parseSphere] with its material and transformation from input stream [s]. */
 fun parseSphere(s: SceneInputStream, scene: Scene): Sphere {
-	TODO()
+	
+	expectSymbol(s, '(')
+	
+	val materialName = expectIdentifier(s)
+	val material = scene.materials[materialName] ?:
+	//We raise the exception here because input_file is pointing to the end of the wrong identifier
+	throw GrammarError(s.location, "Unknown material $materialName")
+	
+	expectSymbol(s, ',')
+	val transformation = parseTransformation(s, scene)
+	expectSymbol(s, ')')
+	
+	return Sphere(transformation = transformation, material = material)
+	
 }
 
-/** ... */
+/** Parse a [Plane] with its material and transformation from input stream [s]. */
 fun parsePlane(s: SceneInputStream, scene: Scene): Plane {
-	TODO()
+	
+	expectSymbol(s, '(')
+	val materialName = expectIdentifier(s)
+	val material = scene.materials[materialName] ?: throw GrammarError(s.location, "Unknown material $materialName")
+	
+	expectSymbol(s, ',')
+	val transformation = parseTransformation(s, scene)
+	expectSymbol(s, ')')
+	
+	return Plane(transformation=transformation, material=material)
+	
 }
 
-/** ... */
+/**
+ * Parse either a [PerspectiveCamera] or an [OrthogonalCamera] from [s].
+ *
+ * The screen distance is used only when constructing a perspective camera.
+ */
 fun parseCamera(s: SceneInputStream, scene: Scene): Camera {
-	TODO()
+	
+	expectSymbol(s, '(')
+	val typeKW = expectKeyword(s, listOf(Keyword.PERSPECTIVE, Keyword.ORTHOGONAL))
+	expectSymbol(s, ',')
+	val transformation = parseTransformation(s, scene)
+	expectSymbol(s, ',')
+	val aspectRatio = expectNumber(s, scene)
+	expectSymbol(s, ',')
+	val distance = expectNumber(s, scene)
+	expectSymbol(s, ')')
+	
+	return when (typeKW) {
+		Keyword.PERSPECTIVE -> PerspectiveCamera(distance, aspectRatio = aspectRatio, transformation = transformation)
+		Keyword.ORTHOGONAL -> OrthogonalCamera(aspectRatio = aspectRatio, transformation = transformation)
+		else -> throw AssertionError("Unreachable: expectKeyword allowed an invalid keyword through!")
+	}
 }
 
 /** Read a scene description from input file [s] and return a class [Scene] object. */
