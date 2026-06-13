@@ -8,6 +8,8 @@ class ShapesTest {
 	val sphere = Sphere()
 	val t = Vec(10f, 0f, 0f)
 	val sphere1 = Sphere(translation(t))
+	val s = Vec(10f, 10f, 10f)
+	val sphere2 = Sphere(scaling(s))
 	
 	@Test
 	fun `test sphereNormal`() {
@@ -99,7 +101,16 @@ class ShapesTest {
 	
 	@Test
 	fun `test scaling rayIntersection`() {
-		TODO()
+		val ray = Ray(Point(0f, 0f, 15f), -vecZ())
+		val hit = sphere2.rayIntersection(ray)
+		val uv = Vec2d(0f, 0f)
+		//if there is a scaling remember always to normalize()
+		assertTrue(
+			hit?.worldPoint?.isClose(Point(0f, 0f, 10f)) ?: false &&
+					hit.normal.normalize().isClose(vecZ().toNormal()) &&
+					hit.surfacePoint.isClose(uv) &&
+					areClose(hit.t, 5f)
+		)
 	}
 	
 	/**
