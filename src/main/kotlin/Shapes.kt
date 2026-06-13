@@ -81,6 +81,13 @@ class Plane(
 	override val material: Material = Material()
 ) : Shape {
 	
+	fun planePointToUV(point: Point): Vec2d {
+		
+		val u = point.x - floor(point.x)
+		val v = point.y - floor(point.y)
+		return Vec2d(u,v)
+	}
+	
 	/**
 	 * Checks if the [ray] intersect the [Plane].
 	 * Returns a [HitRecord] or `null` if no intersection is found.

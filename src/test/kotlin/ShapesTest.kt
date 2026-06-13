@@ -20,9 +20,9 @@ class ShapesTest {
 	@Test
 	fun `test spherePointToUV`() {
 		val point1 = Point(1f, 0f, 0f)
-		val uv1=Vec2d(0f, 0.5f)
+		val uv1 = Vec2d(0f, 0.5f)
 		val point2 = Point(0.577f, 0.577f, 0.577f) //punto sulla diagonale primo quadrante
-		val uv2=Vec2d(0.125f, 0.30422f)
+		val uv2 = Vec2d(0.125f, 0.30422f)
 		
 		assertTrue(spherePointToUV(point1).isClose(uv1))
 		assertTrue(spherePointToUV(point2).isClose(uv2))
@@ -125,11 +125,40 @@ class ShapesTest {
 	
 	
 	//test Plane
-	val plane = Plane()
 	
-	//è interessante ruotare il piano checkered e vedere se i colori sono scambiati
+	val groundMaterial = Material(
+		brdf = DiffuseBRDF(
+			pigment = CheckeredPigment(
+				color1 = Color.white,
+				color2 = Color.black,
+				numSteps = 2
+			)
+		)
+	)
+	val plane = Plane(material = groundMaterial)
+	
+	
 	@Test
 	fun `test intersaction`() {
-		TODO()
+		val s = scaling(Vec(-1f, 1f, 1f)) //invert on x axis
+		val planes = Plane(s, groundMaterial)
+		val point = Point(0.25f, 0.25f)
+		val point1 = Point(0.25f, 0.75f)
+		
+		val uvPlane = plane.planePointToUV(point)
+		val uvPlane1 = plane.planePointToUV(point1)
+		
+		//to the plane with transformation we need to pass the inverse transformation on the point
+		val localPoint = planes.transformation.inverse() * point
+		val localPoint1 = planes.transformation.inverse() * point1
+		val uvPlanes = planes.planePointToUV(localPoint)
+		val uvPlanes1 = planes.planePointToUV(localPoint1)
+		
+		//without scaling
+		assertEquals(plane.material.brdf.pigment.getColor(uvPlane), Color.white)
+		assertEquals(plane.material.brdf.pigment.getColor(uvPlane1), Color.black)
+		//with scaling
+		assertEquals(planes.material.brdf.pigment.getColor(uvPlanes1), Color.white)
+		assertEquals(planes.material.brdf.pigment.getColor(uvPlanes), Color.black)
 	}
 }
