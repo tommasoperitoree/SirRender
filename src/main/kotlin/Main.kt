@@ -225,7 +225,6 @@ class Demo : CliktCommand(
 		
 		val world = buildDemoWorld()
 		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
-		
 		for (frameIndex in 0 until numFrames) {
 			val angle = 90f
 			//val angle = observerAngle + (frameIndex * angleStep)
@@ -249,7 +248,7 @@ class Demo : CliktCommand(
 			
 			//Run the ray-tracer
 			
-			val pathTracer = ImageTracer(img, cam)
+			val pathTracer = ImageTracer(img, cam, antialiasing = 0, pcg = PCG())
 			
 			print("Using a path tracer")
 			
