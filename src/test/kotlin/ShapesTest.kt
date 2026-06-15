@@ -25,7 +25,7 @@ class ShapesTest {
 		
 		val ray2 = Ray(Point(3f, 0f, 0f), -vecX())
 		val hit2 = sphere.rayIntersection(ray2)
-		val uv2 = Vec2d(1 / 4f, 1 / 2f)
+		val uv2 = Vec2d(0f, 1 / 2f)
 		
 		assertTrue(
 			hit2?.worldPoint?.isClose(Point(1f, 0f, 0f)) ?: false &&
@@ -40,7 +40,7 @@ class ShapesTest {
 	fun `test rayIntersection inside sphere`() {
 		val ray3 = Ray(Point(0f, 0f, 0f), vecX())
 		val hit3 = sphere.rayIntersection(ray3)
-		val uv3 = Vec2d(1 / 4f, 1 / 2f)
+		val uv3 = Vec2d(0f, 1 / 2f)
 		
 	}
 	
@@ -56,7 +56,7 @@ class ShapesTest {
 		
 		val ray2 = Ray(Point(13f, 0f, 0f), -vecX())
 		val hit2 = sphere1.rayIntersection(ray2)
-		val uv2 = Vec2d(1 / 4f, 1 / 2f)
+		val uv2 = Vec2d(0f, 1 / 2f)
 		
 		
 		assertTrue(

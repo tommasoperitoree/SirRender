@@ -247,8 +247,8 @@ class Demo : CliktCommand(
 			}
 			
 			//Run the ray-tracer
-			
-			val pathTracer = ImageTracer(img, cam, antialiasing = 0, pcg = PCG())
+			println("Starting render...\n")
+			val pathTracer = ImageTracer(img, cam, antialiasing =2, pcg = PCG())
 			
 			print("Using a path tracer")
 			
@@ -256,14 +256,16 @@ class Demo : CliktCommand(
 				world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 10,
+				numRays = 4,
 				maxRayDepth = 6,
 				russianRouletteLimit = 4
 			)
 			
 			// Run the ray-tracer with ProgressBar
+			val samplesPerPixel = if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
 			val totalPixels = img.width.toLong() * img.height.toLong()
-			val progressBar = ProgressBar(totalPixels)
+			val totalSamples = totalPixels * samplesPerPixel
+			val progressBar = ProgressBar(totalSamples)
 			
 			var done = 0L
 			
