@@ -10,6 +10,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.float
+import com.github.ajalt.clikt.parameters.types.inputStream
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.ulong
 import java.io.ByteArrayInputStream
@@ -398,13 +399,133 @@ class Animation : CliktCommand(
 	}
 }
 
-
+class Render : CliktCommand("render") {
+	override fun help(context: Context) = "Generate a scene image"
+	
+	val width: Int by option(
+		"--width", "-w", help = "Image width in pixels"
+	).int().default(640)
+	val height: Int by option(
+		"--height", "-h", help = "Image height in pixels"
+	).int().default(480)
+	val numFrames: Int by option(
+		"--num-frames", "-n", help = "Number of frames (angles) to generate"
+	).int().default(1)
+	val outputDir: String by option(
+		"--output-dir", "-o", help = "Output directory for PFM frames"
+	).default("./src/main/resources/frames")
+	val observerAngle: Float by option(
+		"--observer-angle", "-i", help = "Starting observer angle in degrees"
+	).float().default(0f)
+	val renderImage: Boolean by option(
+		"--render", "-r", help = "Also convert output to PNG"
+	).flag(default = false)
+	val factor: Float by option(
+		"--factor", "-f", help = "Luminosity scaling factor"
+	).float().default(0.2f)
+	val gamma: Float by option(
+		"--gamma", "-g", help = "Gamma correction value"
+	).float().default(1f)
+	val initState: ULong by option(
+		"--initState", help = "Initial state number for random generation"
+	).ulong().default(42uL)
+	val initSeq: ULong by option(
+		"--initSeq", help = "Initial sequence number for random generation"
+	).ulong().default(54uL)
+	val antialiasing: Int by option(
+		"--antialiasing", "-a", help="Antialiasing value"
+	).int().default(2)
+	val inputFile: File by option("--input-file", "-inp", help = "Input file path")
+		.file(mustExist = true, canBeDir = false, mustBeReadable = true)
+		.default(File("SceneR/sceneFile.txt"))
+	
+	
+	override fun run() {
+		val parsedScene: Scene = inputFile.reader().use { reader ->
+			val sceneStream = SceneInputStream(reader)
+			parseScene(sceneStream)
+		}
+		val cameraDir = "${parsedScene.camera}"
+		File(cameraDir).mkdirs() // create output dir if it doesn't exist
+		
+		val baseCamera = parsedScene.camera ?: throw IllegalArgumentException("No camera found")
+		
+		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
+		
+		for (frameIndex in 0 until numFrames) {
+			val angle = 90f
+			//val angle = observerAngle + (frameIndex * angleStep)
+			val angleNNN = "%03d".format(frameIndex)
+			
+			val img = HDRImage(width, height)
+			
+			val screenCenter = Vec(-1f, 0f, 0f)
+			
+			val cam = when (baseCamera) {
+				is OrthogonalCamera -> OrthogonalCamera(baseCamera.aspectRatio, transformation = baseCamera.transformation)
+				is PerspectiveCamera -> PerspectiveCamera(
+					baseCamera.distance,
+					baseCamera.aspectRatio,
+					transformation = baseCamera.transformation
+				)
+				
+				else -> throw IllegalStateException("No camera found for $baseCamera")
+			}
+			
+			//Run the ray-tracer
+			
+			val pathTracer = ImageTracer(img, cam)
+			
+			print("Using a path tracer")
+			
+			val renderer = PathTracer(
+				parsedScene.world,
+				Color(),
+				PCG(initState, initSeq),
+				numRays = 10,
+				maxRayDepth = 5,
+				russianRouletteLimit = 4
+			)
+			
+			// Run the ray-tracer with ProgressBar
+			val totalPixels = img.width.toLong() * img.height.toLong()
+			val progressBar = ProgressBar(totalPixels)
+			
+			var done = 0L
+			
+			pathTracer.fireAllRays { ray ->
+				val color = renderer(ray)
+				
+				done++
+				progressBar.update(done)
+				
+				color
+			}
+			progressBar.update(totalPixels, force = true)
+			
+			val baseName = "Scene"
+			val pfmPath = "$baseCamera/$baseName.pfm"
+			img.writePFMFile(pfmPath)
+			println("Saved PFM → $pfmPath")
+			
+			
+			if (renderImage) {
+				//img.normalizeImage(factor)
+				img.clampImage()
+				
+				val pngPath = "$cameraDir/$baseName.png"
+				FileOutputStream(pngPath).use { img.writeLDRImage(it, "png", gamma) }
+				println("Saved PNG → $pngPath")
+			}
+		}
+	}
+}
 // --- Entry point ---
 
 fun main(args: Array<String>) =
 	SirRender(
 	).subcommands(
-		Pfm2Png(), Demo(), Animation()
+		Pfm2Png(), Demo(), Animation(), Render()
 	).main(args)
 
 // ./gradlew run --args="demo -w 640 -h 480 -c "Orthogonal" -o demo.png"

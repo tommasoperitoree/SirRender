@@ -1,0 +1,36 @@
+float clock(150)
+
+        material sunMaterial(
+        		diffuse(uniform((1.0f, 0.4f, 0f))),
+        		uniform((10.0f, 4f, 0f))
+        	)
+
+        material ground_material(
+            diffuse(checkered((1, 0.3, 0), //arancio
+                              (0, 0, 0), 5)),
+            uniform((0, 0, 0))
+        )
+
+        material sphere_material(
+            specular(uniform((0.8, 0, 0))),
+            uniform((0, 0, 0))
+        )
+
+        plane (sky_material, translation((0, 0, 100)) * rotation_y(clock))
+        plane (ground_material, identity)
+
+        sphere(sphere_material, translation((0, 0, 1)))
+
+        camera(perspective, rotation_z(30) * translation((-4, 0, 1)), 1.0, 2.0)
+
+
+
+
+	//Pavement
+	world.addShape(Plane(transformation = Transformation(), groundMaterial))
+	//use a sphere instead of two plane for the sky
+	world.addShape(
+		Sphere(
+			transformation = scaling(Vec(50f, 50f, 50f)),
+			material = skyMaterial
+		)
