@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 class ImageTracerTest {
 	val image = HDRImage(2, 4)
 	val camera = PerspectiveCamera(1f, 2f)
-	val tracer = ImageTracer(image, camera)
+	val tracer = ImageTracer(image, camera,0,PCG())
 	
 	val ray1 = tracer.fireRay(0, 0, 2.5f, 1.5f)
 	val ray2 = tracer.fireRay(2, 1, .5f, .5f)

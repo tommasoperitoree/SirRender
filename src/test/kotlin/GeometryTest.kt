@@ -2,8 +2,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-//da decidere isClose lo teniamo sempre in alto
-// oppure lo inseriamo nelle utulity functions?
+
 class VecTest() {
 	
 	val vecA = Vec(1f, 2f, 3f)

@@ -64,7 +64,7 @@ class ShapesTest {
 	fun `test rayIntersection inside sphere`() {
 		val ray3 = Ray(Point(0f, 0f, 0f), vecX())
 		val hit3 = sphere.rayIntersection(ray3)
-		val uv3 = Vec2d(1 / 4f, 1 / 2f)
+		val uv3 = Vec2d(0f, 1 / 2f)
 		
 	}
 	
@@ -150,7 +150,7 @@ class ShapesTest {
 	
 	
 	@Test
-	fun `test intersaction`() {
+	fun `test intersection`() {
 		val s = scaling(Vec(-1f, 1f, 1f)) //invert on x axis
 		val planes = Plane(s, groundMaterial)
 		val point = Point(0.25f, 0.25f)
