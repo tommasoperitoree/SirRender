@@ -150,7 +150,7 @@ class ShapesTest {
 	
 	
 	@Test
-	fun `test intersaction`() {
+	fun `test intersection`() {
 		val s = scaling(Vec(-1f, 1f, 1f)) //invert on x axis
 		val planes = Plane(s, groundMaterial)
 		val point = Point(0.25f, 0.25f)

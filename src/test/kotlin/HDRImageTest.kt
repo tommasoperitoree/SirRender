@@ -119,47 +119,46 @@ class HDRImageTest {
 	@Test
 	fun `test averageLuminosity`() {
 		img = HDRImage(2, 1)
-
-		img.setPixel(0, 0, Color(.5f, 1.0f, 1.5f))
-		img.setPixel(1, 0, Color(50.0f, 100.0f, 150.0f))
 		
-		print(img.averageLuminosity(delta =0f))
-		assertTrue { areClose(10.0f, img.averageLuminosity(delta =0f)) }
+		img.setPixel(0, 0, Color(.5f, 1f, 1.5f))
+		img.setPixel(1, 0, Color(50f, 100f, 150f))
+		print(img.averageLuminosity(delta = 0f))
+		assertTrue { areClose(10f, img.averageLuminosity()) }
 	}
 	
 	@Test
 	fun `test averageLuminosityDelta`() {
 		img = HDRImage(2, 1)
-		img.setPixel(0, 0, Color(0.5f, 1.0f, 1.50f))
-		img.setPixel(1, 0, Color(50.0f, 100.0f, 150.0f))
+		img.setPixel(0, 0, Color(0.5f, 1f, 1.5f))
+		img.setPixel(1, 0, Color(50f, 100f, 150f))
 		print(img.averageLuminosity(10e-10f))
-		assertTrue { areClose(10.0f, img.averageLuminosity(10e-10f)) }
+		assertTrue { areClose(10f, img.averageLuminosity(10e-10f)) }
 	}
 	
 	@Test
 	fun `test normalizeImage`() {
 		img = HDRImage(width = 2, height = 1)
-		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
-		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
+		img.setPixel(0, 0, Color(5f, 10f, 15f))
+		img.setPixel(1, 0, Color(500f, 1000f, 1500f))
 		
-		img.normalizeImage(100.0f, 1000.0f)
+		img.normalizeImage(100f, 1000f)
 		
-		assertTrue { img.getPixel(0, 0).isClose(Color(5.0e-1f, 1.0f, 1.5f)) }
-		assertTrue { img.getPixel(1, 0).isClose(Color(50.0f, 1.0e2f, 1.5e2f)) }
+		assertTrue { img.getPixel(0, 0).isClose(Color(5e-1f, 1f, 1.5f)) }
+		assertTrue { img.getPixel(1, 0).isClose(Color(50f, 1e2f, 1.5e2f)) }
 	}
 	
 	@Test
 	fun `test clampImage`() {
 		img = HDRImage(2, 1)
-		img.setPixel(0, 0, Color(0.5e1f, 1.0e1f, 1.5e1f))
-		img.setPixel(1, 0, Color(0.5e3f, 1.0e3f, 1.5e3f))
+		img.setPixel(0, 0, Color(0.5e1f, 1e1f, 1.5e1f))
+		img.setPixel(1, 0, Color(0.5e3f, 1e3f, 1.5e3f))
 		
 		img.clampImage()
 		
 		for (clampPixel in img.pixels) {
-			assertTrue { clampPixel.r in 0.0f..1.0f }
-			assertTrue { clampPixel.g in 0.0f..1.0f }
-			assertTrue { clampPixel.b in 0.0f..1.0f }
+			assertTrue { clampPixel.r in 0f..1f }
+			assertTrue { clampPixel.g in 0f..1f }
+			assertTrue { clampPixel.b in 0f..1f }
 		}
 	}
 	
