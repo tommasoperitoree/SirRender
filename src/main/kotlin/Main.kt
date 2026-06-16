@@ -262,7 +262,7 @@ class Demo : CliktCommand(
 			
 			//Run the ray-tracer
 			println("Starting render...\n")
-			val pathTracer = ImageTracer(img, cam, antialiasing =2, pcg = PCG())
+			val pathTracer = ImageTracer(img, cam, antialiasing = 2, pcg = PCG())
 			
 			print("Using a path tracer")
 			
@@ -276,7 +276,8 @@ class Demo : CliktCommand(
 			)
 			
 			// Run the ray-tracer with ProgressBar
-			val samplesPerPixel = if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
+			val samplesPerPixel =
+				if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
 			val totalPixels = img.width.toLong() * img.height.toLong()
 			val totalSamples = totalPixels * samplesPerPixel
 			val progressBar = ProgressBar(totalSamples)
@@ -434,7 +435,7 @@ class Render : CliktCommand("render") {
 		"--initSeq", help = "Initial sequence number for random generation"
 	).ulong().default(54uL)
 	val antialiasing: Int by option(
-		"--antialiasing", "-a", help="Antialiasing value"
+		"--antialiasing", "-a", help = "Antialiasing value"
 	).int().default(2)
 	val inputFile: File by option("--input-file", "-inp", help = "Input file path")
 		.file(mustExist = true, canBeDir = false, mustBeReadable = true)
@@ -463,7 +464,11 @@ class Render : CliktCommand("render") {
 			val screenCenter = Vec(-1f, 0f, 0f)
 			
 			val cam = when (baseCamera) {
-				is OrthogonalCamera -> OrthogonalCamera(baseCamera.aspectRatio, transformation = baseCamera.transformation)
+				is OrthogonalCamera -> OrthogonalCamera(
+					baseCamera.aspectRatio,
+					transformation = baseCamera.transformation
+				)
+				
 				is PerspectiveCamera -> PerspectiveCamera(
 					baseCamera.distance,
 					baseCamera.aspectRatio,
@@ -475,7 +480,7 @@ class Render : CliktCommand("render") {
 			
 			//Run the ray-tracer
 			
-			val pathTracer = ImageTracer(img, cam,antialiasing=antialiasing, pcg = PCG())
+			val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
 			
 			print("Using a path tracer")
 			
@@ -483,14 +488,16 @@ class Render : CliktCommand("render") {
 				parsedScene.world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 10,
+				numRays = 2,
 				maxRayDepth = 5,
 				russianRouletteLimit = 4
 			)
 			
-			// Run the ray-tracer with ProgressBar
+			// Inserisci questo in Render:
+			val samplesPerPixel = if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
 			val totalPixels = img.width.toLong() * img.height.toLong()
-			val progressBar = ProgressBar(totalPixels)
+			val totalSamples = totalPixels * samplesPerPixel
+			val progressBar = ProgressBar(totalSamples)
 			
 			var done = 0L
 			
