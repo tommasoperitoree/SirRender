@@ -103,7 +103,7 @@ private fun buildDemoWorld(): World {
 		)
 	)
 	
-	
+	*/
 	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
 		Sphere(
@@ -123,7 +123,7 @@ private fun buildDemoWorld(): World {
 			material = sphereMaterial
 		)
 	)
-	
+	/*
 	//second sphere in (-4,-1,1) silver that reflect the first sphere
 	world.addShape(
 		Sphere(
@@ -133,13 +133,13 @@ private fun buildDemoWorld(): World {
 			mirrorMaterial
 		)
 	)
-	*/
+	
 	world.addShape(
 		Cube(
 			scaling(Vec(0.2f, 0.2f, 0.2f)) * translation(Vec(-3f, -1f, 1f)),
 			cubeMaterial
 		)
-	)
+	)*/
 	return world
 }
 
@@ -229,6 +229,9 @@ class Demo : CliktCommand(
 	val initSeq: ULong by option(
 		"--initSeq", help = "Initial sequence number for random generation"
 	).ulong().default(54uL)
+	val antialiasing: Int by option(
+		"--antialiasing", "-a", help = "Antialiasing"
+	).int().default(2)
 	
 	override fun run() {
 		
@@ -238,14 +241,14 @@ class Demo : CliktCommand(
 		val world = buildDemoWorld()
 		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
 		for (frameIndex in 0 until numFrames) {
-			val angle = 90f
+			val angle = 15f
 			//val angle = observerAngle + (frameIndex * angleStep)
 			val angleNNN = "%03d".format(frameIndex)
 			
 			val img = HDRImage(width, height)
 			
 			val screenCenter = Vec(-1f, 0f, 0f)
-			val verticalAngle = 35f // angle to rotate above plane (around y-axis)
+			val verticalAngle = 10f // angle to rotate above plane (around y-axis)
 			// concatenation of transformations: first move away from scene,
 			// then rotate upwards around y-axis, and finally gradually move around the scene (z-axis)
 			val camTransformation = rotationZ(angle) *
@@ -259,8 +262,8 @@ class Demo : CliktCommand(
 			}
 			
 			//Run the ray-tracer
-			println("Starting render...\n")
-			val pathTracer = ImageTracer(img, cam, antialiasing =2, pcg = PCG())
+			println("Starting render...")
+			val pathTracer = ImageTracer(img, cam,antialiasing=antialiasing, pcg = PCG())
 			
 			print("Using a path tracer")
 			
@@ -268,7 +271,7 @@ class Demo : CliktCommand(
 				world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 4,
+				numRays = 8,
 				maxRayDepth = 6,
 				russianRouletteLimit = 4
 			)
@@ -291,7 +294,7 @@ class Demo : CliktCommand(
 			}
 			progressBar.update(totalPixels, force = true)
 			
-			val baseName = "demo"
+			val baseName = "Red_sphere&sun"
 			val pfmPath = "$cameraDir/$baseName.pfm"
 			img.writePFMFile(pfmPath)
 			println("Saved PFM → $pfmPath")
