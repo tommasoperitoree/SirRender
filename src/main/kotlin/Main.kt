@@ -436,7 +436,7 @@ class Render : CliktCommand("render") {
 	).ulong().default(54uL)
 	val antialiasing: Int by option(
 		"--antialiasing", "-a", help = "Antialiasing value"
-	).int().default(2)
+	).int().default(1)
 	val inputFile: File by option("--input-file", "-inp", help = "Input file path")
 		.file(mustExist = true, canBeDir = false, mustBeReadable = true)
 		.default(File("SceneR/sceneFile.txt"))
