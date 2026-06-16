@@ -55,7 +55,7 @@ class PathTracer(
 	val pcg: PCG = PCG(),
 	val numRays: Int, // number of ray generate for integral calculation
 	val maxRayDepth: Int,
-	val russianRouletteLimit: Int, // limit of the Russian Roulette
+	val russianRouletteLimit: Int // limit of the Russian Roulette
 ) : Renderer {
 	
 	override operator fun invoke(ray: Ray): Color { // operator is necessary to use the recursion

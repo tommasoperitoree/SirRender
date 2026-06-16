@@ -22,6 +22,7 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.imageio.ImageTypeSpecifier
 import javax.imageio.metadata.IIOMetadataNode
+import kotlin.math.sqrt
 
 
 /** Create elements of the demo scene. */
@@ -47,13 +48,13 @@ private fun buildDemoWorld(): World {
 		)
 	)
 	
-	/*
+	
 	val sunMaterial = Material(
 		brdf = DiffuseBRDF(
 			pigment = UniformPigment(Color(1.0f, 0.4f, 0f))
 		),
 		emittedRadiance = UniformPigment(Color(10.0f, 4f, 0f))
-	)*/
+	)
 	
 	//RED
 	val sphereMaterial = Material(
@@ -62,6 +63,11 @@ private fun buildDemoWorld(): World {
 		)
 	)
 	
+	val cubeMaterial = Material(
+		brdf = DiffuseBRDF(
+			UniformPigment(Color(0f, 0f, 1f))
+		)
+	)
 	val mirrorMaterial = Material(
 		brdf = SpecularBRDF(
 			UniformPigment(Color(0.753f, 0.753f, 0.753f))
@@ -107,7 +113,7 @@ private fun buildDemoWorld(): World {
 			material = sunMaterial
 		)
 	)
-	*/
+	
 	//first sphere in (-2,1,1) red
 	world.addShape(
 		Sphere(
@@ -121,9 +127,17 @@ private fun buildDemoWorld(): World {
 	//second sphere in (-4,-1,1) silver that reflect the first sphere
 	world.addShape(
 		Sphere(
-			transformation = scaling(Vec(0.3f, 0.3f, 0.3f))
-					* translation(Vec(-4f, -1f, 0f)),
-			material = mirrorMaterial
+			scaling(
+				Vec(0.2f, 0.2f, 0.2f)
+			) * translation(Vec(-6f, -1f, 1f)),
+			mirrorMaterial
+		)
+	)
+	*/
+	world.addShape(
+		Cube(
+			scaling(Vec(0.2f, 0.2f, 0.2f)) * translation(Vec(-3f, -1f, 1f)),
+			cubeMaterial
 		)
 	)
 	return world
@@ -223,7 +237,6 @@ class Demo : CliktCommand(
 		
 		val world = buildDemoWorld()
 		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
-		
 		for (frameIndex in 0 until numFrames) {
 			val angle = 90f
 			//val angle = observerAngle + (frameIndex * angleStep)
@@ -246,8 +259,8 @@ class Demo : CliktCommand(
 			}
 			
 			//Run the ray-tracer
-			
-			val pathTracer = ImageTracer(img, cam)
+			println("Starting render...\n")
+			val pathTracer = ImageTracer(img, cam, antialiasing =2, pcg = PCG())
 			
 			print("Using a path tracer")
 			
@@ -255,14 +268,16 @@ class Demo : CliktCommand(
 				world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 10,
-				maxRayDepth = 5,
+				numRays = 4,
+				maxRayDepth = 6,
 				russianRouletteLimit = 4
 			)
 			
 			// Run the ray-tracer with ProgressBar
+			val samplesPerPixel = if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
 			val totalPixels = img.width.toLong() * img.height.toLong()
-			val progressBar = ProgressBar(totalPixels)
+			val totalSamples = totalPixels * samplesPerPixel
+			val progressBar = ProgressBar(totalSamples)
 			
 			var done = 0L
 			
