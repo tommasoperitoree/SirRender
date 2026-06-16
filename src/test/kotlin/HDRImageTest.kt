@@ -1,11 +1,22 @@
+import HDRImage.Companion.readFloat
+import HDRImage.Companion.writeFloat
+import HDRImage.Companion.readLine
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.io.OutputStream
 import java.nio.ByteOrder.BIG_ENDIAN
 import java.nio.ByteOrder.LITTLE_ENDIAN
+import javax.imageio.ImageIO
+import kotlin.test.assertEquals
+import kotlin.test.assertContentEquals
+
 
 class HDRImageTest {
 	
@@ -16,6 +27,7 @@ class HDRImageTest {
 	// generic Height and Width for testing
 	val x: Int = 2
 	val y: Int = 6
+	val eps: Float = 10e-5f
 	
 	// pfm reference files val declaration
 	val referenceBE = byteArrayOfInts(
@@ -56,55 +68,13 @@ class HDRImageTest {
 		assertEquals(y * width + x, img.pixelOffset(x, y))
 	}
 	
+	//Here we test eather set & get pixel in  one test
 	@Test
-	fun `test readLine`() {
-		val sb = "Hello\nWorld"
-		val line: InputStream = sb.byteInputStream()
-		assertEquals("Hello", HDRImage.readLine(line))
-		assertEquals("World", HDRImage.readLine(line))
-		// assertEquals("", HDRImage.readLine(line))  // gives error, should we allow reading EOF
-	}
-	
-	@Test
-	fun `test parseImgSize`() {
-		assertEquals(Pair(3, 2), HDRImage.parseImgSize("3 2"))
-		assertThrows(InvalidPFMImageFormat::class.java) {
-			HDRImage.parseImgSize("1 2 3")         // too many args
-		}
-		assertThrows(InvalidPFMImageFormat::class.java) {
-			HDRImage.parseImgSize("-1 2")           // negative dimension
-		}
-		assertThrows(InvalidPFMImageFormat::class.java) {
-			HDRImage.parseImgSize("width height")   // not integers
-		}
-	}
-	
-	@Test
-	fun `test parseEndianness`() {
-		assertEquals(BIG_ENDIAN, HDRImage.parseEndianness("1.0"))
-		assertEquals(LITTLE_ENDIAN, HDRImage.parseEndianness("-3.0"))
-		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.parseEndianness("0.0") }
-		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.parseEndianness("ABC") }
-	}
-	
-	@Test
-	fun `test constructor fromPFMStream`() {
-		for (referenceBytes in arrayOf(referenceBE, referenceLE)) {
-			img = HDRImage.fromPFMStream(ByteArrayInputStream(referenceBytes))
-			
-			assertEquals(img.width, 3)
-			assertEquals(img.height, 2)
-			
-			assertTrue(img.getPixel(0, 0).isClose(Color(1.0e1f, 2.0e1f, 3.0e1f)))
-			assertTrue(img.getPixel(1, 0).isClose(Color(4.0e1f, 5.0e1f, 6.0e1f)))
-			assertTrue(img.getPixel(2, 0).isClose(Color(7.0e1f, 8.0e1f, 9.0e1f)))
-			assertTrue(img.getPixel(0, 1).isClose(Color(1.0e2f, 2.0e2f, 3.0e2f)))
-			assertTrue(img.getPixel(0, 0).isClose(Color(1.0e1f, 2.0e1f, 3.0e1f)))
-			assertTrue(img.getPixel(1, 1).isClose(Color(4.0e2f, 5.0e2f, 6.0e2f)))
-			assertTrue(img.getPixel(2, 1).isClose(Color(7.0e2f, 8.0e2f, 9.0e2f)))
-		}
-		val p = "PA"
-		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.fromPFMStream(p.byteInputStream()) }
+	fun `test get-set-Pixel`() {
+		val img = HDRImage(width, height)
+		val refColor = Color(0.5f, 0.1f, 0.2f)
+		img.setPixel(4, 5, refColor)
+		assertTrue(refColor.isClose(img.getPixel(4, 5)))
 	}
 	
 	@Test
@@ -119,19 +89,49 @@ class HDRImageTest {
 		}
 	}
 	
-	//@Test
-	//fun `test readPixels`() {
-	//	TODO()
-	//}
+	@Test
+	fun `test writePFMFile`() {
+		
+		val img = HDRImage(2, 2)
+		img.setPixel(0, 0, Color(1f, 0f, 0f))
+		img.setPixel(1, 0, Color(0f, 1f, 0f))
+		img.setPixel(0, 1, Color(0f, 0f, 1f))
+		img.setPixel(1, 1, Color(1f, 1f, 1f))
+		
+		// Write the image to a temporary file, then read it back to verify that each pixel's color matches
+		val tempFile = File.createTempFile("temp", ".pfm")
+		//use try & finally to open and close the temporary file at the end of test even if there are some exception
+		try {
+			img.writePFMFile(tempFile.path) //path extract from file the path of File that is a String
+			val imgRead = tempFile.inputStream().use { HDRImage.fromPFMStream(it) }
+			assertEquals(img.width, imgRead.width)
+			assertEquals(img.height, imgRead.height)
+			for (y in 0 until 2) {
+				for (x in 0 until 2) {
+					assertTrue { imgRead.getPixel(x, y).isClose(img.getPixel(x, y)) }
+				}
+			}
+		} finally {
+			tempFile.delete()
+		}
+	}
 	
 	@Test
 	fun `test averageLuminosity`() {
 		img = HDRImage(2, 1)
+<<<<<<< HEAD
 		img.setPixel(0, 0, Color(.5f, 1.0f, 1.5f))
 		img.setPixel(1, 0, Color(50.0f, 100.0f, 150.0f))
 		
 		print(img.averageLuminosity(delta = 10e-10f))
 		assertTrue { areClose(1.0f, img.averageLuminosity(delta = 10e-10f)) }
+=======
+		img.setPixel(0, 0, Color(0.5f, 1.0f, 1.50f))
+		img.setPixel(1, 0, Color(50.0f, 100.0f, 150.0f))
+		
+		print(img.averageLuminosity())
+		assertTrue { areClose(10f, img.averageLuminosity()) }
+>>>>>>> origin/main
 	}
 	
 	@Test
@@ -168,5 +168,137 @@ class HDRImageTest {
 			assertTrue { clampPixel.g in 0.0f..1.0f }
 			assertTrue { clampPixel.b in 0.0f..1.0f }
 		}
+	}
+	
+	@Test
+	fun `test writeLDRImage`() {
+		val img = HDRImage(2, 2)
+		img.setPixel(0, 0, Color(1f, 0f, 0f))
+		img.setPixel(1, 0, Color(0f, 1f, 0f))
+		img.setPixel(0, 1, Color(0f, 0f, 1f))
+		img.setPixel(1, 1, Color(1f, 1f, 1f))
+		
+		//write on an output stream
+		val byteOut = ByteArrayOutputStream()
+		val imgOut = img.writeLDRImage(byteOut, "png", 1f)
+		
+		//Read the image from the stream e check  the dimension of the written image and the colors
+		val imgRead = ImageIO.read(ByteArrayInputStream(byteOut.toByteArray()))
+		
+		assertEquals(img.width, imgRead.width)
+		assertEquals(img.height, imgRead.height)
+		//and is operation bit-bit (1 if they are the same else 0) is useful for getRGB format
+		assertEquals(0xFF0000, imgRead.getRGB(0, 0) and 0xFFFFFF)
+		assertEquals(0x00FF00, imgRead.getRGB(1, 0) and 0xFFFFFF)
+		assertEquals(0x0000FF, imgRead.getRGB(0, 1) and 0xFFFFFF)
+		assertEquals(0xFFFFFF, imgRead.getRGB(1, 1) and 0xFFFFFF)
+	}
+	
+	
+	//--- test on parsing utilities ---
+	
+	@Test
+	fun `test readLine`() {
+		val sb = "Hello\nWorld"
+		val line: InputStream = sb.byteInputStream()
+		assertEquals("Hello", readLine(line))
+		assertEquals("World", readLine(line))
+		val exception = assertThrows<InvalidPFMImageFormat> { readLine(line) }
+		assertEquals("Unexpected End of File", exception.message)
+	}
+	
+	@Test
+	fun `test readFloat`() {
+		// 1.0f in little endian = 0x00 0x00 0x80 0x3F
+		//Kotlin use signed byte so 0x80=128, and it is out of range (-128/127), 0x80.toByte()=-128 that is permitted,
+		//ByteArray doesn't look at the sign so -128 & 128 are equals
+		val bytesLE = byteArrayOf(0x00, 0x00, 0x80.toByte(), 0x3F)
+		val streamLE = ByteArrayInputStream(bytesLE)
+		assertEquals(1f, readFloat(streamLE, LITTLE_ENDIAN), eps)
+		
+		// 1.0f in big endian = 0x3F 0x80 0x00 0x00
+		val bytesBE = byteArrayOf(0x3F, 0x80.toByte(), 0x00, 0x00)
+		val streamBE = ByteArrayInputStream(bytesBE)
+		assertEquals(1f, readFloat(streamBE, BIG_ENDIAN), eps)
+	}
+	
+	@Test
+	fun `test writeFloat`() {
+		val byteOutLE = ByteArrayOutputStream()
+		writeFloat(byteOutLE, 1f, LITTLE_ENDIAN)
+		assertContentEquals(byteArrayOf(0x00, 0x00, 0x80.toByte(), 0x3F), byteOutLE.toByteArray())
+	}
+	
+	
+	@Test
+	fun `test parseImgSize`() {
+		assertEquals(Pair(3, 2), HDRImage.parseImgSize("3 2"))
+		assertThrows(InvalidPFMImageFormat::class.java) {
+			HDRImage.parseImgSize("1 2 3")         // too many args
+		}
+		assertThrows(InvalidPFMImageFormat::class.java) {
+			HDRImage.parseImgSize("-1 2")           // negative dimension
+		}
+		assertThrows(InvalidPFMImageFormat::class.java) {
+			HDRImage.parseImgSize("width height")   // not integers
+		}
+	}
+	
+	
+	// --- test on public factory function ---
+	
+	@Test
+	fun `test parseEndianness`() {
+		assertEquals(BIG_ENDIAN, HDRImage.parseEndianness("1.0"))
+		assertEquals(LITTLE_ENDIAN, HDRImage.parseEndianness("-3.0"))
+		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.parseEndianness("0.0") }
+		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.parseEndianness("ABC") }
+	}
+	
+	@Test
+	fun `test constructor fromPFMStream`() {
+		for (referenceBytes in arrayOf(referenceBE, referenceLE)) {
+			img = HDRImage.fromPFMStream(ByteArrayInputStream(referenceBytes))
+			
+			assertEquals(img.width, 3)
+			assertEquals(img.height, 2)
+			
+			assertTrue(img.getPixel(0, 0).isClose(Color(1.0e1f, 2.0e1f, 3.0e1f)))
+			assertTrue(img.getPixel(1, 0).isClose(Color(4.0e1f, 5.0e1f, 6.0e1f)))
+			assertTrue(img.getPixel(2, 0).isClose(Color(7.0e1f, 8.0e1f, 9.0e1f)))
+			assertTrue(img.getPixel(0, 1).isClose(Color(1.0e2f, 2.0e2f, 3.0e2f)))
+			assertTrue(img.getPixel(0, 0).isClose(Color(1.0e1f, 2.0e1f, 3.0e1f)))
+			assertTrue(img.getPixel(1, 1).isClose(Color(4.0e2f, 5.0e2f, 6.0e2f)))
+			assertTrue(img.getPixel(2, 1).isClose(Color(7.0e2f, 8.0e2f, 9.0e2f)))
+		}
+		val p = "PA"
+		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.fromPFMStream(p.byteInputStream()) }
+	}
+	
+	@Test
+	fun `test equals`() {
+		val img1 = HDRImage(2, 2)
+		val img2 = HDRImage(2, 2)
+		
+		img1.setPixel(0, 0, Color(1f, 0f, 0f))
+		img1.setPixel(1, 0, Color(0f, 1f, 0f))
+		img1.setPixel(0, 1, Color(0f, 0f, 1f))
+		img1.setPixel(1, 1, Color(1f, 1f, 1f))
+		
+		img2.setPixel(0, 0, Color(1f, 0f, 0f))
+		img2.setPixel(1, 0, Color(0f, 1f, 0f))
+		img2.setPixel(0, 1, Color(0f, 0f, 1f))
+		img2.setPixel(1, 1, Color(1f, 1f, 1f))
+		
+		// same image
+		assertEquals(img1, img2)
+		
+		// different dimension
+		assertNotEquals(img1, HDRImage(3, 2))
+		
+		// different pixels
+		val img3 = HDRImage(2, 2)
+		img3.setPixel(0, 0, Color(0f, 0f, 0f))
+		assertNotEquals(img1, img3)
 	}
 }
