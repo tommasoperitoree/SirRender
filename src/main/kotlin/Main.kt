@@ -40,7 +40,7 @@ private fun buildDemoWorld(): World {
 		brdf = DiffuseBRDF(
 			pigment = CheckeredPigment(
 				//color1 = Color.white,
-				color1 = Color(1f, 0.3f, 0f), //arancio
+				color1 = Color(1f, 0.3f, 0f), // orange
 				//color1 = Color(0.8f, 0.05f, 0.2f),
 				color2 = Color.black,
 				numSteps = 5
@@ -238,6 +238,7 @@ class Demo : CliktCommand(
 		
 		val world = buildDemoWorld()
 		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
+		
 		for (frameIndex in 0 until numFrames) {
 			val angle = 90f
 			//val angle = observerAngle + (frameIndex * angleStep)
@@ -474,7 +475,7 @@ class Render : CliktCommand("render") {
 			
 			//Run the ray-tracer
 			
-			val pathTracer = ImageTracer(img, cam)
+			val pathTracer = ImageTracer(img, cam,antialiasing=antialiasing, pcg = PCG())
 			
 			print("Using a path tracer")
 			
