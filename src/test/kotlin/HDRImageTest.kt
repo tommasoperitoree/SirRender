@@ -123,8 +123,8 @@ class HDRImageTest {
 		img.setPixel(0, 0, Color(.5f, 1.0f, 1.5f))
 		img.setPixel(1, 0, Color(50.0f, 100.0f, 150.0f))
 		
-		print(img.averageLuminosity(delta = 10e-10f))
-		assertTrue { areClose(10.0f, img.averageLuminosity(delta = 10e-10f)) }
+		print(img.averageLuminosity(delta =0f))
+		assertTrue { areClose(10.0f, img.averageLuminosity(delta =0f)) }
 	}
 	
 	@Test
