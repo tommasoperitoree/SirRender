@@ -542,3 +542,6 @@ fun main(args: Array<String>) =
 // ./gradlew run --args="animation --width=480 --height=480 --output demo.png --num-frames=72"
 
 // ./gradlew run --args="demo -r -c "Orthogonal" "-f0.01" -w 1280 -h 720 -o src/main/resources/Ortho_demo"
+
+
+//./gradlew run --args="render -r -inp SceneR/cube.txt -w 1280 -f0.5 -h 720 -a 3 -o output"
