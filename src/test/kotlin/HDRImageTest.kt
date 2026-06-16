@@ -119,19 +119,12 @@ class HDRImageTest {
 	@Test
 	fun `test averageLuminosity`() {
 		img = HDRImage(2, 1)
-<<<<<<< HEAD
+
 		img.setPixel(0, 0, Color(.5f, 1.0f, 1.5f))
 		img.setPixel(1, 0, Color(50.0f, 100.0f, 150.0f))
 		
 		print(img.averageLuminosity(delta = 10e-10f))
 		assertTrue { areClose(1.0f, img.averageLuminosity(delta = 10e-10f)) }
-=======
-		img.setPixel(0, 0, Color(0.5f, 1.0f, 1.50f))
-		img.setPixel(1, 0, Color(50.0f, 100.0f, 150.0f))
-		
-		print(img.averageLuminosity())
-		assertTrue { areClose(10f, img.averageLuminosity()) }
->>>>>>> origin/main
 	}
 	
 	@Test
