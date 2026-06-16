@@ -24,6 +24,7 @@ enum class Keyword(val lexeme: String) {
 	GROUND("ground"),
 	MATERIAL("material"),
 	PLANE("plane"),
+	CUBE("cube"),
 	SPHERE("sphere"),
 	DIFFUSE("diffuse"),
 	SPECULAR("specular"),

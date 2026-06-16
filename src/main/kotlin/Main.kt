@@ -447,8 +447,10 @@ class Render : CliktCommand("render") {
 			val sceneStream = SceneInputStream(reader)
 			parseScene(sceneStream)
 		}
-		val cameraDir = "${parsedScene.camera}"
-		File(cameraDir).mkdirs() // create output dir if it doesn't exist
+		
+		val sceneName = inputFile.nameWithoutExtension
+		
+		File(outputDir).mkdirs()
 		
 		val baseCamera = parsedScene.camera ?: throw IllegalArgumentException("No camera found")
 		
@@ -511,8 +513,8 @@ class Render : CliktCommand("render") {
 			}
 			progressBar.update(totalPixels, force = true)
 			
-			val baseName = "Scene"
-			val pfmPath = "$baseCamera/$baseName.pfm"
+			val baseName = "${inputFile.nameWithoutExtension}"
+			val pfmPath = "$outputDir/$baseName.pfm"
 			img.writePFMFile(pfmPath)
 			println("Saved PFM → $pfmPath")
 			
@@ -521,7 +523,7 @@ class Render : CliktCommand("render") {
 				//img.normalizeImage(factor)
 				img.clampImage()
 				
-				val pngPath = "$cameraDir/$baseName.png"
+				val pngPath = "$outputDir/$baseName.png"
 				FileOutputStream(pngPath).use { img.writeLDRImage(it, "png", gamma) }
 				println("Saved PNG → $pngPath")
 			}

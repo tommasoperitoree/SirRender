@@ -260,6 +260,21 @@ fun parseSphere(s: SceneInputStream, scene: Scene): Sphere {
 	
 }
 
+fun parseCube(s: SceneInputStream, scene: Scene): Cube {
+	expectSymbol(s, '(')
+	
+	val materialName = expectIdentifier(s)
+	val material = scene.materials[materialName] ?:
+	//We raise the exception here because input_file is pointing to the end of the wrong identifier
+	throw GrammarError(s.location, "Unknown material $materialName")
+	
+	expectSymbol(s, ',')
+	val transformation = parseTransformation(s, scene)
+	expectSymbol(s, ')')
+	
+	return Cube(transformation = transformation, material = material)
+	
+}
 /** Parse a [Plane] with its material and transformation from input stream [s]. */
 fun parsePlane(s: SceneInputStream, scene: Scene): Plane {
 	
@@ -329,6 +344,8 @@ fun parseScene(s: SceneInputStream, variables: Map<String, Float> = emptyMap()):
 			}
 			
 			Keyword.SPHERE -> scene.world.addShape(parseSphere(s, scene))
+			
+			Keyword.CUBE-> scene.world.addShape(parseCube(s,scene))
 			
 			Keyword.PLANE -> scene.world.addShape(parsePlane(s, scene))
 			
