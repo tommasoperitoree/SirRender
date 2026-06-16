@@ -63,6 +63,11 @@ private fun buildDemoWorld(): World {
 		)
 	)
 	
+	val cubeMaterial = Material(
+		brdf = DiffuseBRDF(
+			UniformPigment(Color(0f, 0f, 1f))
+		)
+	)
 	val mirrorMaterial = Material(
 		brdf = SpecularBRDF(
 			UniformPigment(Color(0.753f, 0.753f, 0.753f))
@@ -97,7 +102,7 @@ private fun buildDemoWorld(): World {
 			skyMaterial
 		)
 	)
-	*/
+	
 	
 	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
@@ -126,6 +131,13 @@ private fun buildDemoWorld(): World {
 				Vec(0.2f, 0.2f, 0.2f)
 			) * translation(Vec(-6f, -1f, 1f)),
 			mirrorMaterial
+		)
+	)
+	*/
+	world.addShape(
+		Cube(
+			scaling(Vec(0.2f, 0.2f, 0.2f)) * translation(Vec(-3f, -1f, 1f)),
+			cubeMaterial
 		)
 	)
 	return world

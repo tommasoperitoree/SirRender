@@ -1,10 +1,34 @@
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 class ShapesTest {
+	
+	//Test sphere
 	val sphere = Sphere()
 	val t = Vec(10f, 0f, 0f)
 	val sphere1 = Sphere(translation(t))
+	val s = Vec(10f, 10f, 10f)
+	val sphere2 = Sphere(scaling(s))
+	
+	@Test
+	fun `test sphereNormal`() {
+		val normal = Normal(1f, 0f, 0f)
+		val ray = Ray(Point(5f, 0f, 0f), -vecX())
+		assertEquals(sphereNormal(Point(1f, 0f, 0f), ray.dir), normal)
+		assertTrue(sphereNormal(Point(-1f, 0f, 0f), ray.dir).isClose(normal))
+	}
+	
+	@Test
+	fun `test spherePointToUV`() {
+		val point1 = Point(1f, 0f, 0f)
+		val uv1 = Vec2d(0f, 0.5f)
+		val point2 = Point(0.577f, 0.577f, 0.577f) //punto sulla diagonale primo quadrante
+		val uv2 = Vec2d(0.125f, 0.30422f)
+		
+		assertTrue(spherePointToUV(point1).isClose(uv1))
+		assertTrue(spherePointToUV(point2).isClose(uv2))
+	}
 	
 	@Test
 	fun `test rayIntersection z direction`() {
@@ -25,7 +49,7 @@ class ShapesTest {
 		
 		val ray2 = Ray(Point(3f, 0f, 0f), -vecX())
 		val hit2 = sphere.rayIntersection(ray2)
-		val uv2 = Vec2d(1 / 4f, 1 / 2f)
+		val uv2 = Vec2d(0f, 1 / 2f)
 		
 		assertTrue(
 			hit2?.worldPoint?.isClose(Point(1f, 0f, 0f)) ?: false &&
@@ -56,23 +80,37 @@ class ShapesTest {
 		
 		val ray2 = Ray(Point(13f, 0f, 0f), -vecX())
 		val hit2 = sphere1.rayIntersection(ray2)
-		val uv2 = Vec2d(1 / 4f, 1 / 2f)
+		val uv2 = Vec2d(0f, 1 / 2f)
 		
 		
 		assertTrue(
 			hit?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
 					hit.normal.isClose(vecZ().toNormal()) &&
-					hit.surfacePoint.isClose(uv)&&
-					areClose(hit.t,1f)
+					hit.surfacePoint.isClose(uv) &&
+					areClose(hit.t, 1f)
 		)
 		
 		assertTrue(
 			hit2?.worldPoint?.isClose(Point(11f, 0f, 0f)) ?: false &&
 					hit2.normal.isClose(vecX().toNormal()) &&
 					hit2.surfacePoint.isClose(uv2) &&
-					areClose(hit2.t,2f)
+					areClose(hit2.t, 2f)
 		)
 		
+	}
+	
+	@Test
+	fun `test scaling rayIntersection`() {
+		val ray = Ray(Point(0f, 0f, 15f), -vecZ())
+		val hit = sphere2.rayIntersection(ray)
+		val uv = Vec2d(0f, 0f)
+		//if there is a scaling remember always to normalize()
+		assertTrue(
+			hit?.worldPoint?.isClose(Point(0f, 0f, 10f)) ?: false &&
+					hit.normal.normalize().isClose(vecZ().toNormal()) &&
+					hit.surfacePoint.isClose(uv) &&
+					areClose(hit.t, 5f)
+		)
 	}
 	
 	/**
@@ -94,5 +132,44 @@ class ShapesTest {
 			hit2?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
 					hit2.normal.isClose(vecZ().toNormal())
 		)
+	}
+	
+	
+	//test Plane
+	
+	val groundMaterial = Material(
+		brdf = DiffuseBRDF(
+			pigment = CheckeredPigment(
+				color1 = Color.white,
+				color2 = Color.black,
+				numSteps = 2
+			)
+		)
+	)
+	val plane = Plane(material = groundMaterial)
+	
+	
+	@Test
+	fun `test intersaction`() {
+		val s = scaling(Vec(-1f, 1f, 1f)) //invert on x axis
+		val planes = Plane(s, groundMaterial)
+		val point = Point(0.25f, 0.25f)
+		val point1 = Point(0.25f, 0.75f)
+		
+		val uvPlane = plane.planePointToUV(point)
+		val uvPlane1 = plane.planePointToUV(point1)
+		
+		//to the plane with transformation we need to pass the inverse transformation on the point
+		val localPoint = planes.transformation.inverse() * point
+		val localPoint1 = planes.transformation.inverse() * point1
+		val uvPlanes = planes.planePointToUV(localPoint)
+		val uvPlanes1 = planes.planePointToUV(localPoint1)
+		
+		//without scaling
+		assertEquals(plane.material.brdf.pigment.getColor(uvPlane), Color.white)
+		assertEquals(plane.material.brdf.pigment.getColor(uvPlane1), Color.black)
+		//with scaling
+		assertEquals(planes.material.brdf.pigment.getColor(uvPlanes1), Color.white)
+		assertEquals(planes.material.brdf.pigment.getColor(uvPlanes), Color.black)
 	}
 }
