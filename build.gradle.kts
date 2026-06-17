@@ -8,7 +8,6 @@ group = "sirrender"
 version = "v0.3.0"
 
 // --- SECURITY FIX ---
-// This block intercepts all dependencies across all configurations (including Dokka)
 configurations.all {
 	resolutionStrategy.eachDependency {
 		if (requested.group == "com.fasterxml.jackson.core" && requested.name == "jackson-core") {
@@ -22,7 +21,6 @@ repositories {
 	mavenCentral()
 }
 
-
 dependencies {
 	testImplementation(kotlin("test"))
 	testImplementation(libs.junit.jupiter)
@@ -31,7 +29,7 @@ dependencies {
 }
 
 kotlin {
-	jvmToolchain(25)
+	jvmToolchain(21)   // ← 25 is non-LTS preview, use 21
 }
 
 application {
@@ -40,4 +38,17 @@ application {
 
 tasks.test {
 	useJUnitPlatform()
+}
+
+// --- Dokka ---
+dokka {
+	moduleName = "SirRender"
+	dokkaSourceSets.main {
+		includes.from("docs/module.md")   // ← landing page
+		sourceLink {
+			localDirectory.set(file("src/main/kotlin"))
+			remoteUrl.set(uri("https://github.com/tommasoperitoree/SirRender/blob/main/src/main/kotlin"))
+			remoteLineSuffix.set("#L")    // links to specific lines on GitHub
+		}
+	}
 }
