@@ -215,3 +215,59 @@ internal fun parseImgSize(line: String): Pair<Int, Int>
  */
 fun validCoordinates(x: Int, y: Int): Boolean
 ```
+---
+
+## 🌍 Scene File Format
+
+In addition to the built-in demo, SirRender can render a scene described entirely in a `.txt` file.
+
+### Supported Shapes
+
+- `Plane`
+- `Sphere`
+- `Cube`
+
+### Syntax Rules
+
+- Triplets (vectors and colors) must be wrapped in **round parentheses** `(...)`, e.g. `(0, 0, 1)`. Do **not** use `<`, `[`, or `{`.
+- To render large resolutions (e.g. `1280x720`), the camera's aspect ratio must be explicitly set to match, i.e. `1.777` (`16:9`).
+
+### Defining Materials
+
+A material is declared as:
+
+material <name>(
+
+<brdf>(<pigment>(<color>))
+
+)
+
+- **`brdf`**: `diffuse` or `specular`
+- **`pigment`**: `uniform` or `checkered`
+- **`color`**: an RGB triplet in parentheses, e.g. `(0, 0, 0)`
+
+An emitted radiance can optionally be added as a second pigment, after a comma:
+
+material sky_material(
+
+diffuse(uniform((0, 0, 0))),
+
+uniform((3.5, 7.5, 10))
+
+)
+
+---
+The BRDF (*Bidirectional Reflectance Distribution Function*) determines whether a surface behaves like a matte object, a perfect mirror, or a glossy material when struck by a light ray.
+
+| BRDF Type   | Type | Kotlin Class | Main Parameters | Description and Usage |
+| :--- | :--- | :--- | :--- |
+| **Diffuse** | `DiffuseBRDF` | `pigment: Pigment` | Implements ideal diffuse reflection with uniform scattering.<br>Perfect for matte materials like the ground, walls, or sky. |
+| **Specular** | `SpecularBRDF` | `pigment: Pigment` | Implements ideal specular reflection based on geometric optics.<br>Used for perfect mirrors and polished metallic surfaces. |
+### Available Pigment Types
+
+The `Pigment` defines the surface albedo (the intrinsic color) before any light reflection calculations are performed by the BRDF.
+
+| Pigment Type | Kotlin Class | Main Parameters | Description and Usage                                                                                                                                                  |
+| :--- | :--- | :--- |:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Uniform** | `UniformPigment` | `color: Color` | A solid color, perfectly homogeneous and constant across every point of the geometric shape's surface.                                                                 |
+| **Checkered** | `CheckeredPigment` | `color1: Color`<br>`color2: Color`<br>`numSteps: Int` | Generates a procedural checkered pattern alternating between the two provided colors. <br/>The `numSteps` parameter controls the frequency and density of the grid squares. |

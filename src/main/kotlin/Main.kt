@@ -513,7 +513,7 @@ class Render : CliktCommand("render") {
 			}
 			progressBar.update(totalPixels, force = true)
 			
-			val baseName = "${inputFile.nameWithoutExtension}"
+			val baseName = inputFile.nameWithoutExtension
 			val pfmPath = "$outputDir/$baseName.pfm"
 			img.writePFMFile(pfmPath)
 			println("Saved PFM → $pfmPath")
