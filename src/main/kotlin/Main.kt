@@ -103,8 +103,8 @@ private fun buildDemoWorld(): World {
 			skyMaterial
 		)
 	)
-	
-	
+
+
 	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
 		Sphere(
@@ -114,7 +114,7 @@ private fun buildDemoWorld(): World {
 			material = sunMaterial
 		)
 	)
-	
+
 	//first sphere in (-2,1,1) red
 	world.addShape(
 		Sphere(
@@ -124,7 +124,7 @@ private fun buildDemoWorld(): World {
 			material = sphereMaterial
 		)
 	)
-	
+
 	//second sphere in (-4,-1,1) silver that reflect the first sphere
 	world.addShape(
 		Sphere(
@@ -496,7 +496,8 @@ class Render : CliktCommand("render") {
 			)
 			
 			// Inserisci questo in Render:
-			val samplesPerPixel = if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
+			val samplesPerPixel =
+				if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
 			val totalPixels = img.width.toLong() * img.height.toLong()
 			val totalSamples = totalPixels * samplesPerPixel
 			val progressBar = ProgressBar(totalSamples)
@@ -513,7 +514,7 @@ class Render : CliktCommand("render") {
 			}
 			progressBar.update(totalPixels, force = true)
 			
-			val baseName = inputFile.nameWithoutExtension
+			val baseName = "inputFile.nameWithoutExtension"
 			val pfmPath = "$outputDir/$baseName.pfm"
 			img.writePFMFile(pfmPath)
 			println("Saved PFM → $pfmPath")
