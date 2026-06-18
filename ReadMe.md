@@ -274,3 +274,36 @@ The `Pigment` defines the surface albedo (the intrinsic color) before any light 
 | :--- | :--- | :--- |:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Uniform** | `UniformPigment` | `color: Color` | A solid color, perfectly homogeneous and constant across every point of the geometric shape's surface.                                                                 |
 | **Checkered** | `CheckeredPigment` | `color1: Color`<br>`color2: Color`<br>`numSteps: Int` | Generates a procedural checkered pattern alternating between the two provided colors. <br/>The `numSteps` parameter controls the frequency and density of the grid squares. |
+
+## The `render` Command
+
+The `render` command loads a 3D scene from a text description file and computes the final image using the Path Tracing algorithm.
+
+### How It Works
+
+1. **Scene Parsing:** Reads the text file via `SceneInputStream` to reconstruct the `World` geometry, materials, and camera.
+2. **Camera Init:** Dynamically identifies the camera type (`is OrthogonalCamera` or `is PerspectiveCamera`) and inherits its original physical properties.
+3. **Rendering:** The `ImageTracer` fires rays into the scene via `fireAllRays`, while the `PathTracer` computes global illumination, reflections, and shadows using a random `PCG` generator.
+4. **Saving:** Exports the high-dynamic-range (HDR) image as a `.pfm` file. If requested, it applies tone-mapping to save a standard `.png` file as well.
+
+### Terminal Usage Example
+
+To launch a high-resolution render with an advanced level of antialiasing, run:
+
+```bash
+./gradlew run --args="render -r -inp SceneR/sceneFile.txt -w 1280 -f0.5 -h 720 -a 5 -o output"
+```
+| Option (Flag) | Type | Description | Default |
+| :--- | :--- | :--- | :--- |
+| `--input-file` (`-inp`) | `File` | Path to the 3D scene file. | `SceneR/sceneFile.txt` |
+| `--width` (`-w`) | `Int` | Image width in pixels. | `640` |
+| `--height` (`-h`) | `Int` | Image height in pixels. | `480` |
+| `--render` (`-r`) | *Flag* | If present, also exports to `.png`. | `false` |
+| `--antialiasing` (`-a`) | `Int` | Samples per pixel ($a^2$ rays)\footnote{The value is squared: e.g., -a 5 traces 25 rays per pixel.}. | `1` |
+| `--output-dir` (`-o`) | `String`| Target output directory for files. | `./src/main/resources/frames` |
+| `--factor` (`-f`) | `Float` | Luminosity scale (tone-mapping). | `0.2f` |
+| `--gamma` (`-g`) | `Float` | Gamma correction for the PNG file. | `1f` |
+| `--num-frames` (`-n`) | `Int` | Total number of frames to generate. | `1` |
+| `--observer-angle` (`-i`)| `Float` | Starting observer angle in degrees. | `0f` |
+| `--initState` | `ULong` | State seed for the PCG generator. | `42` |
+| `--initSeq` | `ULong` | Sequence seed for the PCG generator. | `54` |
