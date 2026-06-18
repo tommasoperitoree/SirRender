@@ -294,7 +294,7 @@ To launch a high-resolution render with an advanced level of antialiasing, run:
 ./gradlew run --args="render -r -inp SceneR/sceneFile.txt -w 1280 -f0.5 -h 720 -a 5 -o output"
 ```
 | Option (Flag) | Type | Description | Default |
-| :----- | :--- | :--- | :--- |
+| :------------- | :--- | :--- | :--- |
 | `--input-file` (`-inp`) | `File` | Path to the 3D scene file. | `SceneR/sceneFile.txt` |
 | `--width` (`-w`) | `Int` | Image width in pixels. | `640` |
 | `--height` (`-h`) | `Int` | Image height in pixels. | `480` |
