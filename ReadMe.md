@@ -258,11 +258,14 @@ uniform((3.5, 7.5, 10))
 
 ---
 The BRDF (*Bidirectional Reflectance Distribution Function*) determines whether a surface behaves like a matte object, a perfect mirror, or a glossy material when struck by a light ray.
+### Available BRDF Types
 
-| BRDF Type   | Type | Kotlin Class | Main Parameters | Description and Usage |
-| :--- | :--- | :--- | :--- |
-| **Diffuse** | `DiffuseBRDF` | `pigment: Pigment` | Implements ideal diffuse reflection with uniform scattering.<br>Perfect for matte materials like the ground, walls, or sky. |
-| **Specular** | `SpecularBRDF` | `pigment: Pigment` | Implements ideal specular reflection based on geometric optics.<br>Used for perfect mirrors and polished metallic surfaces. |
+The BRDF (*Bidirectional Reflectance Distribution Function*) determines whether a surface behaves like a matte object, a perfect mirror, or a glossy material when struck by a light ray.
+
+| BRDF Type | Kotlin Class | Main Parameters | Description and Usage                                                                                                                                                        |
+| :--- | :--- | :--- |:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Diffuse** | `DiffuseBRDF` | `pigment: Pigment` | Implements ideally diffuse reflection. Light is reflected uniformly in all directions of the hemisphere.<br/> It is ideal for matte materials like the ground, walls, or the sky. |
+| **Specular** | `SpecularBRDF` | `pigment: Pigment` | Implements ideal specular reflection. Rays are reflected sharply following the law of geometric optics.<br/> It is used for perfect mirrors and chromed metallic surfaces.        |
 ### Available Pigment Types
 
 The `Pigment` defines the surface albedo (the intrinsic color) before any light reflection calculations are performed by the BRDF.
