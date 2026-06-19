@@ -2,7 +2,7 @@ float clock(150)
 
         material sky_material(
         		diffuse(uniform((0, 0, 0))),
-        		uniform((0.35, 0.75, 1))
+        		uniform((0.7, 1.5, 2))
         	)
 
         material ground_material(
@@ -17,10 +17,15 @@ float clock(150)
             uniform((0, 0, 0))
         )
 
+        //mirror sphere
+        material mirror_material(
+            specular(uniform((0.3,0.3,0.3))),
+            uniform((0,0,0))
+        )
 
         sphere(sky_material, scaling((50,50,50)))
         plane (ground_material, identity)
-
+        sphere(mirror_material,scaling((0.5,0.5,0.5))*translation((-3,3,0)))
         sphere(sphere_material, translation((0, 0, 1)))
 
         camera(perspective, rotation_z(30) * translation((-4, 0, 1)), 1.777, 2.0)

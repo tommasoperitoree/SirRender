@@ -490,8 +490,8 @@ class Render : CliktCommand("render") {
 				parsedScene.world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 2,
-				maxRayDepth = 5,
+				numRays = 7,
+				maxRayDepth = 10,
 				russianRouletteLimit = 4
 			)
 			
@@ -512,7 +512,7 @@ class Render : CliktCommand("render") {
 				
 				color
 			}
-			progressBar.update(totalPixels, force = true)
+			//progressBar.update(totalPixels, force = true)
 			
 			val baseName = "inputFile.nameWithoutExtension"
 			val pfmPath = "$outputDir/$baseName.pfm"
