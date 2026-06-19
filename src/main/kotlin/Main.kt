@@ -495,7 +495,6 @@ class Render : CliktCommand("render") {
 				russianRouletteLimit = 4
 			)
 			
-			// Inserisci questo in Render:
 			val samplesPerPixel =
 				if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
 			val totalPixels = img.width.toLong() * img.height.toLong()
