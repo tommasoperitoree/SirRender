@@ -22,6 +22,7 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.imageio.ImageTypeSpecifier
 import javax.imageio.metadata.IIOMetadataNode
+import kotlin.math.sqrt
 
 
 /** Create elements of the demo scene. */
@@ -38,7 +39,7 @@ private fun buildDemoWorld(): World {
 		brdf = DiffuseBRDF(
 			pigment = CheckeredPigment(
 				//color1 = Color.white,
-				color1 = Color(1f, 0.3f, 0f), // orange
+				color1 = Color(1f, 0.3f, 0f), //arancio
 				//color1 = Color(0.8f, 0.05f, 0.2f),
 				color2 = Color.black,
 				numSteps = 5
@@ -52,7 +53,7 @@ private fun buildDemoWorld(): World {
 		brdf = DiffuseBRDF(
 			pigment = UniformPigment(Color(1.0f, 0.4f, 0f))
 		),
-		emittedRadiance = UniformPigment(Color(1.0f, 0.4f,0f))
+		emittedRadiance = UniformPigment(Color(10.0f, 4f, 0f))
 	)
 	
 	//RED
@@ -62,6 +63,11 @@ private fun buildDemoWorld(): World {
 		)
 	)
 	
+	val cubeMaterial = Material(
+		brdf = DiffuseBRDF(
+			UniformPigment(Color(0f, 0f, 1f))
+		)
+	)
 	val mirrorMaterial = Material(
 		brdf = SpecularBRDF(
 			UniformPigment(Color(0.753f, 0.753f, 0.753f))
@@ -70,7 +76,15 @@ private fun buildDemoWorld(): World {
 	
 	//Pavement
 	world.addShape(Plane(transformation = Transformation(), groundMaterial))
+	//use a sphere instead of two plane for the sky
+	world.addShape(
+		Sphere(
+			transformation = scaling(Vec(50f, 50f, 50f)),
+			material = skyMaterial
+		)
+	)
 	
+	/*
 	//Sky blu, rotate it to prevent the sky and the ground overlapping, the second plane is put in order to cover all the angles
 	world.addShape(
 		Plane(
@@ -89,7 +103,7 @@ private fun buildDemoWorld(): World {
 		)
 	)
 	
-	
+	*/
 	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
 		Sphere(
@@ -109,7 +123,7 @@ private fun buildDemoWorld(): World {
 			material = sphereMaterial
 		)
 	)
-	
+	/*
 	//second sphere in (-4,-1,1) silver that reflect the first sphere
 	world.addShape(
 		Sphere(
@@ -119,6 +133,13 @@ private fun buildDemoWorld(): World {
 			mirrorMaterial
 		)
 	)
+	
+	world.addShape(
+		Cube(
+			scaling(Vec(0.2f, 0.2f, 0.2f)) * translation(Vec(-3f, -1f, 1f)),
+			cubeMaterial
+		)
+	)*/
 	return world
 }
 
@@ -208,6 +229,9 @@ class Demo : CliktCommand(
 	val initSeq: ULong by option(
 		"--initSeq", help = "Initial sequence number for random generation"
 	).ulong().default(54uL)
+	val antialiasing: Int by option(
+		"--antialiasing", "-a", help = "Antialiasing"
+	).int().default(2)
 	
 	override fun run() {
 		
@@ -216,15 +240,15 @@ class Demo : CliktCommand(
 		
 		val world = buildDemoWorld()
 		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
-		
 		for (frameIndex in 0 until numFrames) {
-			val angle = observerAngle + (frameIndex * angleStep)
+			val angle = 15f
+			//val angle = observerAngle + (frameIndex * angleStep)
 			val angleNNN = "%03d".format(frameIndex)
 			
 			val img = HDRImage(width, height)
 			
 			val screenCenter = Vec(-1f, 0f, 0f)
-			val verticalAngle = 30f // angle to rotate above plane (around y-axis)
+			val verticalAngle = 10f // angle to rotate above plane (around y-axis)
 			// concatenation of transformations: first move away from scene,
 			// then rotate upwards around y-axis, and finally gradually move around the scene (z-axis)
 			val camTransformation = rotationZ(angle) *
@@ -237,9 +261,9 @@ class Demo : CliktCommand(
 				else -> throw IllegalStateException("No camera found for $camera.")
 			}
 			
-			// Run the ray-tracer
-			
-			val pathTracer = ImageTracer(img, cam)
+			//Run the ray-tracer
+			println("Starting render...")
+			val pathTracer = ImageTracer(img, cam,antialiasing=antialiasing, pcg = PCG())
 			
 			print("Using a path tracer")
 			
@@ -247,15 +271,16 @@ class Demo : CliktCommand(
 				world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 15,
-				maxRayDepth = 10,
+				numRays = 8,
+				maxRayDepth = 6,
 				russianRouletteLimit = 4
 			)
 			
-			
 			// Run the ray-tracer with ProgressBar
+			val samplesPerPixel = if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
 			val totalPixels = img.width.toLong() * img.height.toLong()
-			val progressBar = ProgressBar(totalPixels)
+			val totalSamples = totalPixels * samplesPerPixel
+			val progressBar = ProgressBar(totalSamples)
 			
 			var done = 0L
 			
@@ -269,14 +294,14 @@ class Demo : CliktCommand(
 			}
 			progressBar.update(totalPixels, force = true)
 			
-			val baseName = "demo"
+			val baseName = "Red_sphere&sun"
 			val pfmPath = "$cameraDir/$baseName.pfm"
 			img.writePFMFile(pfmPath)
 			println("Saved PFM → $pfmPath")
 			
 			
 			if (renderImage) {
-				img.normalizeImage(factor)
+				//img.normalizeImage(factor)
 				img.clampImage()
 				
 				val pngPath = "$cameraDir/$baseName.png"
@@ -387,3 +412,5 @@ fun main(args: Array<String>) =
 
 // ./gradlew run --args="demo -w 640 -h 480 -c "Orthogonal" -o demo.png"
 // ./gradlew run --args="animation --width=480 --height=480 --output demo.png --num-frames=72"
+
+// ./gradlew run --args="demo -r -c "Orthogonal" "-f0.01" -w 1280 -h 720 -o src/main/resources/Ortho_demo"

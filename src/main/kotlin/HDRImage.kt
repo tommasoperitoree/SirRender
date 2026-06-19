@@ -100,7 +100,7 @@ data class HDRImage(
 		for (pix in pixels) {
 			sum += log10(delta + pix.luminosity())
 		}
-		return 10.0.pow(sum / pixels.size).toFloat()
+		return (10.0).pow(sum / pixels.size).toFloat()
 	}
 	
 	/**
