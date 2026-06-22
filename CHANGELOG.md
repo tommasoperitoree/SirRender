@@ -1,14 +1,17 @@
-# Unrelease 
+# Unreleased
+
 - Implement cube shape
-- Implement antialising algorithm 
+- Implement antialiasing algorithm
 
 # Version 0.3.0
--*Breaking change*: Implement path tracer method in demo
-- Production of first photorealistic image 
+
+- *Breaking change*: Implement path tracer method in demo
+- Production of first photorealistic image
 
 # Version 0.2.0
 
-- *Breaking change*: Implement the `demo` and the `animation` command with CLI Interface through `Clickt` Kotlin Library [#4](https://github.com/tommasoperitoree/SirRender/pull/4)
+- *Breaking change*: Implement the `demo` and the `animation` command with CLI Interface through `Clickt` Kotlin
+  Library [#4](https://github.com/tommasoperitoree/SirRender/pull/4)
 - Fix an issue with the vertical order of the images [#5](https://github.com/tommasoperitoree/SirRender/pull/5)
 
 # Version 0.1.0

@@ -39,7 +39,21 @@ data class Transformation(
 	 */
 	fun isConsistent(): Boolean = invm.isInverseOf(m)
 	
+	fun isClose(other: Transformation): Boolean {
+		return this.m.isClose(other.m)
+	}
 	
+	companion object {
+		
+		fun identity() = HomogMatr4x4(
+			floatArrayOf(
+				1f, 0f, 0f, 0f,
+				0f, 1f, 0f, 0f,
+				0f, 0f, 1f, 0f,
+				0f, 0f, 0f, 1f
+			)
+		)
+	}
 	// --- Operations ---
 	
 	/**
