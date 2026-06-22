@@ -22,12 +22,18 @@ import core.PathTracer
 import core.PerspectiveCamera
 import core.ProgressBar
 import core.World
+import geometry.Sphere
+import materials.CheckeredPigment
 import materials.Color
+import materials.DiffuseBRDF
 import materials.HDRImage
+import materials.Material
+import materials.UniformPigment
 import math.PCG
 import math.Vec
 import math.rotationY
 import math.rotationZ
+import math.scaling
 import math.translation
 import parsing.Scene
 import parsing.SceneInputStream
@@ -99,10 +105,10 @@ class Demo : CliktCommand(
 	
 	val width: Int by option(
 		"--width", "-w", help = "Image width in pixels"
-	).int().default(640)
+	).int().default(1280)
 	val height: Int by option(
 		"--height", "-h", help = "Image height in pixels"
-	).int().default(480)
+	).int().default(720)
 	val camera: String by option(
 		"--camera", "-c", help = "Camera type (projection): Orthogonal or Perspective"
 	).choice("Orthogonal", "Perspective", ignoreCase = true).default("Perspective")
@@ -182,7 +188,7 @@ class Demo : CliktCommand(
 			
 			color
 		}
-		progressBar.update(totalPixels, force = true)
+		
 		
 		// Create a safe, sortable timestamp (e.g., 2026-06-22_16-16-33)
 		val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
@@ -209,7 +215,26 @@ class Demo : CliktCommand(
 private fun buildDemoWorld(): World {
 	
 	val world = World()
+	val scale = 1 / 10f
+	val scaling = scaling(Vec(scale, scale, scale))
+	val coords = listOf(-0.5f, 0.5f)
 	
+	val sphere_material= Material(
+		brdf = DiffuseBRDF(UniformPigment(Color.white)),
+		CheckeredPigment(Color.white,Color(1f,1f,0f),4)
+	)
+	val sphere_material1= Material(
+		brdf = DiffuseBRDF(UniformPigment(Color.black)),
+		UniformPigment(Color(1f,0f,0f))
+	)
+	
+	// spheres in every vertex of a cube centered in origin with edge 1, scaled 1/10
+	for (x in coords) for (y in coords) for (z in coords)
+		world.addShape(Sphere(translation(Vec(x, y, z)) * scaling,sphere_material))
+	
+	// two more spheres in middle of two faces, gives asymmetry to scene
+	world.addShape(Sphere(translation(Vec(0f, 0f, -0.5f)) * scaling,sphere_material1))
+	world.addShape(Sphere(translation(Vec(0f, 0.5f, 0f)) * scaling,sphere_material1))
 	
 	
 	return world
