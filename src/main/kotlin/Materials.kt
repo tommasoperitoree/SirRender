@@ -128,7 +128,7 @@ class DiffuseBRDF(
 		return Ray(
 			intPoint,
 			e1 * cos(phi) * sinTheta + e2 * sin(phi) * sinTheta + e3 * cosTheta,
-			1e-5f,
+			1e-3f,
 			Float.POSITIVE_INFINITY,
 			depth
 		)

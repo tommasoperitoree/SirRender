@@ -3,7 +3,7 @@ class ImageTracer(
 	val image: HDRImage,
 	val camera: Camera,
 	val antialiasing: Int,
-	val pcg:PCG
+	val pcg: PCG
 ) {
 	
 	/**
@@ -12,11 +12,11 @@ class ImageTracer(
 	 * the pixel boundaries (defaulting to 0.5 for the center).
 	 *
 	 */
-	fun fireRay(col: Int, row: Int, uPixel: Float=0.5f, vPixel:Float=0.5f): Ray {
-			val u = (col + uPixel) / image.width
-			val v = 1f - (row + vPixel) / image.height
-			return camera.fireRay(u, v)
-		}
+	fun fireRay(col: Int, row: Int, uPixel: Float = 0.5f, vPixel: Float = 0.5f): Ray {
+		val u = (col + uPixel) / image.width
+		val v = 1f - (row + vPixel) / image.height
+		return camera.fireRay(u, v)
+	}
 	
 	
 	/**

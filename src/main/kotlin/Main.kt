@@ -32,7 +32,7 @@ private fun buildDemoWorld(): World {
 	
 	val skyMaterial = Material(
 		brdf = DiffuseBRDF(pigment = UniformPigment(Color())),
-		emittedRadiance = UniformPigment(Color(0.35f, 0.75f, 1.0f))
+		emittedRadiance = UniformPigment(Color(3.5f, 7.5f, 10f))
 	)
 	
 	val groundMaterial = Material(
@@ -42,7 +42,7 @@ private fun buildDemoWorld(): World {
 				color1 = Color(1f, 0.3f, 0f), //arancio
 				//color1 = Color(0.8f, 0.05f, 0.2f),
 				color2 = Color.black,
-				numSteps = 5
+				numSteps = 15
 			)
 			//pigment = UniformPigment(Color(1f, 0.3f, 0f))
 		)
@@ -53,7 +53,7 @@ private fun buildDemoWorld(): World {
 		brdf = DiffuseBRDF(
 			pigment = UniformPigment(Color(1.0f, 0.4f, 0f))
 		),
-		emittedRadiance = UniformPigment(Color(10.0f, 4f, 0f))
+		emittedRadiance = UniformPigment(Color(30.0f, 12f, 0f))
 	)
 	
 	//RED
@@ -77,6 +77,7 @@ private fun buildDemoWorld(): World {
 	//Pavement
 	world.addShape(Plane(transformation = Transformation(), groundMaterial))
 	//use a sphere instead of two plane for the sky
+	
 	world.addShape(
 		Sphere(
 			transformation = scaling(Vec(50f, 50f, 50f)),
@@ -102,44 +103,41 @@ private fun buildDemoWorld(): World {
 			skyMaterial
 		)
 	)
-	
 	*/
 	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
 		Sphere(
 			transformation = scaling(
-				Vec(0.3f, 0.3f, 0.3f)
-			) * translation(Vec(-0.4f, 0f, 5f)),
+				Vec(0.8f, 0.8f, 0.8f)
+			) * translation(Vec(0f, 0f, 5f)),
 			material = sunMaterial
 		)
 	)
 	
-	//first sphere in (-2,1,1) red
+	//first sphere in (0,0,0) red
 	world.addShape(
 		Sphere(
-			transformation = scaling(
-				Vec(0.4f, 0.4f, 0.4f)
-			) * translation(Vec(-2f, 1f, 1f)),
+			scaling(Vec(0.4f, 0.4f, 0.4f))*translation(Vec (-1f,0f,0f)),
 			material = sphereMaterial
 		)
 	)
-	/*
+	
 	//second sphere in (-4,-1,1) silver that reflect the first sphere
 	world.addShape(
 		Sphere(
 			scaling(
 				Vec(0.2f, 0.2f, 0.2f)
-			) * translation(Vec(-6f, -1f, 1f)),
+			) * translation(Vec(-1f, -6f, 1f)),
 			mirrorMaterial
 		)
 	)
 	
 	world.addShape(
 		Cube(
-			scaling(Vec(0.2f, 0.2f, 0.2f)) * translation(Vec(-3f, -1f, 1f)),
+			scaling(Vec(0.2f, 0.2f, 0.2f)) * translation(Vec(-1f, -3f, 1f)),
 			cubeMaterial
 		)
-	)*/
+	)
 	return world
 }
 
@@ -198,10 +196,10 @@ class Demo : CliktCommand(
 	
 	val width: Int by option(
 		"--width", "-w", help = "Image width in pixels"
-	).int().default(640)
+	).int().default(1280)
 	val height: Int by option(
 		"--height", "-h", help = "Image height in pixels"
-	).int().default(480)
+	).int().default(720)
 	val camera: String by option(
 		"--camera", "-c", help = "Camera type (projection): Orthogonal or Perspective"
 	).choice("Orthogonal", "Perspective", ignoreCase = true).default("Perspective")
@@ -216,7 +214,7 @@ class Demo : CliktCommand(
 	).float().default(0f)
 	val renderImage: Boolean by option(
 		"--render", "-r", help = "Also convert output to PNG"
-	).flag(default = false)
+	).flag(default = true)
 	val factor: Float by option(
 		"--factor", "-f", help = "Luminosity scaling factor"
 	).float().default(0.2f)
@@ -262,22 +260,20 @@ class Demo : CliktCommand(
 			}
 			
 			//Run the ray-tracer
-			println("Starting render...")
-			val pathTracer = ImageTracer(img, cam,antialiasing=antialiasing, pcg = PCG())
-			
-			print("Using a path tracer")
+			val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
 			
 			val renderer = PathTracer(
 				world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 8,
-				maxRayDepth = 6,
-				russianRouletteLimit = 4
+				numRays = 10,
+				maxRayDepth = 5,
+				russianRouletteLimit = 3
 			)
 			
 			// Run the ray-tracer with ProgressBar
-			val samplesPerPixel = if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
+			val samplesPerPixel =
+				if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
 			val totalPixels = img.width.toLong() * img.height.toLong()
 			val totalSamples = totalPixels * samplesPerPixel
 			val progressBar = ProgressBar(totalSamples)
@@ -292,16 +288,16 @@ class Demo : CliktCommand(
 				
 				color
 			}
-			progressBar.update(totalPixels, force = true)
+			renderer.printProfiling()
+			//progressBar.update(totalPixels, force = true)
 			
-			val baseName = "Red_sphere&sun"
+			val baseName = "demo"
 			val pfmPath = "$cameraDir/$baseName.pfm"
 			img.writePFMFile(pfmPath)
 			println("Saved PFM → $pfmPath")
 			
 			
 			if (renderImage) {
-				//img.normalizeImage(factor)
 				img.clampImage()
 				
 				val pngPath = "$cameraDir/$baseName.png"
