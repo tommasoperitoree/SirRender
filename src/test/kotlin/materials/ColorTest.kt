@@ -1,0 +1,52 @@
+package materials
+
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
+
+class ColorTest {
+	
+	val colorA = Color(1.0f, 2.0f, 3.0f)
+	val colorB = Color(5.0f, 6.0f, 7.0f)
+	var colorC = Color()
+	val scalar = 3.0f
+	
+	@Test
+	fun `test sum of two Colors`() {
+		colorC = colorA + colorB
+		Assertions.assertTrue(colorC.isClose(Color(6.0f, 8.0f, 10.0f)))
+	}
+	
+	@Test
+	fun `test multiplication of Color by scalar`() {
+		colorC = colorA * scalar
+		Assertions.assertTrue(colorC.isClose(Color(3.0f, 6.0f, 9.0f)))
+	}
+	
+	@Test
+	fun `test multiplication of Color by Color`() {
+		colorC = colorA * colorB
+		Assertions.assertTrue(colorC.isClose(Color(5.0f, 12.0f, 21.0f)))
+	}
+	
+	@Test
+	fun `test isColorClose function`() {
+		Assertions.assertFalse(colorA.isClose(Color(11.0f, 2.0f, 3.0f)))
+	}
+	
+	@Test
+	fun `test luminosity`() {
+		val col1 = Color(1.0f, 2.9f, 3.0f)
+		val col2 = Color(9.0f, 5.0f, 5.1f)
+		
+		Assertions.assertTrue(areClose(col1.luminosity(), 2.0f))
+		Assertions.assertTrue(areClose(col2.luminosity(), 7.0f))
+	}
+	
+	// --- Test default data class function overriding ---
+	
+	@Test
+	fun `test equals`() {
+		Assertions.assertFalse(colorA == colorB)
+		Assertions.assertEquals(colorA, Color(1f, 2f, 3f))
+	}
+}

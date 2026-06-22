@@ -1,0 +1,128 @@
+package parsing
+
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+
+
+class LexerTest {
+	
+	/** Set of test of [SceneInputStream] **/
+	@Test
+	fun `test SceneInputStream`() {
+		//need reader() in order to read a char
+		val stream = SceneInputStream("abc \nd //comment \ne\tf".reader())
+		
+		assertEquals(1, stream.location.lineNum)
+		assertEquals(1, stream.location.colNum)
+		
+		//NB 'a' is a char typo, meanwhile "a" is a String typo
+		assertEquals('a', stream.readChar())
+		assertEquals(1, stream.location.lineNum)
+		assertEquals(2, stream.location.colNum)
+		
+		//Overwrite a with A, then readChar read A and then the location goes to (1,2)
+		stream.unreadChar('A')
+		assertEquals(1, stream.location.lineNum)
+		assertEquals(1, stream.location.colNum)
+		
+		assertEquals('A', stream.readChar())
+		assertEquals(1, stream.location.lineNum)
+		assertEquals(2, stream.location.colNum)
+		
+		assertEquals('b', stream.readChar())
+		assertEquals(1, stream.location.lineNum)
+		assertEquals(3, stream.location.colNum)
+		
+		assertEquals('c', stream.readChar())
+		assertEquals(1, stream.location.lineNum)
+		assertEquals(4, stream.location.colNum)
+		
+		// *** TEST skipWhitespaceAndComments (whitespace)*** //
+		stream.skipWhitespacesAndComments()
+		
+		//*** TEST updatePos() after \n ***//
+		assertEquals(2, stream.location.lineNum)
+		assertEquals(1, stream.location.colNum)
+		
+		assertEquals('d', stream.readChar())
+		assertEquals(2, stream.location.lineNum)
+		assertEquals(2, stream.location.colNum)
+		
+		stream.skipWhitespacesAndComments() //test comment//
+		
+		assertEquals(3, stream.location.lineNum)
+		assertEquals(1, stream.location.colNum)
+		
+		assertEquals('e', stream.readChar())
+		assertEquals(3, stream.location.lineNum)
+		assertEquals(2, stream.location.colNum)
+		
+		stream.skipWhitespacesAndComments() //test \t//
+		//*** TEST updatePos() after \t ***//
+		assertEquals(3, stream.location.lineNum)
+		assertEquals(6, stream.location.colNum)
+		
+		assertEquals('f', stream.readChar())
+		assertEquals(3, stream.location.lineNum)
+		assertEquals(7, stream.location.colNum)
+		
+		assertEquals(expected = null, actual = stream.readChar())
+	}
+	
+	@Test
+	fun `test Lexer`() {
+		val stream = ("// comment\n new material skyMaterial(" +
+				"diffuse(image('myfile.pfm')),<5.0, 500, 300> ").reader()
+		
+		val inputFile = SceneInputStream(stream)
+		
+		assertEquals(1, inputFile.location.lineNum)
+		assertEquals(1, inputFile.location.colNum)
+		
+		inputFile.skipWhitespacesAndComments()
+		
+		var rT = inputFile.readToken()
+		
+		assertIs<KeywordToken>(rT)
+		assertEquals(Keyword.NEW, rT.keyword)
+		
+		rT = inputFile.readToken()
+		
+		assertIs<KeywordToken>(rT)
+		assertEquals(rT.keyword, Keyword.MATERIAL)
+		
+		rT = inputFile.readToken()
+		
+		assertIs<IdentifierToken>(rT)
+		assertEquals(rT.identifier, "skyMaterial")
+		
+		rT = inputFile.readToken()
+		assertIs<SymbolToken>(rT)
+		assertEquals(expected = "(", actual = rT.toString())
+		
+		rT = inputFile.readToken()
+		assertIs<KeywordToken>(rT)
+		assertEquals(rT.keyword, Keyword.DIFFUSE)
+		
+		rT = inputFile.readToken()
+		assertIs<SymbolToken>(rT)
+		assertEquals(expected = "(", actual = rT.toString())
+		
+		rT = inputFile.readToken()
+		assertIs<KeywordToken>(rT)
+		assertEquals(rT.keyword, Keyword.IMAGE)
+		
+		rT = inputFile.readToken()
+		assertIs<SymbolToken>(rT)
+		assertEquals(expected = "(", actual = rT.toString())
+		
+		rT = inputFile.readToken()
+		
+		assertIs<StringToken>(rT)
+		assertEquals(rT.toString(), "myfile.pfm")
+		rT = inputFile.readToken()
+		assertIs<SymbolToken>(rT)
+		assertEquals(expected = ")", actual = rT.toString())
+	}
+}
