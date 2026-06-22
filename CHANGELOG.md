@@ -1,12 +1,11 @@
-# Unrelease
+# Unreleased
 
 - Implement cube shape
 - Implement antialiasing algorithm
 
 # Version 0.3.0
 
--*Breaking change*: Implement path tracer method in demo
-
+- *Breaking change*: Implement path tracer method in demo
 - Production of first photorealistic image
 
 # Version 0.2.0

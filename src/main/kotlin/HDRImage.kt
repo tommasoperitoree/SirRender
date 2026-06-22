@@ -16,7 +16,7 @@ import javax.imageio.ImageIO
  * the expected Portable FloatMap (PFM) specification.
  */
 class InvalidPFMImageFormat(
-	message: String = "Invalid PFM format"
+	override val message: String = "Invalid PFM format"
 ) : Exception(message)
 
 /**

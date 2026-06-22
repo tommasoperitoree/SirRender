@@ -10,6 +10,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.float
+import com.github.ajalt.clikt.parameters.types.inputStream
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.ulong
 import java.io.ByteArrayInputStream
@@ -39,7 +40,7 @@ private fun buildDemoWorld(): World {
 		brdf = DiffuseBRDF(
 			pigment = CheckeredPigment(
 				//color1 = Color.white,
-				color1 = Color(1f, 0.3f, 0f), //arancio
+				color1 = Color(1f, 0.3f, 0f), // orange
 				//color1 = Color(0.8f, 0.05f, 0.2f),
 				color2 = Color.black,
 				numSteps = 5
@@ -102,8 +103,8 @@ private fun buildDemoWorld(): World {
 			skyMaterial
 		)
 	)
-	
-	*/
+
+
 	//Sun in the sky in (-0.5,-3,6)
 	world.addShape(
 		Sphere(
@@ -113,7 +114,7 @@ private fun buildDemoWorld(): World {
 			material = sunMaterial
 		)
 	)
-	
+
 	//first sphere in (-2,1,1) red
 	world.addShape(
 		Sphere(
@@ -123,7 +124,7 @@ private fun buildDemoWorld(): World {
 			material = sphereMaterial
 		)
 	)
-	/*
+
 	//second sphere in (-4,-1,1) silver that reflect the first sphere
 	world.addShape(
 		Sphere(
@@ -133,13 +134,13 @@ private fun buildDemoWorld(): World {
 			mirrorMaterial
 		)
 	)
-	
+	*/
 	world.addShape(
 		Cube(
 			scaling(Vec(0.2f, 0.2f, 0.2f)) * translation(Vec(-3f, -1f, 1f)),
 			cubeMaterial
 		)
-	)*/
+	)
 	return world
 }
 
@@ -229,9 +230,6 @@ class Demo : CliktCommand(
 	val initSeq: ULong by option(
 		"--initSeq", help = "Initial sequence number for random generation"
 	).ulong().default(54uL)
-	val antialiasing: Int by option(
-		"--antialiasing", "-a", help = "Antialiasing"
-	).int().default(2)
 	
 	override fun run() {
 		
@@ -240,15 +238,16 @@ class Demo : CliktCommand(
 		
 		val world = buildDemoWorld()
 		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
+		
 		for (frameIndex in 0 until numFrames) {
-			val angle = 15f
+			val angle = 90f
 			//val angle = observerAngle + (frameIndex * angleStep)
 			val angleNNN = "%03d".format(frameIndex)
 			
 			val img = HDRImage(width, height)
 			
 			val screenCenter = Vec(-1f, 0f, 0f)
-			val verticalAngle = 10f // angle to rotate above plane (around y-axis)
+			val verticalAngle = 35f // angle to rotate above plane (around y-axis)
 			// concatenation of transformations: first move away from scene,
 			// then rotate upwards around y-axis, and finally gradually move around the scene (z-axis)
 			val camTransformation = rotationZ(angle) *
@@ -262,8 +261,8 @@ class Demo : CliktCommand(
 			}
 			
 			//Run the ray-tracer
-			println("Starting render...")
-			val pathTracer = ImageTracer(img, cam,antialiasing=antialiasing, pcg = PCG())
+			println("Starting render...\n")
+			val pathTracer = ImageTracer(img, cam, antialiasing = 2, pcg = PCG())
 			
 			print("Using a path tracer")
 			
@@ -271,13 +270,14 @@ class Demo : CliktCommand(
 				world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 8,
+				numRays = 4,
 				maxRayDepth = 6,
 				russianRouletteLimit = 4
 			)
 			
 			// Run the ray-tracer with ProgressBar
-			val samplesPerPixel = if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
+			val samplesPerPixel =
+				if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
 			val totalPixels = img.width.toLong() * img.height.toLong()
 			val totalSamples = totalPixels * samplesPerPixel
 			val progressBar = ProgressBar(totalSamples)
@@ -294,7 +294,7 @@ class Demo : CliktCommand(
 			}
 			progressBar.update(totalPixels, force = true)
 			
-			val baseName = "Red_sphere&sun"
+			val baseName = "demo"
 			val pfmPath = "$cameraDir/$baseName.pfm"
 			img.writePFMFile(pfmPath)
 			println("Saved PFM → $pfmPath")
@@ -401,16 +401,147 @@ class Animation : CliktCommand(
 	}
 }
 
-
+class Render : CliktCommand("render") {
+	override fun help(context: Context) = "Generate a scene image"
+	
+	val width: Int by option(
+		"--width", "-w", help = "Image width in pixels"
+	).int().default(640)
+	val height: Int by option(
+		"--height", "-h", help = "Image height in pixels"
+	).int().default(480)
+	val numFrames: Int by option(
+		"--num-frames", "-n", help = "Number of frames (angles) to generate"
+	).int().default(1)
+	val outputDir: String by option(
+		"--output-dir", "-o", help = "Output directory for PFM frames"
+	).default("./src/main/resources/frames")
+	val observerAngle: Float by option(
+		"--observer-angle", "-i", help = "Starting observer angle in degrees"
+	).float().default(0f)
+	val renderImage: Boolean by option(
+		"--render", "-r", help = "Also convert output to PNG"
+	).flag(default = false)
+	val factor: Float by option(
+		"--factor", "-f", help = "Luminosity scaling factor"
+	).float().default(0.2f)
+	val gamma: Float by option(
+		"--gamma", "-g", help = "Gamma correction value"
+	).float().default(1f)
+	val initState: ULong by option(
+		"--initState", help = "Initial state number for random generation"
+	).ulong().default(42uL)
+	val initSeq: ULong by option(
+		"--initSeq", help = "Initial sequence number for random generation"
+	).ulong().default(54uL)
+	val antialiasing: Int by option(
+		"--antialiasing", "-a", help = "Antialiasing value"
+	).int().default(1)
+	val inputFile: File by option("--input-file", "-inp", help = "Input file path")
+		.file(mustExist = true, canBeDir = false, mustBeReadable = true)
+		.default(File("SceneR/sceneFile.txt"))
+	
+	
+	override fun run() {
+		val parsedScene: Scene = inputFile.reader().use { reader ->
+			val sceneStream = SceneInputStream(reader)
+			parseScene(sceneStream)
+		}
+		
+		val sceneName = inputFile.nameWithoutExtension
+		
+		File(outputDir).mkdirs()
+		
+		val baseCamera = parsedScene.camera ?: throw IllegalArgumentException("No camera found")
+		
+		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
+		
+		for (frameIndex in 0 until numFrames) {
+			val angle = 90f
+			//val angle = observerAngle + (frameIndex * angleStep)
+			val angleNNN = "%03d".format(frameIndex)
+			
+			val img = HDRImage(width, height)
+			
+			val screenCenter = Vec(-1f, 0f, 0f)
+			
+			val cam = when (baseCamera) {
+				is OrthogonalCamera -> OrthogonalCamera(
+					baseCamera.aspectRatio,
+					transformation = baseCamera.transformation
+				)
+				
+				is PerspectiveCamera -> PerspectiveCamera(
+					baseCamera.distance,
+					baseCamera.aspectRatio,
+					transformation = baseCamera.transformation
+				)
+				
+				else -> throw IllegalStateException("No camera found for $baseCamera")
+			}
+			
+			//Run the ray-tracer
+			
+			val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
+			
+			print("Using a path tracer")
+			
+			val renderer = PathTracer(
+				parsedScene.world,
+				Color(),
+				PCG(initState, initSeq),
+				numRays = 7,
+				maxRayDepth = 10,
+				russianRouletteLimit = 4
+			)
+			
+			val samplesPerPixel =
+				if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
+			val totalPixels = img.width.toLong() * img.height.toLong()
+			val totalSamples = totalPixels * samplesPerPixel
+			val progressBar = ProgressBar(totalSamples)
+			
+			var done = 0L
+			
+			pathTracer.fireAllRays { ray ->
+				val color = renderer(ray)
+				
+				done++
+				progressBar.update(done)
+				
+				color
+			}
+			//progressBar.update(totalPixels, force = true)
+			
+			val baseName = "inputFile.nameWithoutExtension"
+			val pfmPath = "$outputDir/$baseName.pfm"
+			img.writePFMFile(pfmPath)
+			println("Saved PFM → $pfmPath")
+			
+			
+			if (renderImage) {
+				//img.normalizeImage(factor)
+				img.clampImage()
+				
+				val pngPath = "$outputDir/$baseName.png"
+				FileOutputStream(pngPath).use { img.writeLDRImage(it, "png", gamma) }
+				println("Saved PNG → $pngPath")
+			}
+		}
+	}
+}
 // --- Entry point ---
 
 fun main(args: Array<String>) =
 	SirRender(
 	).subcommands(
-		Pfm2Png(), Demo(), Animation()
+		Pfm2Png(), Demo(), Animation(), Render()
 	).main(args)
 
 // ./gradlew run --args="demo -w 640 -h 480 -c "Orthogonal" -o demo.png"
 // ./gradlew run --args="animation --width=480 --height=480 --output demo.png --num-frames=72"
 
 // ./gradlew run --args="demo -r -c "Orthogonal" "-f0.01" -w 1280 -h 720 -o src/main/resources/Ortho_demo"
+
+
+//./gradlew run --args="render -r -inp SceneR/cube.txt -w 1280 -f0.5 -h 720 -a 3 -o output"
