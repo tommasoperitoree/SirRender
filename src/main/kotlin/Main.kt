@@ -406,10 +406,10 @@ class Render : CliktCommand("render") {
 	
 	val width: Int by option(
 		"--width", "-w", help = "Image width in pixels"
-	).int().default(640)
+	).int().default(1280)
 	val height: Int by option(
 		"--height", "-h", help = "Image height in pixels"
-	).int().default(480)
+	).int().default(720)
 	val numFrames: Int by option(
 		"--num-frames", "-n", help = "Number of frames (angles) to generate"
 	).int().default(1)
@@ -511,9 +511,9 @@ class Render : CliktCommand("render") {
 				
 				color
 			}
-			//progressBar.update(totalPixels, force = true)
 			
-			val baseName = "inputFile.nameWithoutExtension"
+			
+			val baseName = inputFile.nameWithoutExtension
 			val pfmPath = "$outputDir/$baseName.pfm"
 			img.writePFMFile(pfmPath)
 			println("Saved PFM → $pfmPath")

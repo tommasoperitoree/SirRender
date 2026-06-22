@@ -1,0 +1,16 @@
+float clock(150)
+
+material sky_material(
+    diffuse(uniform((0,0,0))),
+        uniform((1.4, 3, 4))
+    )
+
+material sphere_material(
+    diffuse(uniform((0.8,0,0))),
+        uniform((0,0,0))
+        )
+
+ sphere(sky_material,scaling((50,50,50)))
+ sphere(sphere_material,scaling((2,2,2)))
+
+ camera(perspective, rotation_z(60) * translation((-4, 0, 0)), 1.777, 2.0)

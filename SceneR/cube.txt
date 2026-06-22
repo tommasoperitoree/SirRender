@@ -1,13 +1,13 @@
 float clock(150)
 
         material sky_material(
-        		diffuse(uniform((0, 0, 0))),
-        		uniform((0.7, 1.5, 2))
+        		diffuse(uniform((1, 1, 1))),
+        		uniform((1.4,3, 4))
         	)
 
         material ground_material(
             diffuse(checkered((1, 0.3, 0), //orange
-                              (0, 0, 0), 5)),
+                              (0, 0, 0), 4)),
             uniform((0, 0, 0))
         )
 
@@ -21,7 +21,7 @@ float clock(150)
         sphere(sky_material, scaling((50,50,50)))
         plane (ground_material, identity)
 
-        cube(cube_material, scaling((0.4,0.4,0.4))*translation((0, 0, 1)))
+        cube(cube_material, translation((0, 0, 1))*scaling((0.5,0.5,0.5)))
 
         camera(perspective, rotation_z(30) * translation((-4, 0, 1)), 1.777, 2.0)
 
