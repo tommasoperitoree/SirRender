@@ -418,8 +418,8 @@ class Render : CliktCommand("render") {
 				parsedScene.world,
 				Color(),
 				PCG(initState, initSeq),
-				numRays = 7,
-				maxRayDepth = 10,
+				numRays = 4,
+				maxRayDepth = 6,
 				russianRouletteLimit = 4
 			)
 			
