@@ -1,7 +1,7 @@
 class Ray(
 	var origin: Point = Point(),
 	var dir: Vec = Vec(),
-	var tMin: Float = 1e-5f,
+	var tMin: Float = 1e-3f,
 	var tMax: Float = Float.POSITIVE_INFINITY,
 	var depth: Int = 0,
 ) {

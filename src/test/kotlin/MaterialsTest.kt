@@ -51,14 +51,15 @@ class BRDFTest {
 	@Test
 	fun `ScatterRay DiffuseBRDF test`() {
 		val diffuseBRDF = DiffuseBRDF()
-		val ray = diffuseBRDF.scatterRay(pcg, incomingDir, intPoint, normal, depth)
+		var ray = diffuseBRDF.scatterRay(pcg, incomingDir, intPoint, normal, depth)
 		assertEquals(intPoint, ray.origin)
-		assertEquals(1e-5f, ray.tMin)
+		assertEquals(1e-3f, ray.tMin)
 		assertEquals(Float.POSITIVE_INFINITY, ray.tMax)
 		assertEquals(depth, ray.depth)
 		
 		//test it for numerous rays
 		repeat(1000) {
+			ray = diffuseBRDF.scatterRay(pcg, incomingDir, intPoint, normal, depth)
 			assertTrue(areClose(ray.dir.squaredNorm(), 1f))
 			assertTrue(ray.dir.dot(normal.toVec()) >= 0f)
 			assertTrue(incomingDir.dot(normal.toVec()) <= 0f)

@@ -1,4 +1,10 @@
+import kotlin.compareTo
+import kotlin.div
 import kotlin.math.max
+import kotlin.time.measureTimedValue
+import kotlin.time.measureTime
+import kotlin.time.Duration
+
 
 interface Renderer {
 	val world: World
@@ -58,10 +64,25 @@ class PathTracer(
 	val russianRouletteLimit: Int // limit of the Russian Roulette
 ) : Renderer {
 	
+	var totalIntersectionTime = Duration.ZERO
+	var totalScatterTime = Duration.ZERO
+	var calls = 0
+	companion object {
+		const val PROFILING = false  // cambia a true solo per misurare
+	}
+	
 	override operator fun invoke(ray: Ray): Color { // operator is necessary to use the recursion
 		if (ray.depth > maxRayDepth) return Color.black
 		
-		val hitRecord = world.rayIntersection(ray) ?: return backgroundColor
+		//profiling
+		val (hitRecord, intersectionTime) = measureTimedValue {
+			world.rayIntersection(ray)
+		}
+		
+		if (PROFILING) totalIntersectionTime += intersectionTime
+		totalIntersectionTime += intersectionTime
+		
+		hitRecord ?: return backgroundColor
 		
 		// extract from the point of intersection the color reflected and the emitted radiance
 		val hitMaterial = hitRecord.shape.material
@@ -88,18 +109,35 @@ class PathTracer(
 		// if hitColorLum is 0 it means that the surface is completely black, so MonteCarlo is useless
 		if (hitColorLum > 0f) {
 			repeat(numRays) {
-				val newRay = hitMaterial.brdf.scatterRay(
-					pcg,
-					hitRecord.ray.dir,
-					hitRecord.worldPoint,
-					hitRecord.normal,
-					ray.depth + 1
-				) // depth has to be incremented, otherwise the new ray won't pass the first if
-				cumRadiance += hitColor * this(newRay) // recursive call with this(newRay)
+				var newRay: Ray? = null
+				val scatterTime = measureTime {
+					newRay = hitMaterial.brdf.scatterRay(
+						pcg,
+						hitRecord.ray.dir,
+						hitRecord.worldPoint,
+						hitRecord.normal,
+						ray.depth + 1
+					)
+				}
+				totalScatterTime += scatterTime
+				calls++
+				// depth has to be incremented, otherwise the new ray won't pass the first if
+				cumRadiance += hitColor * this(newRay!!) // recursive call with this(newRay)
 			}
 		}
 		// Rendering equation
 		return emittedRadiance + cumRadiance * (1.0f / numRays)
 		// return the emitted radiance (ex from a light ball) + mean value of radiance reflected
+	}
+	
+	fun printProfiling() {
+		println("=== PathTracer Profiling ===")
+		println("rayIntersection: $totalIntersectionTime")
+		println("scatterRay:      $totalScatterTime")
+		println("chiamate: $calls")
+		if (calls > 0) {
+			println("media rayIntersection: ${totalIntersectionTime / calls}")
+			println("media scatterRay:      ${totalScatterTime / calls}")
+		}
 	}
 }
