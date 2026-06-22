@@ -6,7 +6,6 @@ local.properties
 
 ### Output & Renders ###
 *.log
-outputs/
 # Catch any local renders accidentally generated in the root directory
 /*.pfm
 /*.png
