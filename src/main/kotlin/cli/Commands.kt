@@ -399,13 +399,12 @@ class Render : CliktCommand("render") {
 		// --- Run the ray-tracer ---
 		
 		val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
-		print("Using a path tracer")
 		
 		val renderer = PathTracer(
 			parsedScene.world,
 			Color(),
 			PCG(initState, initSeq),
-			numRays = 4,
+			numRays = 8,
 			maxRayDepth = 6,
 			russianRouletteLimit = 4
 		)

@@ -14,7 +14,7 @@ material sphere_material(
     uniform((0, 0, 0))
 )
 
-sphere(sky_material, scaling((50,50,50)))
+sphere(sky_material, scaling((20,20,20)))
 
 plane (ground_material, identity)
 

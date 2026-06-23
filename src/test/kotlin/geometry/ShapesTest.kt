@@ -169,14 +169,14 @@ class ShapesTest {
 		val point = Point(0.25f, 0.25f)
 		val point1 = Point(0.25f, 0.75f)
 		
-		val uvPlane = plane.planePointToUV(point)
-		val uvPlane1 = plane.planePointToUV(point1)
+		val uvPlane = planePointToUV(point)
+		val uvPlane1 =planePointToUV(point1)
 		
 		// to the plane with transformation we need to pass the inverse transformation on the point
 		val localPoint = planes.transformation.inverse() * point
 		val localPoint1 = planes.transformation.inverse() * point1
-		val uvPlanes = planes.planePointToUV(localPoint)
-		val uvPlanes1 = planes.planePointToUV(localPoint1)
+		val uvPlanes = planePointToUV(localPoint)
+		val uvPlanes1 =planePointToUV(localPoint1)
 		
 		//without scaling
 		assertEquals(plane.material.brdf.pigment.getColor(uvPlane), Color.white)

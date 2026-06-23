@@ -225,7 +225,6 @@ data class Vec2d(
  * [normal] has to be normalized!
  */
 fun createOnbFromZ(normal: Normal): Triple<Vec, Vec, Vec> {
-	
 	val sign = sign(normal.z)
 	
 	val a = -1f / (sign + normal.z)
