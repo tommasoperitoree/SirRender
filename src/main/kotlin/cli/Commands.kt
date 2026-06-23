@@ -332,10 +332,10 @@ class Render : CliktCommand("render") {
 	
 	val width: Int by option(
 		"--width", "-w", help = "Image width in pixels"
-	).int().default(1280)
+	).int().default(854)
 	val height: Int by option(
 		"--height", "-h", help = "Image height in pixels"
-	).int().default(720)
+	).int().default(480)
 	val numFrames: Int by option(
 		"--num-frames", "-n", help = "Number of frames (angles) to generate"
 	).int().default(1)
@@ -405,8 +405,8 @@ class Render : CliktCommand("render") {
 			parsedScene.world,
 			Color(),
 			PCG(initState, initSeq),
-			numRays = 4,
-			maxRayDepth = 6,
+			numRays = 50,
+			maxRayDepth = 10,
 			russianRouletteLimit = 4
 		)
 		

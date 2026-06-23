@@ -78,7 +78,7 @@ class PathTracer(
 	override operator fun invoke(ray: Ray): Color { // operator is necessary to use the recursion
 		if (ray.depth > maxRayDepth) return Color.black
 		
-		//profiling
+		// profiling
 		val (hitRecord, intersectionTime) = measureTimedValue {
 			world.rayIntersection(ray)
 		}
@@ -113,7 +113,7 @@ class PathTracer(
 		// if hitColorLum is 0 it means that the surface is completely black, so MonteCarlo is useless
 		if (hitColorLum > 0f) {
 			repeat(numRays) {
-				var newRay: Ray? = null
+				var newRay = Ray()
 				val scatterTime = measureTime {
 					newRay = hitMaterial.brdf.scatterRay(
 						pcg,
@@ -126,7 +126,7 @@ class PathTracer(
 				totalScatterTime += scatterTime
 				calls++
 				// depth has to be incremented, otherwise the new ray won't pass the first if
-				cumRadiance += hitColor * this(newRay!!) // recursive call with this(newRay)
+				cumRadiance += hitColor * this(newRay) // recursive call with this(newRay)
 			}
 		}
 		// Rendering equation
