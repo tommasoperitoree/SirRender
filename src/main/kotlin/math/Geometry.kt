@@ -218,13 +218,15 @@ data class Vec2d(
 	fun isClose(other: Vec2d) = areClose(u, other.u) && areClose(v, other.v)
 }
 
+
+
 /**
  * Create Orthonormal basis from given [normal] taken as the `ez` versor.
  * [normal] has to be normalized!
  */
 fun createOnbFromZ(normal: Normal): Triple<Vec, Vec, Vec> {
 	
-	val sign = sign(normal.z + Float.MIN_VALUE)
+	val sign = sign(normal.z)
 	
 	val a = -1f / (sign + normal.z)
 	val b = normal.x * normal.y * a
@@ -232,5 +234,5 @@ fun createOnbFromZ(normal: Normal): Triple<Vec, Vec, Vec> {
 	val e1 = Vec(1f + sign * normal.x * normal.x * a, sign * b, -sign * normal.x)
 	val e2 = Vec(b, sign + normal.y * normal.y * a, -normal.y)
 	
-	return Triple(e1, e2, Vec(normal.x, normal.y, normal.z))
+	return Triple(e1, e2, normal.toVec())
 }

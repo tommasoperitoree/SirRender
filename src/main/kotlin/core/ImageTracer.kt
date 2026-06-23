@@ -34,11 +34,12 @@ class ImageTracer(
 	fun fireAllRays(shader: (Ray) -> Color) {
 		for (row in 0 until image.height) {
 			for (col in 0 until image.width) {
-				var colorSum = Color()
+				var colorSum = Color.black
 				
 				if (antialiasing <= 1) {
 					val ray = fireRay(col, row)
 					colorSum = shader(ray)
+					
 				} else {
 					for (i in 0 until antialiasing) {
 						for (j in 0 until antialiasing) {

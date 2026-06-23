@@ -16,20 +16,6 @@ import kotlin.math.floor
 import kotlin.math.sqrt
 import kotlin.ranges.rangeTo
 
-/** Calculation of [Sphere]'s [Normal] at intersection [point] */
-fun sphereNormal(point: Point, rayDir: Vec): Normal {
-	val result = Normal(point.x, point.y, point.z)
-	return if ((point.toVec() dot rayDir) < 0f) result else result.unaryMinus()
-}
-
-/** Calculation of intersection [point] on the geometry.Sphere's surface, in (u,v) coordinates*/
-fun spherePointToUV(point: Point): Vec2d {
-	val u = atan2(point.y, point.x) / (2f * PI.toFloat())
-	val v = acos(point.z) / PI.toFloat()
-	return Vec2d(
-		if (u >= 0f) u else u + 1f, v
-	)
-}
 
 /**
  * A generic 3D shape.
@@ -46,6 +32,21 @@ interface Shape {
 }
 
 
+/** Calculation of [Sphere]'s [Normal] at intersection [point] */
+fun sphereNormal(point: Point, rayDir: Vec): Normal {
+	val result = Normal(point.x, point.y, point.z)
+	return if ((point.toVec() dot rayDir) < 0f) result else -result
+}
+
+/** Calculation of intersection [point] on the geometry.Sphere's surface, in (u,v) coordinates*/
+fun spherePointToUV(point: Point): Vec2d {
+	val u = 0.5f + atan2(point.y, point.x) / (2f * PI.toFloat())
+	val v = acos(point.z) / PI.toFloat()
+	return Vec2d(
+		if (u >= 0f) u else u + 1f, v
+	)
+}
+
 /** A 3D unitary sphere centered at the origin. */
 class Sphere(
 	override val transformation: Transformation = Transformation(), override val material: Material = Material()
@@ -60,16 +61,20 @@ class Sphere(
 		val invRay: Ray = ray.transform(transformation.inverse())
 		val o: Vec = invRay.origin.toVec()
 		val d: Vec = invRay.dir
-		//val delta4: Float = (o dot d).pow(2f) - d.squaredNorm().times(o.squaredNorm() - 1f)
-		//try to use vectorial formula in slides, it's still ok but could be a problem if o is perpendicular to d
-		// so that t1 & t2 are too small and rejected
-		val a = d.squaredNorm()
-		val bHalf = o.dot(d)
-		val cross = o.cross(d)
-		val delta4: Float = a - (cross).squaredNorm()
-		if (delta4 == 0f) return null //adding this check if there are no intersection
-		val t1: Float = (-bHalf - sqrt(delta4)) / a
-		val t2: Float = (-bHalf + sqrt(delta4)) / a
+		val od: Float = o dot d // sign tells if ray is moving towards or away from ray's origin
+		val dSq = d.squaredNorm()
+		val oSq = o.squaredNorm()
+		
+		if (oSq > 1f && od > 0f) return null
+		
+		val deltaRid: Float = od * od - dSq * (oSq - 1f)
+		
+		if (deltaRid <= 0f) return null // adding this check if there are no intersection
+		
+		val sqr = sqrt(deltaRid)
+		
+		val t1: Float = (-od - sqr) / dSq
+		val t2: Float = (-od + sqr) / dSq
 		val tFirstHit = if (t1 > invRay.tMin && t1 < invRay.tMax) {
 			t1
 		} else if (t2 > invRay.tMin && t2 < invRay.tMax) {
@@ -81,7 +86,7 @@ class Sphere(
 		
 		return HitRecord(
 			transformation * hitPoint,
-			transformation * sphereNormal(hitPoint, rayDir = invRay.dir),
+			transformation * sphereNormal(hitPoint, rayDir = d),
 			spherePointToUV(hitPoint),
 			tFirstHit,
 			ray,
@@ -91,18 +96,17 @@ class Sphere(
 }
 
 
+fun planePointToUV(point: Point): Vec2d {
+	val u = point.x - floor(point.x)
+	val v = point.y - floor(point.y)
+	return Vec2d(u, v)
+}
+
 /** A 3D infinite plane parallel to the x and y axes and passing through the origin. */
 class Plane(
 	override val transformation: Transformation = Transformation(),
 	override val material: Material = Material()
 ) : Shape {
-	
-	fun planePointToUV(point: Point): Vec2d {
-		
-		val u = point.x - floor(point.x)
-		val v = point.y - floor(point.y)
-		return Vec2d(u, v)
-	}
 	
 	/**
 	 * Checks if the [ray] intersect the [Plane].
@@ -124,10 +128,7 @@ class Plane(
 		return HitRecord(
 			transformation * hitPoint,
 			transformation * Normal(0f, 0f, if (invRay.dir.z < 0f) 1f else -1f),
-			Vec2d(
-				hitPoint.x - (hitPoint.x).toInt(),
-				hitPoint.y - (hitPoint.y).toInt(),
-			),
+			planePointToUV(hitPoint),
 			t,
 			ray,
 			this
@@ -138,28 +139,40 @@ class Plane(
 }
 
 
+fun cubePointToUV(point: Point, axis: Int, sign: Float): Vec2d {
+	val u = when (axis) {
+		0 -> if (sign > 0) point.y else -point.y
+		1 -> if (sign > 0) point.x else -point.x
+		else -> if (sign > 0) point.x else -point.x
+	}
+	val v = when (axis) {
+		0 -> point.z
+		1 -> point.z
+		else -> if (sign > 0) point.y else -point.y
+	}
+	// Shift to [0, 1] range and strictly coerce to prevent bounds crashing
+	return Vec2d(
+		((u + 1f) / 2f).coerceIn(0f, 1f),
+		((v + 1f) / 2f).coerceIn(0f, 1f)
+	)
+}
+
+fun findExitAxis(point: Point): Pair<Int, Float> {
+	val coords = floatArrayOf(point.x, point.y, point.z)
+	for (axis in 0..2) if (areClose(abs(coords[axis]), 1f)) {
+		return Pair(axis, if (coords[axis] > 0) 1f else -1f)
+	}
+	return Pair(0, 1f) //fallback
+}
+
+/**
+ *
+ */
 class Cube(
 	override val transformation: Transformation = Transformation(),
 	override val material: Material = Material()
 ) : Shape {
-	
 	// 0=x, 1=y, 2=z
-	
-	fun cubePointToUV(point: Point, axis: Int, sign: Float): Vec2d {
-		return when (axis) {
-			0 -> Vec2d((point.y + 1f) / 2f, (point.z + 1f) / 2f)
-			1 -> Vec2d((point.x + 1f) / 2f, (point.z + 1f) / 2f)
-			else -> Vec2d((point.x + 1f) / 2f, (point.y + 1f) / 2f)
-		}
-	}
-	
-	fun findExitAxis(point: Point): Pair<Int, Float> {
-		val coords = floatArrayOf(point.x, point.y, point.z)
-		for (axis in 0..2) if (areClose(abs(coords[axis]), 1f)) {
-			return Pair(axis, if (coords[axis] > 0) 1f else -1f)
-		}
-		return Pair(0, 1f) //fallback
-	}
 	
 	//unitary cube centered in the origin with length 2 [-1,1]
 	override fun rayIntersection(ray: Ray): HitRecord? {
@@ -228,7 +241,6 @@ class Cube(
 		val worldPoint = transformation * hitPoint
 		val worldNormal = (transformation * normalVec.toNormal())
 		val uv = cubePointToUV(hitPoint, axis, sign)
-		
 		
 		return HitRecord(
 			worldPoint = worldPoint,
