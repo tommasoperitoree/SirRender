@@ -11,10 +11,13 @@ import math.Vec
 import math.Vec2d
 import math.scaling
 import math.translation
+import math.Transformation
 import math.vecX
 import math.vecZ
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import kotlin.math.sqrt
 import kotlin.test.assertEquals
 
 class ShapesTest {
@@ -25,13 +28,18 @@ class ShapesTest {
 	val sphere1 = Sphere(translation(t))
 	val s = Vec(10f, 10f, 10f)
 	val sphere2 = Sphere(scaling(s))
+	val s3 = Vec(2f, 1f, 1f)
+	val sphere3 = Sphere(scaling(s3))
 	
 	@Test
 	fun `test sphereNormal`() {
-		val normal = Normal(1f, 0f, 0f)
-		val ray = Ray(Point(5f, 0f, 0f), -vecX())
-		assertEquals(sphereNormal(Point(1f, 0f, 0f), ray.dir), normal)
-		Assertions.assertTrue(sphereNormal(Point(-1f, 0f, 0f), ray.dir).isClose(normal))
+		val ray = Ray(Point(12f, 12f, 0f), Vec(-1f, -1f, 0f))
+		val invRay: Ray = ray.transform(scaling(s3).inverse())
+		val normal = Normal(1f, 4f, 0f).normalize()
+		val hit = sphere3.rayIntersection(ray)!!
+		val hitPoint = invRay.at(hit.t)
+		val actual = (scaling(s3) * sphereNormal(hitPoint, invRay.dir)).normalize()
+		assertTrue(actual.isClose(normal))
 	}
 	
 	@Test
@@ -80,8 +88,12 @@ class ShapesTest {
 		val ray3 = Ray(Point(0f, 0f, 0f), vecX())
 		val hit3 = sphere.rayIntersection(ray3)
 		val uv3 = Vec2d(0f, 1 / 2f)
-		
-		TODO()
+		Assertions.assertTrue(
+			hit3?.worldPoint?.isClose(Point(1f, 0f, 0f)) ?: false &&
+					hit3.normal.isClose(-vecX().toNormal()) &&
+					hit3.surfacePoint.isClose(uv3) &&
+					areClose(hit3.t, 1f)
+		)
 	}
 	
 	/**
