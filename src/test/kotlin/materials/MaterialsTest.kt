@@ -79,7 +79,7 @@ class BRDFTest {
 		assertEquals(intPoint, ray.origin)
 		assertTrue(areClose(ray.dir.squaredNorm(), 1f))
 		assertTrue(ray.dir.dot(normal.toVec()) >= 0f)
-		assertEquals(1e-5f, ray.tMin)
+		assertEquals(1e-3f, ray.tMin)
 		assertEquals(Float.POSITIVE_INFINITY, ray.tMax)
 		assertEquals(depth, ray.depth)
 		// for incoming ray form (0,0,-1) the reflected ray has dir (0,0,1)
