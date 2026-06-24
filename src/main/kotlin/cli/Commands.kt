@@ -213,7 +213,6 @@ private fun buildDemoWorld(): World {
 	val scale = 1 / 10f
 	val scaling = scaling(Vec(scale, scale, scale))
 	val coords = listOf(-0.5f, 0.5f)
-	
 	val sphereMaterial = Material(
 		brdf = DiffuseBRDF(UniformPigment(Color.white)),
 		CheckeredPigment(Color.white, Color(1f, 1f, 0f), 4)
@@ -378,14 +377,32 @@ class Render : CliktCommand("render") {
 		val baseCamera = parsedScene.camera ?: throw IllegalArgumentException("No camera found")
 		val img = HDRImage(width, height)
 		
-<<<<<<< Updated upstream
 		val cam = when (baseCamera) {
 			is OrthogonalCamera -> OrthogonalCamera(
 				baseCamera.aspectRatio,
 				transformation = baseCamera.transformation
-=======
-		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
+			)
+			
+			is PerspectiveCamera -> PerspectiveCamera(
+				baseCamera.distance,
+				baseCamera.aspectRatio,
+				transformation = baseCamera.transformation
+			)
+			
+			else -> throw IllegalStateException("No camera found for $baseCamera")
+		}
 		
+<<<<<<< Updated upstream
+		// --- Run the ray-tracer ---
+		
+		val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
+		print("Using a path tracer")
+		
+		val renderer = PathTracer(
+			parsedScene.world,
+			Color(),
+			PCG(initState, initSeq),
+=======
 		for (frameIndex in 0 until numFrames) {
 			val angle = 90f
 			//val angle = observerAngle + (frameIndex * angleStep)
@@ -419,34 +436,11 @@ class Render : CliktCommand("render") {
 				parsedScene.world,
 				Color(),
 				PCG(initState, initSeq),
+>>>>>>> Stashed changes
 				numRays = 4,
 				maxRayDepth = 6,
 				russianRouletteLimit = 4
->>>>>>> Stashed changes
 			)
-			
-			is PerspectiveCamera -> PerspectiveCamera(
-				baseCamera.distance,
-				baseCamera.aspectRatio,
-				transformation = baseCamera.transformation
-			)
-			
-			else -> throw IllegalStateException("No camera found for $baseCamera")
-		}
-		
-		// --- Run the ray-tracer ---
-		
-		val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
-		print("Using a path tracer")
-		
-		val renderer = PathTracer(
-			parsedScene.world,
-			Color(),
-			PCG(initState, initSeq),
-			numRays = 7,
-			maxRayDepth = 6,
-			russianRouletteLimit = 3
-		)
 		
 		val samplesPerPixel =
 			if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
