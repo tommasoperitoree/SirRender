@@ -1,8 +1,10 @@
 package math
 
 import materials.areClose
+import kotlin.math.abs
 import kotlin.math.sign
 import kotlin.math.sqrt
+import kotlin.math.withSign
 
 /**
  * Represents a 3D vector with components ([x], [y], [z]).
@@ -219,19 +221,20 @@ data class Vec2d(
 }
 
 
-
 /**
  * Create Orthonormal basis from given [normal] taken as the `ez` versor.
  * [normal] has to be normalized!
  */
 fun createOnbFromZ(normal: Normal): Triple<Vec, Vec, Vec> {
 	
-	val sign = if (normal.z >= 0f) 1f else -1f
+	require(abs(normal.norm() - 1f) < 1e-3f) { "Normals need to be normalized when creating onb" }
+	
+	val sign: Float = 1f.withSign(normal.z)
 	
 	val a = -1f / (sign + normal.z)
 	val b = normal.x * normal.y * a
 	
-	val e1 = Vec(1f + sign * normal.x * normal.x * a, sign * b, -sign * normal.x)
+	val e1 = Vec(1.0f + sign * normal.x * normal.x * a, sign * b, -sign * normal.x)
 	val e2 = Vec(b, sign + normal.y * normal.y * a, -normal.y)
 	
 	return Triple(e1, e2, normal.toVec())

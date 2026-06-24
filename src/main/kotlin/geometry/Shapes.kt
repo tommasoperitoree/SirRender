@@ -40,10 +40,11 @@ fun sphereNormal(point: Point, rayDir: Vec): Normal {
 
 /** Calculation of intersection [point] on the geometry.Sphere's surface, in (u,v) coordinates*/
 fun spherePointToUV(point: Point): Vec2d {
+	// To understand if 0.5f shift is needed
+	// val u = 0.5f + atan2(point.y, point.x) / (2f * PI.toFloat())
 	val u = atan2(point.y, point.x) / (2f * PI.toFloat())
-	val v = acos(point.z) / PI.toFloat()
 	return Vec2d(
-		if (u >= 0f) u else u + 1f, v
+		if (u >= 0f) u else u + 1f, acos(point.z) / PI.toFloat()
 	)
 }
 
@@ -61,6 +62,7 @@ class Sphere(
 		val invRay: Ray = ray.transform(transformation.inverse())
 		val o: Vec = invRay.origin.toVec()
 		val d: Vec = invRay.dir
+<<<<<<< Updated upstream
 		val od: Float = o dot d // sign tells if ray is moving towards or away from ray's origin
 		val dSq = d.squaredNorm()
 		val oSq = o.squaredNorm()
@@ -75,6 +77,18 @@ class Sphere(
 		
 		val t1: Float = (-od - sqr) / dSq
 		val t2: Float = (-od + sqr) / dSq
+=======
+		//val delta4: Float = (o dot d).pow(2f) - d.squaredNorm().times(o.squaredNorm() - 1f)
+		//try to use vectorial formula in slides, it's still ok but could be a problem if o is perpendicular to d
+		// so that t1 & t2 are too small and rejected
+		val a = d.squaredNorm()
+		val bHalf = o dot d
+		val cross = o cross d
+		val delta4: Float = a - (cross).squaredNorm()
+		if (delta4 == 0f) return null //adding this check if there are no intersection
+		val t1: Float = (-bHalf - sqrt(delta4)) / a
+		val t2: Float = (-bHalf + sqrt(delta4)) / a
+>>>>>>> Stashed changes
 		val tFirstHit = if (t1 > invRay.tMin && t1 < invRay.tMax) {
 			t1
 		} else if (t2 > invRay.tMin && t2 < invRay.tMax) {
@@ -96,11 +110,8 @@ class Sphere(
 }
 
 
-fun planePointToUV(point: Point): Vec2d {
-	val u = point.x - floor(point.x)
-	val v = point.y - floor(point.y)
-	return Vec2d(u, v)
-}
+fun planePointToUV(point: Point): Vec2d =
+	Vec2d(point.x - floor(point.x), point.y - floor(point.y))
 
 /** A 3D infinite plane parallel to the x and y axes and passing through the origin. */
 class Plane(

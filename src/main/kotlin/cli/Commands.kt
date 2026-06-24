@@ -217,22 +217,22 @@ private fun buildDemoWorld(): World {
 	val scaling = scaling(Vec(scale, scale, scale))
 	val coords = listOf(-0.5f, 0.5f)
 	
-	val sphere_material = Material(
+	val sphereMaterial = Material(
 		brdf = DiffuseBRDF(UniformPigment(Color.white)),
 		CheckeredPigment(Color.white, Color(1f, 1f, 0f), 4)
 	)
-	val sphere_material1 = Material(
+	val sphereMaterial1 = Material(
 		brdf = DiffuseBRDF(UniformPigment(Color.black)),
 		UniformPigment(Color(1f, 0f, 0f))
 	)
 	
 	// spheres in every vertex of a cube centered in origin with edge 1, scaled 1/10
 	for (x in coords) for (y in coords) for (z in coords)
-		world.addShape(Sphere(translation(Vec(x, y, z)) * scaling, sphere_material))
+		world.addShape(Sphere(translation(Vec(x, y, z)) * scaling, sphereMaterial))
 	
 	// two more spheres in middle of two faces, gives asymmetry to scene
-	world.addShape(Sphere(translation(Vec(0f, 0f, -0.5f)) * scaling, sphere_material1))
-	world.addShape(Sphere(translation(Vec(0f, 0.5f, 0f)) * scaling, sphere_material1))
+	world.addShape(Sphere(translation(Vec(0f, 0f, -0.5f)) * scaling, sphereMaterial1))
+	world.addShape(Sphere(translation(Vec(0f, 0.5f, 0f)) * scaling, sphereMaterial1))
 	
 	
 	return world
@@ -381,10 +381,51 @@ class Render : CliktCommand("render") {
 		val baseCamera = parsedScene.camera ?: throw IllegalArgumentException("No camera found")
 		val img = HDRImage(width, height)
 		
+<<<<<<< Updated upstream
 		val cam = when (baseCamera) {
 			is OrthogonalCamera -> OrthogonalCamera(
 				baseCamera.aspectRatio,
 				transformation = baseCamera.transformation
+=======
+		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
+		
+		for (frameIndex in 0 until numFrames) {
+			val angle = 90f
+			//val angle = observerAngle + (frameIndex * angleStep)
+			val angleNNN = "%03d".format(frameIndex)
+			
+			val img = HDRImage(width, height)
+			
+			val screenCenter = Vec(-1f, 0f, 0f)
+			
+			val cam = when (baseCamera) {
+				is OrthogonalCamera -> OrthogonalCamera(
+					baseCamera.aspectRatio,
+					transformation = baseCamera.transformation
+				)
+				
+				is PerspectiveCamera -> PerspectiveCamera(
+					baseCamera.distance,
+					baseCamera.aspectRatio,
+					transformation = baseCamera.transformation
+				)
+				
+				else -> throw IllegalStateException("No camera found for $baseCamera")
+			}
+			
+			//Run the ray-tracer
+			
+			val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
+			
+			
+			val renderer = PathTracer(
+				parsedScene.world,
+				Color(),
+				PCG(initState, initSeq),
+				numRays = 4,
+				maxRayDepth = 6,
+				russianRouletteLimit = 4
+>>>>>>> Stashed changes
 			)
 			
 			is PerspectiveCamera -> PerspectiveCamera(
@@ -405,9 +446,9 @@ class Render : CliktCommand("render") {
 			parsedScene.world,
 			Color(),
 			PCG(initState, initSeq),
-			numRays = 50,
-			maxRayDepth = 10,
-			russianRouletteLimit = 4
+			numRays = 7,
+			maxRayDepth = 6,
+			russianRouletteLimit = 3
 		)
 		
 		val samplesPerPixel =

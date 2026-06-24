@@ -6,7 +6,7 @@ material skyMaterial(
 )
 
 material groundMaterial(
-    diffuse(uniform((0,0.8,0.8))),
+    diffuse(uniform((0.12, 0.2, 0.2))),
     uniform((0, 0, 0))
 )
 material sphereMaterial(
