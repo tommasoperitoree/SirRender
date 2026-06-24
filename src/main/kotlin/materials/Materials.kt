@@ -109,7 +109,7 @@ interface BRDF {
 
 class DiffuseBRDF(
 	override val pigment: Pigment = UniformPigment(Color.white),
-	val reflectance: Float = 0.5f
+	val reflectance: Float = 1f
 ) : BRDF {
 	
 	override fun eval(normal: Normal, inDir: Vec, outDir: Vec, uv: Vec2d): Color =

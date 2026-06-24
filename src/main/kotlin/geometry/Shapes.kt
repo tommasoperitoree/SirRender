@@ -44,7 +44,7 @@ fun spherePointToUV(point: Point): Vec2d {
 	// val u = 0.5f + atan2(point.y, point.x) / (2f * PI.toFloat())
 	val u = atan2(point.y, point.x) / (2f * PI.toFloat())
 	return Vec2d(
-		if (u >= 0f) u else u + 1f, acos(point.z) / PI.toFloat()
+		if (u >= 0f) u else u + 1f, acos(point.z.coerceIn(-1f, 1f)) / PI.toFloat()
 	)
 }
 
@@ -66,7 +66,7 @@ class Sphere(
 		val dSq = d.squaredNorm()
 		val oSq = o.squaredNorm()
 		
-		if (oSq > 1f && od > 0f) return null
+		// if (oSq > 1f && od > 0f) return null
 		
 		val deltaRid: Float = od * od - dSq * (oSq - 1f)
 		

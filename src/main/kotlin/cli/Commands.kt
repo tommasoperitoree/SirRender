@@ -110,9 +110,6 @@ class Demo : CliktCommand(
 	val camera: String by option(
 		"--camera", "-c", help = "Camera type (projection): Orthogonal or Perspective"
 	).choice("Orthogonal", "Perspective", ignoreCase = true).default("Perspective")
-	val numFrames: Int by option(
-		"--num-frames", "-n", help = "Number of frames (angles) to generate"
-	).int().default(1)
 	val outputDir: String by option(
 		"--output-dir", "-o", help = "Output directory for images"
 	).default("./src/main/resources/frames")

@@ -84,7 +84,7 @@ class PathTracer(
 		}
 		
 		if (PROFILING) totalIntersectionTime += intersectionTime
-		totalIntersectionTime += intersectionTime
+		// totalIntersectionTime += intersectionTime
 		
 		hitRecord ?: return backgroundColor
 		

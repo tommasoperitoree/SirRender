@@ -2,7 +2,7 @@ float clock(150)
 
 material skyMaterial(
     diffuse(uniform((1, 1, 1))),
-    uniform((1, 1, 1))
+    uniform((2, 2, 2))
 )
 
 material groundMaterial(
@@ -22,4 +22,4 @@ plane (groundMaterial, identity)
 
 sphere(sphereMaterial, scaling((2, 2, 2))*translation((0, 0, 1)))
 
-camera(perspective, translation((-5, 0, 2))*rotationY(10), 1.7777, 2.0)
+camera(perspective, translation((-5, 0, 5))*rotationY(10), 1.7777, 2.0)
