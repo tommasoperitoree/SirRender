@@ -12,6 +12,7 @@ import math.Vec
 import math.rotationY
 import math.translation
 import org.junit.jupiter.api.Test
+import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -21,30 +22,9 @@ class ParserTest {
 	
 	@Test
 	fun `parser Scene`() {
-		val stream = ("float clock(150)\n" +
-				"        material sky_material(\n" +
-				"            diffuse(uniform((0, 0, 0))),\n" +
-				"            uniform((0.7, 0.5, 1))\n" +
-				"        )\n" +
-				"    \n" +
-				"        material ground_material(\n" +
-				"            diffuse(checkered((0.3, 0.5, 0.1),\n" +
-				"                              (0.1, 0.2, 0.5), 4)),\n" +
-				"            uniform((0, 0, 0))\n" +
-				"        )\n" +
-				"    \n" +
-				"        material sphere_material(\n" +
-				"            specular(uniform((0.5, 0.5, 0.5))),\n" +
-				"            uniform((0, 0, 0))\n" +
-				"        )\n" +
-				"    \n" +
-				"        plane (sky_material, translation((0, 0, 100)) * rotation_y(clock))\n" +
-				"        plane (ground_material, identity)\n" +
-				"    \n" +
-				"        sphere(sphere_material, translation((0, 0, 1)))\n" +
-				"    \n" +
-				"        camera(perspective, rotation_z(30) * translation((-4, 0, 1)), 1.0, 2.0)").reader()
 		
+		val testSceneFile = "./src/test/resources/testScene.txt"
+		val stream = File(testSceneFile).reader()
 		
 		val inputFile = SceneInputStream(stream)
 		val scene = parseScene(inputFile)
@@ -58,13 +38,13 @@ class ParserTest {
 		//check material variables
 		assertEquals(3, scene.materials.size)
 		
-		assert("sky_material" in scene.materials)
-		assert("ground_material" in scene.materials)
-		assert("sphere_material" in scene.materials)
+		assert("skyMaterial" in scene.materials)
+		assert("groundMaterial" in scene.materials)
+		assert("sphereMaterial" in scene.materials)
 		
-		val skyMaterial = scene.materials["sky_material"]
-		val groundMaterial = scene.materials["ground_material"]
-		val sphereMaterial = scene.materials["sphere_material"]
+		val skyMaterial = scene.materials["skyMaterial"]
+		val groundMaterial = scene.materials["groundMaterial"]
+		val sphereMaterial = scene.materials["sphereMaterial"]
 		
 		//sky
 		assertNotNull(skyMaterial) //must check if is noNull

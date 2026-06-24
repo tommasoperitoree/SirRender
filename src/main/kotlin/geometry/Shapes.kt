@@ -40,10 +40,11 @@ fun sphereNormal(point: Point, rayDir: Vec): Normal {
 
 /** Calculation of intersection [point] on the geometry.Sphere's surface, in (u,v) coordinates*/
 fun spherePointToUV(point: Point): Vec2d {
-	val u = 0.5f + atan2(point.y, point.x) / (2f * PI.toFloat())
-	val v = acos(point.z) / PI.toFloat()
+	// To understand if 0.5f shift is needed
+	// val u = 0.5f + atan2(point.y, point.x) / (2f * PI.toFloat())
+	val u = atan2(point.y, point.x) / (2f * PI.toFloat())
 	return Vec2d(
-		if (u >= 0f) u else u + 1f, v
+		if (u >= 0f) u else u + 1f, acos(point.z) / PI.toFloat()
 	)
 }
 
@@ -96,11 +97,8 @@ class Sphere(
 }
 
 
-fun planePointToUV(point: Point): Vec2d {
-	val u = point.x - floor(point.x)
-	val v = point.y - floor(point.y)
-	return Vec2d(u, v)
-}
+fun planePointToUV(point: Point): Vec2d =
+	Vec2d(point.x - floor(point.x), point.y - floor(point.y))
 
 /** A 3D infinite plane parallel to the x and y axes and passing through the origin. */
 class Plane(

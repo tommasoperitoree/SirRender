@@ -122,12 +122,9 @@ class DiffuseBRDF(
 		normal: Normal,
 		depth: Int
 	): Ray {
-		//normal & incoming ray have to be in opposite direction
-		val orientedNormal = if (normal.toVec().dot(incomingDir) > 0) {
-			normal.unaryMinus()
-		} else {
-			normal
-		}
+		// normal & incoming ray have to be in opposite direction
+		val orientedNormal = if (normal dot incomingDir > 0) -normal else normal
+		
 		val (e1, e2, e3) = createOnbFromZ(orientedNormal)
 		val cosThetaSq = pcg.randomFloat()
 		val cosTheta = sqrt(cosThetaSq) //cosine-wave distribution around the z axis
@@ -166,12 +163,12 @@ class SpecularBRDF(
 		
 		
 		val rayDir = Vec(incomingDir.x, incomingDir.y, incomingDir.z).normalize()
-		val normal = normal.toVec().normalize()
+		val n = normal.toVec().normalize()
 		
 		return Ray(
 			intPoint,
-			rayDir - normal * 2f * (normal dot rayDir),
-			1e-5f,
+			rayDir - n * 2f * (n dot rayDir),
+			1e-3f,
 			Float.POSITIVE_INFINITY,
 			depth
 		)

@@ -217,22 +217,22 @@ private fun buildDemoWorld(): World {
 	val scaling = scaling(Vec(scale, scale, scale))
 	val coords = listOf(-0.5f, 0.5f)
 	
-	val sphere_material = Material(
+	val sphereMaterial = Material(
 		brdf = DiffuseBRDF(UniformPigment(Color.white)),
 		CheckeredPigment(Color.white, Color(1f, 1f, 0f), 4)
 	)
-	val sphere_material1 = Material(
+	val sphereMaterial1 = Material(
 		brdf = DiffuseBRDF(UniformPigment(Color.black)),
 		UniformPigment(Color(1f, 0f, 0f))
 	)
 	
 	// spheres in every vertex of a cube centered in origin with edge 1, scaled 1/10
 	for (x in coords) for (y in coords) for (z in coords)
-		world.addShape(Sphere(translation(Vec(x, y, z)) * scaling, sphere_material))
+		world.addShape(Sphere(translation(Vec(x, y, z)) * scaling, sphereMaterial))
 	
 	// two more spheres in middle of two faces, gives asymmetry to scene
-	world.addShape(Sphere(translation(Vec(0f, 0f, -0.5f)) * scaling, sphere_material1))
-	world.addShape(Sphere(translation(Vec(0f, 0.5f, 0f)) * scaling, sphere_material1))
+	world.addShape(Sphere(translation(Vec(0f, 0f, -0.5f)) * scaling, sphereMaterial1))
+	world.addShape(Sphere(translation(Vec(0f, 0.5f, 0f)) * scaling, sphereMaterial1))
 	
 	
 	return world
@@ -405,9 +405,9 @@ class Render : CliktCommand("render") {
 			parsedScene.world,
 			Color(),
 			PCG(initState, initSeq),
-			numRays = 50,
-			maxRayDepth = 10,
-			russianRouletteLimit = 4
+			numRays = 7,
+			maxRayDepth = 6,
+			russianRouletteLimit = 3
 		)
 		
 		val samplesPerPixel =
