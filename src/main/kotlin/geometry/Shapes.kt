@@ -40,7 +40,7 @@ fun sphereNormal(point: Point, rayDir: Vec): Normal {
 
 /** Calculation of intersection [point] on the geometry.Sphere's surface, in (u,v) coordinates*/
 fun spherePointToUV(point: Point): Vec2d {
-	val u = 0.5f + atan2(point.y, point.x) / (2f * PI.toFloat())
+	val u = atan2(point.y, point.x) / (2f * PI.toFloat())
 	val v = acos(point.z) / PI.toFloat()
 	return Vec2d(
 		if (u >= 0f) u else u + 1f, v
