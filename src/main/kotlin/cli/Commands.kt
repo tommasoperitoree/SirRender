@@ -333,15 +333,9 @@ class Render : CliktCommand("render") {
 	val height: Int by option(
 		"--height", "-h", help = "Image height in pixels"
 	).int().default(480)
-	val numFrames: Int by option(
-		"--num-frames", "-n", help = "Number of frames (angles) to generate"
-	).int().default(1)
 	val outputDir: String by option(
 		"--output-dir", "-o", help = "Output directory for PFM frames"
 	).default("./src/main/resources/frames")
-	val observerAngle: Float by option(
-		"--observer-angle", "-i", help = "Starting observer angle in degrees"
-	).float().default(0f)
 	val renderImage: Boolean by option(
 		"--render", "-r", help = "Also convert output to PNG"
 	).flag(default = false)
@@ -378,51 +372,10 @@ class Render : CliktCommand("render") {
 		val baseCamera = parsedScene.camera ?: throw IllegalArgumentException("No camera found")
 		val img = HDRImage(width, height)
 		
-<<<<<<< Updated upstream
 		val cam = when (baseCamera) {
 			is OrthogonalCamera -> OrthogonalCamera(
 				baseCamera.aspectRatio,
 				transformation = baseCamera.transformation
-=======
-		val angleStep = if (numFrames == 1) 0f else 360f / numFrames
-		
-		for (frameIndex in 0 until numFrames) {
-			val angle = 90f
-			//val angle = observerAngle + (frameIndex * angleStep)
-			val angleNNN = "%03d".format(frameIndex)
-			
-			val img = HDRImage(width, height)
-			
-			val screenCenter = Vec(-1f, 0f, 0f)
-			
-			val cam = when (baseCamera) {
-				is OrthogonalCamera -> OrthogonalCamera(
-					baseCamera.aspectRatio,
-					transformation = baseCamera.transformation
-				)
-				
-				is PerspectiveCamera -> PerspectiveCamera(
-					baseCamera.distance,
-					baseCamera.aspectRatio,
-					transformation = baseCamera.transformation
-				)
-				
-				else -> throw IllegalStateException("No camera found for $baseCamera")
-			}
-			
-			//Run the ray-tracer
-			
-			val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
-			
-			
-			val renderer = PathTracer(
-				parsedScene.world,
-				Color(),
-				PCG(initState, initSeq),
-				numRays = 4,
-				maxRayDepth = 6,
-				russianRouletteLimit = 4
->>>>>>> Stashed changes
 			)
 			
 			is PerspectiveCamera -> PerspectiveCamera(
@@ -433,6 +386,7 @@ class Render : CliktCommand("render") {
 			
 			else -> throw IllegalStateException("No camera found for $baseCamera")
 		}
+		
 		
 		// --- Run the ray-tracer ---
 		
@@ -456,7 +410,8 @@ class Render : CliktCommand("render") {
 		
 		var done = 0L
 		
-		pathTracer.fireAllRays { ray ->
+		pathTracer.fireAllRays()
+		{ ray ->
 			done++
 			progressBar.update(done)
 			renderer(ray)

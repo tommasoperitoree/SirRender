@@ -62,22 +62,6 @@ class Sphere(
 		val invRay: Ray = ray.transform(transformation.inverse())
 		val o: Vec = invRay.origin.toVec()
 		val d: Vec = invRay.dir
-<<<<<<< Updated upstream
-		val od: Float = o dot d // sign tells if ray is moving towards or away from ray's origin
-		val dSq = d.squaredNorm()
-		val oSq = o.squaredNorm()
-		
-		// if (oSq > 1f && od > 0f) return null
-		
-		val deltaRid: Float = od * od - dSq * (oSq - 1f)
-		
-		if (deltaRid <= 0f) return null // adding this check if there are no intersection
-		
-		val sqr = sqrt(deltaRid)
-		
-		val t1: Float = (-od - sqr) / dSq
-		val t2: Float = (-od + sqr) / dSq
-=======
 		//val delta4: Float = (o dot d).pow(2f) - d.squaredNorm().times(o.squaredNorm() - 1f)
 		//try to use vectorial formula in slides, it's still ok but could be a problem if o is perpendicular to d
 		// so that t1 & t2 are too small and rejected
@@ -88,7 +72,7 @@ class Sphere(
 		if (delta4 == 0f) return null //adding this check if there are no intersection
 		val t1: Float = (-bHalf - sqrt(delta4)) / a
 		val t2: Float = (-bHalf + sqrt(delta4)) / a
->>>>>>> Stashed changes
+		
 		val tFirstHit = if (t1 > invRay.tMin && t1 < invRay.tMax) {
 			t1
 		} else if (t2 > invRay.tMin && t2 < invRay.tMax) {
