@@ -213,6 +213,7 @@ private fun buildDemoWorld(): World {
 	val scale = 1 / 10f
 	val scaling = scaling(Vec(scale, scale, scale))
 	val coords = listOf(-0.5f, 0.5f)
+	
 	val sphereMaterial = Material(
 		brdf = DiffuseBRDF(UniformPigment(Color.white)),
 		CheckeredPigment(Color.white, Color(1f, 1f, 0f), 4)
@@ -332,15 +333,9 @@ class Render : CliktCommand("render") {
 	val height: Int by option(
 		"--height", "-h", help = "Image height in pixels"
 	).int().default(480)
-	val numFrames: Int by option(
-		"--num-frames", "-n", help = "Number of frames (angles) to generate"
-	).int().default(1)
 	val outputDir: String by option(
 		"--output-dir", "-o", help = "Output directory for PFM frames"
 	).default("./src/main/resources/frames")
-	val observerAngle: Float by option(
-		"--observer-angle", "-i", help = "Starting observer angle in degrees"
-	).float().default(0f)
 	val renderImage: Boolean by option(
 		"--render", "-r", help = "Also convert output to PNG"
 	).flag(default = false)
@@ -376,73 +371,50 @@ class Render : CliktCommand("render") {
 		
 		val baseCamera = parsedScene.camera ?: throw IllegalArgumentException("No camera found")
 		
-		for (frameIndex in 0 until numFrames) {
-			val angle = 90f
-			//val angle = observerAngle + (frameIndex * angleStep)
-			val angleNNN = "%03d".format(frameIndex)
+		
+		// --- Run the ray-tracer ---
+		
+		val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
+		print("Using a path tracer")
+		
+		val renderer = PathTracer(
+			parsedScene.world,
+			Color(),
+			PCG(initState, initSeq),
+			numRays = 7,
+			maxRayDepth = 6,
+			russianRouletteLimit = 3
+		)
+		
+		val samplesPerPixel =
+			if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
+		val totalPixels = img.width.toLong() * img.height.toLong()
+		val totalSamples = totalPixels * samplesPerPixel
+		val progressBar = ProgressBar(totalSamples)
+		
+		var done = 0L
+		
+		pathTracer.fireAllRays()
+		{ ray ->
+			done++
+			progressBar.update(done)
+			renderer(ray)
+		}
+		
+		
+		val baseName = inputFile.nameWithoutExtension
+		val pfmPath = "$outputDir/$baseName.pfm"
+		img.writePFMFile(pfmPath)
+		println("Saved PFM → $pfmPath")
+		
+		
+		if (renderImage) {
+			img.normalizeImage(factor)
+			img.clampImage()
 			
-			val img = HDRImage(width, height)
-			
-			val screenCenter = Vec(-1f, 0f, 0f)
-			
-			val cam = when (baseCamera) {
-				is OrthogonalCamera -> OrthogonalCamera(
-					baseCamera.aspectRatio,
-					transformation = baseCamera.transformation
-				)
-				
-				is PerspectiveCamera -> PerspectiveCamera(
-					baseCamera.distance,
-					baseCamera.aspectRatio,
-					transformation = baseCamera.transformation
-				)
-				
-				else -> throw IllegalStateException("No camera found for $baseCamera")
-			}
-			
-			//Run the ray-tracer
-			
-			val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
-			
-			
-			val renderer = PathTracer(
-				parsedScene.world,
-				Color(),
-				PCG(initState, initSeq),
-				numRays = 8,
-				maxRayDepth = 6,
-				russianRouletteLimit = 4
-			)
-			
-			val samplesPerPixel =
-				if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
-			val totalPixels = img.width.toLong() * img.height.toLong()
-			val totalSamples = totalPixels * samplesPerPixel
-			val progressBar = ProgressBar(totalSamples)
-			
-			var done = 0L
-			
-			pathTracer.fireAllRays { ray ->
-				done++
-				progressBar.update(done)
-				renderer(ray)
-			}
-			
-			
-			val baseName = inputFile.nameWithoutExtension
-			val pfmPath = "$outputDir/$baseName.pfm"
-			img.writePFMFile(pfmPath)
-			println("Saved PFM → $pfmPath")
-			
-			
-			if (renderImage) {
-				img.normalizeImage(factor)
-				img.clampImage()
-				
-				val pngPath = "$outputDir/$baseName.png"
-				FileOutputStream(pngPath).use { img.writeLDRImage(it, "png", gamma) }
-				println("Saved PNG → $pngPath")
-			}
+			val pngPath = "$outputDir/$baseName.png"
+			FileOutputStream(pngPath).use { img.writeLDRImage(it, "png", gamma) }
+			println("Saved PNG → $pngPath")
 		}
 	}
 }
