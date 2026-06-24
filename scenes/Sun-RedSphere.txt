@@ -14,7 +14,7 @@ material skyMaterial(
     uniform((1.4, 3, 4))
 )
 
- sphere(sun_material,translation((0,0,-1))*scaling((20,20,20)))
- sphere(sphere_material,translation((0,0,0))*scaling((0.4,0.4,0.4)))
+ sphere(sun_material,translation((0,0,-1.4))*scaling((5,5,1)))
+ sphere(sphere_material,translation((0,0,0.1))*scaling((0.4,0.4,0.4)))
  sphere(skyMaterial,scaling((50,50,50)))
- camera(orthogonal, translation((0, 0, 0))* rotationZ(-25.0), 1.777, 6.0)
+ camera(perspective, translation((-1, 0, 0))*rotationZ(-45), 1.777, 6.0)
