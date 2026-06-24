@@ -392,17 +392,6 @@ class Render : CliktCommand("render") {
 			else -> throw IllegalStateException("No camera found for $baseCamera")
 		}
 		
-<<<<<<< Updated upstream
-		// --- Run the ray-tracer ---
-		
-		val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
-		print("Using a path tracer")
-		
-		val renderer = PathTracer(
-			parsedScene.world,
-			Color(),
-			PCG(initState, initSeq),
-=======
 		for (frameIndex in 0 until numFrames) {
 			val angle = 90f
 			//val angle = observerAngle + (frameIndex * angleStep)
@@ -436,40 +425,40 @@ class Render : CliktCommand("render") {
 				parsedScene.world,
 				Color(),
 				PCG(initState, initSeq),
->>>>>>> Stashed changes
-				numRays = 4,
+				numRays = 8,
 				maxRayDepth = 6,
 				russianRouletteLimit = 4
 			)
-		
-		val samplesPerPixel =
-			if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
-		val totalPixels = img.width.toLong() * img.height.toLong()
-		val totalSamples = totalPixels * samplesPerPixel
-		val progressBar = ProgressBar(totalSamples)
-		
-		var done = 0L
-		
-		pathTracer.fireAllRays { ray ->
-			done++
-			progressBar.update(done)
-			renderer(ray)
-		}
-		
-		
-		val baseName = inputFile.nameWithoutExtension
-		val pfmPath = "$outputDir/$baseName.pfm"
-		img.writePFMFile(pfmPath)
-		println("Saved PFM → $pfmPath")
-		
-		
-		if (renderImage) {
-			img.normalizeImage(factor)
-			img.clampImage()
 			
-			val pngPath = "$outputDir/$baseName.png"
-			FileOutputStream(pngPath).use { img.writeLDRImage(it, "png", gamma) }
-			println("Saved PNG → $pngPath")
+			val samplesPerPixel =
+				if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
+			val totalPixels = img.width.toLong() * img.height.toLong()
+			val totalSamples = totalPixels * samplesPerPixel
+			val progressBar = ProgressBar(totalSamples)
+			
+			var done = 0L
+			
+			pathTracer.fireAllRays { ray ->
+				done++
+				progressBar.update(done)
+				renderer(ray)
+			}
+			
+			
+			val baseName = inputFile.nameWithoutExtension
+			val pfmPath = "$outputDir/$baseName.pfm"
+			img.writePFMFile(pfmPath)
+			println("Saved PFM → $pfmPath")
+			
+			
+			if (renderImage) {
+				img.normalizeImage(factor)
+				img.clampImage()
+				
+				val pngPath = "$outputDir/$baseName.png"
+				FileOutputStream(pngPath).use { img.writeLDRImage(it, "png", gamma) }
+				println("Saved PNG → $pngPath")
+			}
 		}
 	}
 }

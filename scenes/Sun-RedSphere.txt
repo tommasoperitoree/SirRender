@@ -6,10 +6,15 @@ material sphere_material(
         )
 
 material sun_material(
-    diffuse(uniform((0,0,0))),
-        uniform((10,4,0))
+    diffuse(uniform((1,0.4,0))),
+        uniform((0,0,0))
         )
+material skyMaterial(
+    diffuse(uniform((0,0,0))),
+    uniform((1.4, 3, 4))
+)
 
- sphere(sun_material,translation((0,1,0))*scaling((0.5,0.5,0.5)))
+ sphere(sun_material,translation((0,0,-1))*scaling((20,20,20)))
  sphere(sphere_material,translation((0,0,0))*scaling((0.4,0.4,0.4)))
- camera(orthogonal, translation((0, 0, 0))* rotation_z(-25.0), 1.777, 6.0)
+ sphere(skyMaterial,scaling((50,50,50)))
+ camera(orthogonal, translation((0, 0, 0))* rotationZ(-25.0), 1.777, 6.0)
