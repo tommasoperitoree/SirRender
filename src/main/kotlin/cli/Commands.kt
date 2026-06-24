@@ -375,22 +375,6 @@ class Render : CliktCommand("render") {
 		}
 		
 		val baseCamera = parsedScene.camera ?: throw IllegalArgumentException("No camera found")
-		val img = HDRImage(width, height)
-		
-		val cam = when (baseCamera) {
-			is OrthogonalCamera -> OrthogonalCamera(
-				baseCamera.aspectRatio,
-				transformation = baseCamera.transformation
-			)
-			
-			is PerspectiveCamera -> PerspectiveCamera(
-				baseCamera.distance,
-				baseCamera.aspectRatio,
-				transformation = baseCamera.transformation
-			)
-			
-			else -> throw IllegalStateException("No camera found for $baseCamera")
-		}
 		
 		for (frameIndex in 0 until numFrames) {
 			val angle = 90f
