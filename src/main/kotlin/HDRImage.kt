@@ -96,8 +96,16 @@ data class HDRImage(
 	 * default parameter [delta] is to prevent black pixels from appearing in the output image
 	 */
 	fun averageLuminosity(delta: Float = 1e-10f): Float {
+		require(delta.isFinite() && delta > 0f){
+			"Delta must be finite and positive."
+		}
+		
 		var sum = 0.0
+		
 		for (pix in pixels) {
+			require(pix.luminosity().isFinite() && pix.luminosity() >= 0f) {
+				"Luminosity must be finite and non-negative."
+			}
 			sum += log10(delta + pix.luminosity())
 		}
 		return (10.0).pow(sum / pixels.size).toFloat()
@@ -111,8 +119,18 @@ data class HDRImage(
 	 * the average luminosity of the current image calling [averageLuminosity].
 	 */
 	fun normalizeImage(factor: Float, luminosity: Float? = null) {
+		require(factor.isFinite() && factor >= 0f) {
+			"Factor must be finite and non-negative."
+		}
+		
 		val lum = luminosity ?: averageLuminosity()
+		
+		require(lum.isFinite() && lum > 0f) {
+			"Luminosity must be finite and positive."
+		}
+		
 		val scale = factor / lum
+		
 		for (i in pixels.indices) {
 			pixels[i] = pixels[i] * scale
 		}
@@ -124,7 +142,12 @@ data class HDRImage(
 	 * To be applied only after the [normalizeImage]
 	 */
 	fun clampImage() {
-		fun clamp(x: Float): Float = x / (1 + x)
+		fun clamp(x: Float): Float {
+			require(x.isFinite() && x >= 0f) {
+				"X must be finite and positive."
+			}
+			return x / (1 + x)
+		}
 		for (i in pixels.indices) {
 			pixels[i] = Color(clamp(pixels[i].r), clamp(pixels[i].g), clamp(pixels[i].b))
 		}
@@ -239,12 +262,16 @@ data class HDRImage(
 		internal fun parseEndianness(line: String): ByteOrder {
 			// Try to parse, if it fails to be a float, throw the exception immediately
 			val value = line.trim().toFloatOrNull()
-				?: throw InvalidPFMImageFormat("invalid endianness specification: '$line'")
+				?: throw InvalidPFMImageFormat("Invalid endianness specification: '$line'")
+			
+			if (!value.isFinite()) {
+				throw InvalidPFMImageFormat("Invalid endianness specification: value must be finite")
+			}
 			
 			return when {
 				value > 0 -> BIG_ENDIAN
 				value < 0 -> LITTLE_ENDIAN
-				else -> throw InvalidPFMImageFormat("invalid endianness specification: cannot be zero")
+				else -> throw InvalidPFMImageFormat("Invalid endianness specification: cannot be zero")
 			}
 		}
 		
