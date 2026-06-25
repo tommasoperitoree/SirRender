@@ -62,7 +62,7 @@ class Sphere(
 		val invRay: Ray = ray.transform(transformation.inverse())
 		val o: Vec = invRay.origin.toVec()
 		val d: Vec = invRay.dir
-
+		
 		val od: Float = o dot d // sign tells if ray is moving towards or away from ray's origin
 		val dSq = d.squaredNorm()
 		val oSq = o.squaredNorm()
@@ -85,12 +85,16 @@ class Sphere(
 			return null
 		}
 		val hitPoint = invRay.at(tFirstHit)
+		val worldPoint = transformation * hitPoint
+		val normal = transformation * sphereNormal(hitPoint, rayDir = d)
+		val surfacePoint = spherePointToUV(hitPoint)
+		val t = tFirstHit
 		
 		return HitRecord(
-			transformation * hitPoint,
-			transformation * sphereNormal(hitPoint, rayDir = d),
-			spherePointToUV(hitPoint),
-			tFirstHit,
+			worldPoint,
+			normal,
+			surfacePoint,
+			t,
 			ray,
 			this
 		)
@@ -176,16 +180,15 @@ class Cube(
 	//unitary cube centered in the origin with length 2 [-1,1]
 	override fun rayIntersection(ray: Ray): HitRecord? {
 		val invRay: Ray = ray.transform(transformation.inverse())
-		if (invRay.dir.norm() < 1e-5f) {
-			return null
-		}
 		var hitAxis = -1
 		var hitSign = 0f
 		var tNear = Float.NEGATIVE_INFINITY
 		var tFar = Float.POSITIVE_INFINITY
-		
 		val origins = floatArrayOf(invRay.origin.x, invRay.origin.y, invRay.origin.z)
 		val dirs = floatArrayOf(invRay.dir.x, invRay.dir.y, invRay.dir.z)
+		
+		if (invRay.dir.norm() < 1e-5f) return null
+		
 		for (axis in 0..2) {
 			val o = origins[axis]
 			val d = dirs[axis]
@@ -193,6 +196,7 @@ class Cube(
 				if (o < -1f || o > 1f) return null // if the origin of ray is out of length range it won't hit the cube
 				else continue
 			}
+			
 			//ray is describe by the parametric eq x(t)=o+t*d
 			var t1 = (-1 - o) / d //enter
 			var t2 = (1 - o) / d //exit
@@ -237,14 +241,10 @@ class Cube(
 			else -> Vec(0f, 0f, sign)
 		}
 		
-		val worldPoint = transformation * hitPoint
-		val worldNormal = (transformation * normalVec.toNormal())
-		val uv = cubePointToUV(hitPoint, axis, sign)
-		
 		return HitRecord(
-			worldPoint = worldPoint,
-			normal = worldNormal,
-			surfacePoint = uv,
+			worldPoint = transformation * hitPoint,
+			normal = (transformation * normalVec.toNormal()),
+			surfacePoint = cubePointToUV(hitPoint, axis, sign),
 			t = tHit,
 			ray = ray,
 			shape = this
