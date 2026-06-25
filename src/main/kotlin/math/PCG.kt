@@ -30,5 +30,5 @@ class PCG(
 	}
 	
 	/** Generate random float uniformly distributed over [0,1). */
-	fun randomFloat(): Float = random().toFloat() / 0x100000000f
+	fun randomFloat(): Float = random().toFloat() / 0xffffffff
 }

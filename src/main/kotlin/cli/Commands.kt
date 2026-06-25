@@ -370,6 +370,22 @@ class Render : CliktCommand("render") {
 		}
 		
 		val baseCamera = parsedScene.camera ?: throw IllegalArgumentException("No camera found")
+		val img = HDRImage(width, height)
+		
+		val cam = when (baseCamera) {
+			is OrthogonalCamera -> OrthogonalCamera(
+				baseCamera.aspectRatio,
+				transformation = baseCamera.transformation
+			)
+			
+			is PerspectiveCamera -> PerspectiveCamera(
+				baseCamera.distance,
+				baseCamera.aspectRatio,
+				transformation = baseCamera.transformation
+			)
+			
+			else -> throw IllegalStateException("No camera found for $baseCamera")
+		}
 		
 		
 		// --- Run the ray-tracer ---
@@ -381,7 +397,7 @@ class Render : CliktCommand("render") {
 			parsedScene.world,
 			Color(),
 			PCG(initState, initSeq),
-			numRays = 7,
+			numRays = 4,
 			maxRayDepth = 6,
 			russianRouletteLimit = 3
 		)
