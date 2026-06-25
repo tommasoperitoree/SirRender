@@ -8,7 +8,7 @@ local.properties
 *.log
 # Catch any local renders accidentally generated in the root directory
 outputs/scenes/*.pfm
-outputs/scenes/*.png
+# outputs/scenes/*.png
 /*.mp4
 /*.gif
 # Specific local execution folder
