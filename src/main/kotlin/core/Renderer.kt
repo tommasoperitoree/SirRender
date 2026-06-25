@@ -119,7 +119,7 @@ class PathTracer(
 						pcg,
 						hitRecord.ray.dir,
 						hitRecord.worldPoint,
-						hitRecord.normal.normalize(), // might be new use
+						hitRecord.normal.normalize(),
 						ray.depth + 1
 					)
 				}
