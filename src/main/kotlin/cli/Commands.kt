@@ -327,12 +327,13 @@ class Animation : CliktCommand(
 class Render : CliktCommand("render") {
 	override fun help(context: Context) = "Generate a scene image"
 	
+	// formats: FullHD (1920x1080) ; 720p (1280x720) ; 480p (854x480) ; 360p (640x360)
 	val width: Int by option(
 		"--width", "-w", help = "Image width in pixels"
-	).int().default(854)
+	).int().default(640)
 	val height: Int by option(
 		"--height", "-h", help = "Image height in pixels"
-	).int().default(480)
+	).int().default(360)
 	val outputDir: String by option(
 		"--output-dir", "-o", help = "Output directory for PFM frames"
 	).default("./src/main/resources/frames")
@@ -397,8 +398,8 @@ class Render : CliktCommand("render") {
 			parsedScene.world,
 			Color(),
 			PCG(initState, initSeq),
-			numRays = 4,
-			maxRayDepth = 6,
+			numRays = 20,
+			maxRayDepth = 5,
 			russianRouletteLimit = 3
 		)
 		

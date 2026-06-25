@@ -1,44 +1,47 @@
-    float clock(150)
+float clock(150)
 
-    material wallsx_material(
-            diffuse(uniform((1,0,0))),
-            uniform((0,0,0))
-            )
+material wallLeftMaterial(
+    diffuse( uniform( (1, 0, 0) ) ) ,
+    uniform( (0, 0, 0) )
+)
 
-    material walldx_material(
-                diffuse(uniform((0,1,0))),
-                uniform((0,0,0))
-                )
-    material lamp_material(
-                diffuse(uniform((1,1,1))),
-                uniform((100,100,100))
-                )
-    material cube_material(
-                diffuse(uniform((1,1,0))),
-                uniform((0,0,0))
-                )
-    material sphere_material(
-                diffuse(uniform((0,1,1))),
-                uniform((0,0,0))
-                )
+material wallRightMaterial(
+    diffuse( uniform( (0, 1, 0) ) ) ,
+    uniform( (0, 0, 0) )
+)
 
-    material ground_material(
-                 diffuse(uniform((1,1,1))),
-                 uniform((0,0,0))
-                )
-    //side wall
-    plane(wallsx_material,translation((0,5,0))*rotationX(90))
-    plane(walldx_material,translation((0,-5,0))*rotationX(-90))
+material lampMaterial(
+    diffuse( uniform((1, 1, 1) ) ) ,
+    uniform( (100, 100, 100) )
+)
 
-    //ground & back wall
-    plane(ground_material,identity)         //ground
-    plane(ground_material,translation((5,0,0))*rotationY(90)) //back wall
+material cubeMaterial(
+    diffuse( uniform((1, 1, 0) ) ) ,
+    uniform( (0, 0, 0) )
+   )
+material sphereMaterial(
+   diffuse( uniform( (0, 1, 1) ) ) ,
+   uniform( (0, 0, 0) )
+)
 
-    //lamp
-    cube(lamp_material,translation((0,0,5))*scaling((1,1,0.5)))
+material groundMaterial(
+    diffuse( uniform( (1, 1, 1) ) ) ,
+    uniform( (0, 0, 0) )
+)
 
-    //cube & sphere
-    cube(cube_material,translation((0,2,2))*scaling((0.5,0.5,1)))
-    sphere(sphere_material, translation((0,-2,1))*scaling((0.5,0.5,0.5)))
+// side wall
+plane( wallLeftMaterial, translation( (0, 5, 0) ) * rotationZ(90) * rotationY(90) )
+plane( wallRightMaterial, translation( (0, -5, 0) ) * rotationZ(90) * rotationY(-90) )
 
-    camera(perspective, translation((-5, 0, 2.2)), 1.77, 1.0)
+// ground & back wall
+plane( groundMaterial, identity ) // ground
+plane( groundMaterial, translation( (5, 0, 0) ) * rotationY(90)) // back wall
+
+// lamp
+cube( lampMaterial, translation( (0, 0, 7) ) * scaling((1, 1, 0.5) ) )
+
+// cube & sphere
+cube( cubeMaterial, translation( (0, 2, 1) ) * scaling( (0.5, 0.5, 1) ) )
+sphere( sphereMaterial,  translation( (0, -2, 0.5) ) * scaling( (0.5, 0.5, 0.5) ) )
+
+camera( perspective,  translation( (-3,  0,  2.2) ),  1.77, 1 )
