@@ -6,7 +6,7 @@ material skyMaterial(
 )
 
 material groundMaterial(
-    diffuse( checkered( (1, 0.7, 0.4), //orange
+    diffuse( checkered( (1, 0.2, 0), //orange
                         (0, 0, 0), 4) ) ,
     uniform( (0, 0, 0) )
 )
@@ -23,4 +23,4 @@ plane( groundMaterial, identity )
 
 cube( cubeMaterial, translation( (0, 0, 0.5) ) * scaling( (0.5, 0.5, 0.5) ) )
 
-camera( perspective, rotationZ(10) * rotationY(10) * translation( (-4, 0, 1) ), 1.777, 2.0 )
+camera( perspective, rotationZ(10) * rotationY(15) * translation( (-3, 0, 0.5) ), 1.777, 2.0 )

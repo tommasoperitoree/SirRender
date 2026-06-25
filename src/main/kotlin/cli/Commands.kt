@@ -398,9 +398,9 @@ class Render : CliktCommand("render") {
 			parsedScene.world,
 			Color(),
 			PCG(initState, initSeq),
-			numRays = 20,
-			maxRayDepth = 5,
-			russianRouletteLimit = 3
+			numRays = 8,
+			maxRayDepth = 4,
+			russianRouletteLimit = 2
 		)
 		
 		val samplesPerPixel =
