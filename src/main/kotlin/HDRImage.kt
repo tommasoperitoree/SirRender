@@ -241,6 +241,12 @@ data class HDRImage(
 			val value = line.trim().toFloatOrNull()
 				?: throw InvalidPFMImageFormat("invalid endianness specification: '$line'")
 			
+			if (!value.isFinite()) {
+				throw InvalidPFMImageFormat(
+					"Invalid endianness specification: value must be finite"
+				)
+			}
+			
 			return when {
 				value > 0 -> BIG_ENDIAN
 				value < 0 -> LITTLE_ENDIAN
