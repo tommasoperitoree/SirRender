@@ -16,11 +16,11 @@ material lampMaterial(
 )
 
 material cubeMaterial(
-    diffuse( uniform((1, 1, 0) ) ) ,
+    diffuse( uniform((1, 1, 1) ) ) ,
     uniform( (0, 0, 0) )
    )
 material sphereMaterial(
-   diffuse( uniform( (0, 1, 1) ) ) ,
+   diffuse( uniform( (1, 1, 1) ) ) ,
    uniform( (0, 0, 0) )
 )
 
