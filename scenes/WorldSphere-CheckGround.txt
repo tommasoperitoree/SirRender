@@ -1,25 +1,25 @@
 float clock(150)
 
 material skyMaterial(
-    diffuse(uniform((1, 1, 1))),
-    uniform((2, 2, 2))
+    diffuse( uniform( (1, 1, 1) ) ) ,
+    uniform( (2, 2, 2) )
 )
 
 material groundMaterial(
-    diffuse(checkered((0.9, 0.96, 0.96),
-                      (0.12, 0.2, 0.2), 4)),
-    uniform((0, 0, 0))
+    diffuse( checkered( (0.9, 0.96, 0.96),
+                        (0.12, 0.2, 0.2), 4) ) ,
+    uniform( (0, 0, 0) )
 )
 
 material sphereMaterial(
-    diffuse(image("scenes/world.pfm")),
-    uniform((0, 0, 0))
+    diffuse( image("scenes/world.pfm") ) ,
+    uniform( (0, 0, 0) )
 )
 
-sphere(skyMaterial, scaling((10, 10, 10)))
+sphere( skyMaterial, scaling( (10, 10, 10) ) )
 
-plane (groundMaterial, identity)
+plane( groundMaterial, identity )
 
-sphere(sphereMaterial, scaling((2, 2, 2))*translation((0, 0, 1)))
+sphere( sphereMaterial, scaling( (2, 2, 2) ) * translation( (0, 0, 1) ) )
 
-camera(perspective, translation((-5, 0, 5))*rotationY(10), 1.7777, 2.0)
+camera( perspective, translation( (-5, 0, 5) ) * rotationY(10), 1.7777, 2.0 )
