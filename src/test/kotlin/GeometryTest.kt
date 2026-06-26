@@ -212,7 +212,7 @@ class ONBTest() {
 	fun `test Vec2d isClose`() {
 		val a = Vec2d(1f, 2f)
 		
-		assertTrue(a.isClose(Vec2d(1f, 1f)))
+		assertTrue(a.isClose(Vec2d(1f, 2f)))
 		assertFalse(a.isClose(Vec2d(3f, 2f)))
 	}
 	
