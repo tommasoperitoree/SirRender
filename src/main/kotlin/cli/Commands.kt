@@ -399,8 +399,8 @@ class Render : CliktCommand("render") {
 			Color(),
 			PCG(initState, initSeq),
 			numRays = 8,
-			maxRayDepth = 4,
-			russianRouletteLimit = 2
+			maxRayDepth = 6,
+			russianRouletteLimit = 4
 		)
 		
 		val samplesPerPixel =
