@@ -1,25 +1,38 @@
-.gradle
+### Gradle ###
+.gradle/
 build/
+local.properties
 !gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+
+### Output & Renders ###
+*.log
+# Catch any local renders accidentally generated in the root directory
+outputs/scenes/*.pfm
+# outputs/scenes/*.png
+/*.mp4
+/*.gif
+# Specific local execution folder
+/src/main/resources/frames/
 
 ### IntelliJ IDEA ###
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/shelf/
+.idea/httpRequests/
 .idea/modules.xml
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
-.idea/workspace.xml
 .idea/gradle.xml
 *.iws
 *.iml
 *.ipr
 out/
-!**/src/main/**/out/
-!**/src/test/**/out/
 
 ### Kotlin ###
-.kotlin
+.kotlin/
 
 ### Eclipse ###
 .apt_generated
@@ -30,8 +43,6 @@ out/
 .springBeans
 .sts4-cache
 bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
 
 ### NetBeans ###
 /nbproject/private/
@@ -45,6 +56,3 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-
-### Local execution ###
-/src/main/resources/frames/

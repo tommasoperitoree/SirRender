@@ -1,0 +1,25 @@
+float clock(150)
+
+material skyMaterial(
+    diffuse( uniform( (0, 0, 0) ) ) ,
+    uniform( (0.35, 0.75, 1) )
+)
+
+material groundMaterial(
+    diffuse( checkered( (1, 0.3, 0), // orange
+                        (0, 0, 0), 4) ) ,
+    uniform( (0, 0, 0) )
+)
+
+material sphereMaterial(
+    diffuse( uniform( (0.8, 0, 0) ) ) ,
+    uniform( (0, 0, 0) )
+)
+
+sphere( skyMaterial, scaling( (10, 10, 10) ) )
+
+plane( groundMaterial, identity )
+
+sphere( sphereMaterial, scaling( (2, 2, 2) ) * translation( (0, 0, 1) ) )
+
+camera( perspective, translation( (-5, 0, 2) ) * rotationY(10), 1.7777, 2.0 )
