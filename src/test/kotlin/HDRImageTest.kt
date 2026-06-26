@@ -9,11 +9,10 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
-import java.io.OutputStream
 import java.nio.ByteOrder.BIG_ENDIAN
 import java.nio.ByteOrder.LITTLE_ENDIAN
 import javax.imageio.ImageIO
-import javax.swing.Spring
+import kotlin.math.sqrt
 import kotlin.test.assertEquals
 import kotlin.test.assertContentEquals
 import kotlin.test.assertTrue
@@ -127,7 +126,7 @@ class HDRImageTest {
 	}
 	
 	@Test
-	fun `test averageLuminosity`() {
+	fun `test averageLuminosity without delta`() {
 		img = HDRImage(2, 1)
 		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
 		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
@@ -139,28 +138,42 @@ class HDRImageTest {
 	@Test
 	fun `test averageLuminosityDelta`() {
 		img = HDRImage(2, 1)
-		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
-		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
-
-		assertTrue { areClose(100.0f, img.averageLuminosity()) }
+		img.setPixel(0, 0, Color(0f, 0f, 0f))
+		img.setPixel(1, 0, Color(100f, 100f, 100f))
+		
+		assertTrue { areClose(sqrt(101f), img.averageLuminosity(1f)) }
 	}
 	
 	@Test
 	fun `test normalizeImage`() {
+		
 		img = HDRImage(width = 2, height = 1)
 		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
 		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
 		
-		// same image
-		assertEquals(img1, img2)
+		img.normalizeImage(
+			factor = 100f,
+			luminosity = 1000f
+		)
 		
-		// different dimension
-		assertNotEquals(img1, HDRImage(3, 2))
+		assertTrue(
+			img.getPixel(0, 0)
+				.isClose(Color(0.5f, 1f, 1.5f))
+		)
 		
-		// different pixels
-		val img3 = HDRImage(2, 2)
-		img3.setPixel(0, 0, Color(0f, 0f, 0f))
-		assertNotEquals(img1, img3)
+		assertTrue(img.getPixel(1, 0).isClose(Color(50f, 100f, 150f)))
+	}
+	
+	@Test
+	fun `test clampImage`(){
+		val img = HDRImage(1, 1)
+		img.setPixel(0, 0, Color(1.0f, 3.0f, 9.0f))
+		img.clampImage()
+		
+		val result = img.getPixel(0, 0)
+		assertEquals(0.5f, result.r, 1e-6f)
+		assertEquals(0.75f, result.g, 1e-6f)
+		assertEquals(0.9f, result.b, 1e-6f)
 	}
 	
 	@Test
@@ -305,6 +318,8 @@ class HDRImageTest {
 		
 		// same image
 		assertEquals(img1, img2)
+		
+		//same hashcode
 		assertEquals(img1.hashCode(), img2.hashCode())
 		
 		// different dimension
