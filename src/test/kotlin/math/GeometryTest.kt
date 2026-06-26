@@ -1,6 +1,9 @@
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import kotlin.math.sqrt
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 //da decidere isClose lo teniamo sempre in alto
 // oppure lo inseriamo nelle utulity functions?
@@ -52,6 +55,12 @@ class VecTest() {
 	}
 	
 	@Test
+	fun `test Norm function`() {
+		val normA = vecA.norm()
+		assertTrue(areClose(normA, sqrt(14.0f)))
+	}
+	
+	@Test
 	fun `test dot product Vec`() {
 		val dot = vecA dot vecB
 		assertTrue(areClose(dot, 6f))
@@ -75,6 +84,11 @@ class VecTest() {
 		assertEquals(vecA.x, nA.x, eps)
 		assertEquals(vecA.y, nA.y, eps)
 		assertEquals(vecA.z, nA.z, eps)
+	}
+	
+	@Test
+	fun `test toString`(){
+		assertEquals("Vec(1.0, 2.0, 3.0)", vecA.toString())
 	}
 }
 
@@ -119,6 +133,11 @@ class PointTest() {
 	fun `test point toVec`() {
 		val vecRes = pointB.toVec()
 		assertTrue(vecRes.isClose(vecB))
+	}
+	
+	@Test
+	fun `test toString`(){
+		assertEquals("Point(1.0, 2.0, 3.0)", pointA.toString())
 	}
 }
 
@@ -177,12 +196,25 @@ class NormalTest() {
 		assertEquals(vecA.y, nA.y, eps)
 		assertEquals(vecA.z, nA.z, eps)
 	}
+	
+	@Test
+	fun `test toString`(){
+		assertEquals("Normal(1.0, 1.0, 1.0)", nA.toString())
+	}
 }
 
 class ONBTest() {
 	
 	val pcg = PCG()
 	val eps = 1e-5f
+	
+	@Test
+	fun `test Vec2d isClose`() {
+		val a = Vec2d(1f, 2f)
+		
+		assertTrue(a.isClose(Vec2d(1f, 1f)))
+		assertFalse(a.isClose(Vec2d(3f, 2f)))
+	}
 	
 	@Test
 	fun `random testing PCG`() {
