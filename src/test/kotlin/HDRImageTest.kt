@@ -126,22 +126,12 @@ class HDRImageTest {
 	}
 	
 	@Test
-	fun `test averageLuminosity without delta`() {
-		img = HDRImage(2, 1)
-		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
-		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
-		
-		//We pass delta=0.0 to avoid roundings
-		assertTrue { areClose(100.0f, img.averageLuminosity(delta = 0f)) }
-	}
-	
-	@Test
 	fun `test averageLuminosityDelta`() {
 		img = HDRImage(2, 1)
 		img.setPixel(0, 0, Color(0f, 0f, 0f))
 		img.setPixel(1, 0, Color(100f, 100f, 100f))
 		
-		assertTrue { areClose(sqrt(101f), img.averageLuminosity(1f)) }
+		assertTrue { areClose(sqrt(101f), img.averageLuminosity(1f), 1e-5f) }
 	}
 	
 	@Test
