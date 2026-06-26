@@ -1,5 +1,7 @@
+import com.github.ajalt.mordant.rendering.TextColors.Companion.color
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import kotlin.math.abs
 
 class ColorTest {
 	
@@ -40,6 +42,11 @@ class ColorTest {
 		assertTrue(areClose(col2.luminosity(), 7.0f))
 	}
 	
-	// missing tests to writePFMImage
+	// --- Test default data class function overriding ---
 	
+	@Test
+	fun `test equals`() {
+		assertFalse(colorA == colorB)
+		assertEquals(colorA, Color(1f, 2f, 3f))
+	}
 }

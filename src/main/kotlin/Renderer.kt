@@ -40,8 +40,6 @@ class FlatRenderer(
 		val material = hit.shape.material
 		
 		return (material.brdf.pigment.getColor(hit.surfacePoint) + material.emittedRadiance.getColor(hit.surfacePoint))
-		
-		
 	}
 }
 
@@ -57,17 +55,13 @@ class PathTracer(
 	val pcg: PCG = PCG(),
 	val numRays: Int, // number of ray generate for integral calculation
 	val maxRayDepth: Int,
-	val russianRouletteLimit: Int, // limit of the Russian Roulette
+	val russianRouletteLimit: Int // limit of the Russian Roulette
 ) : Renderer {
 	
 	override operator fun invoke(ray: Ray): Color { // operator is necessary to use the recursion
 		if (ray.depth > maxRayDepth) return Color.black
 		
-		val hitRecord = world.rayIntersection(ray) ?: return if (ray.depth == 0) {
-			backgroundColor
-		} else {
-			Color(0.1f, 0.1f, 0.1f)
-		}
+		val hitRecord = world.rayIntersection(ray) ?: return backgroundColor
 		
 		// extract from the point of intersection the color reflected and the emitted radiance
 		val hitMaterial = hitRecord.shape.material
@@ -90,6 +84,7 @@ class PathTracer(
 		
 		// MonteCarlo
 		var cumRadiance = Color.black
+		
 		// if hitColorLum is 0 it means that the surface is completely black, so MonteCarlo is useless
 		if (hitColorLum > 0f) {
 			repeat(numRays) {
