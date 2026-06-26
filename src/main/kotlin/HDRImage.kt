@@ -10,6 +10,7 @@ import kotlin.math.log10
 import kotlin.math.pow
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
+import kotlin.compareTo
 
 /**
  * Exception thrown when a file or stream does not perfectly match
@@ -103,7 +104,6 @@ data class HDRImage(
 		var sum = 0.0
 		
 		for (pix in pixels) {
-			sum += log10(delta.toDouble() + pix.luminosity())
 			require(pix.luminosity().isFinite() && pix.luminosity() >= 0f) {
 				"Luminosity must be finite and non-negative."
 			}

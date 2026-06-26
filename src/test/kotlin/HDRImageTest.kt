@@ -127,11 +127,14 @@ class HDRImageTest {
 	
 	@Test
 	fun `test averageLuminosityDelta`() {
-		img = HDRImage(2, 1)
+		val img = HDRImage(2, 1)
 		img.setPixel(0, 0, Color(0f, 0f, 0f))
 		img.setPixel(1, 0, Color(100f, 100f, 100f))
 		
-		assertTrue { areClose(sqrt(101f), img.averageLuminosity(1f), 1e-5f) }
+		val delta = 1f
+		val expected = sqrt(101f)
+		
+		assertEquals(expected, img.averageLuminosity(delta), 1e-5f)
 	}
 	
 	@Test
