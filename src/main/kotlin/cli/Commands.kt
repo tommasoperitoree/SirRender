@@ -346,6 +346,15 @@ class Render : CliktCommand("render") {
 	val gamma: Float by option(
 		"--gamma", "-g", help = "Gamma correction value"
 	).float().default(1f)
+	val rays: Int by option(
+		"--num-rays", "-n", help = "Num rays"
+	).int().default(8)
+	val depth: Int by option(
+		"--depth", "-d", help = "Depth scaling factor"
+	).int().default(5)
+	val roulette: Int by option(
+		"--roulette", "-rou", help = "Russian Roulette maximum depth factor"
+	).int().default(3)
 	val initState: ULong by option(
 		"--initState", help = "Initial state number for random generation"
 	).ulong().default(42uL)
@@ -355,8 +364,9 @@ class Render : CliktCommand("render") {
 	val antialiasing: Int by option(
 		"--antialiasing", "-a", help = "Antialiasing value"
 	).int().default(1)
-	val inputFile: File by option("--input-file", "-inp", help = "Input file path")
-		.file(mustExist = true, canBeDir = false, mustBeReadable = true)
+	val inputFile: File by option(
+		"--input-file", "-inp", help = "Input file path"
+	).file(mustExist = true, canBeDir = false, mustBeReadable = true)
 		.default(File("SceneR/sceneFile.txt"))
 	
 	
@@ -364,14 +374,20 @@ class Render : CliktCommand("render") {
 		
 		File(outputDir).mkdirs()
 		
-		
 		val parsedScene: Scene = inputFile.reader().use { reader ->
 			val sceneStream = SceneInputStream(reader)
 			parseScene(sceneStream)
 		}
 		
-		val baseCamera = parsedScene.camera ?: throw IllegalArgumentException("No camera found")
+		val baseCamera = parsedScene.camera
+			?: throw IllegalArgumentException("No camera found in scene file")
 		val img = HDRImage(width, height)
+		
+		val cameraType = when (baseCamera) {
+			is OrthogonalCamera -> "Orthogonal"
+			is PerspectiveCamera -> "Perspective (distance=${baseCamera.distance})"
+			else -> "Unknown"
+		}
 		
 		val cam = when (baseCamera) {
 			is OrthogonalCamera -> OrthogonalCamera(
@@ -385,50 +401,66 @@ class Render : CliktCommand("render") {
 				transformation = baseCamera.transformation
 			)
 			
-			else -> throw IllegalStateException("No camera found for $baseCamera")
+			else -> throw IllegalStateException("Unsupported camera type: $baseCamera")
 		}
 		
+		// ── Startup summary ──────────────────────────────────────────────────────
+		val samplesPerPixel = if (antialiasing > 1) antialiasing * antialiasing else 1
+		val totalPixels = width.toLong() * height.toLong()
+		val totalSamples = totalPixels * samplesPerPixel
+		val totalRays = totalSamples * rays.toLong()
 		
-		// --- Run the ray-tracer ---
+		println(
+			"""
+        ┌─ SirRender — Render ──────────────────────────────────────┐
+        │  Scene       : ${inputFile.path}
+        │  Resolution  : $width × $height  (${totalPixels} px)
+        │  Camera      : $cameraType  (aspect ${baseCamera.aspectRatio})
+        │  Antialiasing: $antialiasing × $antialiasing  (${samplesPerPixel} samples/px)
+        │
+        │  Path tracer
+        │    Rays/sample      : $rays
+        │    Max depth        : $depth
+        │    RR limit         : $roulette
+        │    PCG seed (state) : $initState  seq: $initSeq
+        │
+        │  Total samples : $totalSamples
+        │  Total rays    : ~$totalRays  (excl. Russian roulette)
+        │
+        │  Output dir  : $outputDir
+        │  Tone-mapping: factor=$factor  gamma=$gamma  → PNG: $renderImage
+        └───────────────────────────────────────────────────────────┘
+            """.trimIndent()
+		)
+		// ────────────────────────────────────────────────────────────────────────
 		
 		val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
-		print("Using a path tracer")
 		
 		val renderer = PathTracer(
 			parsedScene.world,
 			Color(),
 			PCG(initState, initSeq),
-			numRays = 8,
-			maxRayDepth = 6,
-			russianRouletteLimit = 4
+			numRays = rays,     // ← was hardcoded 7
+			maxRayDepth = depth,    // ← was hardcoded 6
+			russianRouletteLimit = roulette, // ← was hardcoded 3
 		)
 		
-		val samplesPerPixel =
-			if (pathTracer.antialiasing > 1) pathTracer.antialiasing * pathTracer.antialiasing else 1
-		val totalPixels = img.width.toLong() * img.height.toLong()
-		val totalSamples = totalPixels * samplesPerPixel
 		val progressBar = ProgressBar(totalSamples)
-		
 		var done = 0L
-		
-		pathTracer.fireAllRays()
-		{ ray ->
+		pathTracer.fireAllRays { ray ->
 			done++
 			progressBar.update(done)
 			renderer(ray)
 		}
 		
-		
 		val baseName = inputFile.nameWithoutExtension
 		val pfmPath = "$outputDir/$baseName.pfm"
 		img.writePFMFile(pfmPath)
-		println("Saved PFM → $pfmPath")
-		
+		println("\nSaved PFM → $pfmPath")
 		
 		if (renderImage) {
 			img.normalizeImage(factor)
 			img.clampImage()
-			
 			val pngPath = "$outputDir/$baseName.png"
 			FileOutputStream(pngPath).use { img.writeLDRImage(it, "png", gamma) }
 			println("Saved PNG → $pngPath")
