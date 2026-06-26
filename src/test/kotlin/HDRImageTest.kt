@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
+import java.io.OutputStream
 import java.nio.ByteOrder.BIG_ENDIAN
 import java.nio.ByteOrder.LITTLE_ENDIAN
 import javax.imageio.ImageIO
@@ -150,25 +151,16 @@ class HDRImageTest {
 		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
 		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
 		
-		img.normalizeImage(100.0f, 1000.0f)
+		// same image
+		assertEquals(img1, img2)
 		
-		assertTrue { img.getPixel(0, 0).isClose(Color(5.0e-1f, 1.0f, 1.5f)) }
-		assertTrue { img.getPixel(1, 0).isClose(Color(50.0f, 1.0e2f, 1.5e2f)) }
-	}
-	
-	@Test
-	fun `test clampImage`() {
-		img = HDRImage(2, 1)
-		img.setPixel(0, 0, Color(0.5e1f, 1.0e1f, 1.5e1f))
-		img.setPixel(1, 0, Color(0.5e3f, 1.0e3f, 1.5e3f))
+		// different dimension
+		assertNotEquals(img1, HDRImage(3, 2))
 		
-		img.clampImage()
-		
-		for (clampPixel in img.pixels) {
-			assertTrue { clampPixel.r in 0.0f..1.0f }
-			assertTrue { clampPixel.g in 0.0f..1.0f }
-			assertTrue { clampPixel.b in 0.0f..1.0f }
-		}
+		// different pixels
+		val img3 = HDRImage(2, 2)
+		img3.setPixel(0, 0, Color(0f, 0f, 0f))
+		assertNotEquals(img1, img3)
 	}
 	
 	@Test

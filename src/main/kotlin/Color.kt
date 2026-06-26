@@ -17,13 +17,15 @@ data class Color(
 ) {
 	
 	// --- Operator overloading ---
-	
+	/** Adds the components of this [Color] to those of [other]. */
 	operator fun plus(other: Color): Color =
 		Color(r + other.r, g + other.g, b + other.b)
 	
+	/** Multiplies each component of this [Color] by [scalar]. */
 	operator fun times(scalar: Float): Color =
 		Color(r * scalar, g * scalar, b * scalar)
 	
+	/** Multiplies this [Color] by [other] component by component. */
 	operator fun times(other: Color): Color =
 		Color(r * other.r, g * other.g, b * other.b)
 	
@@ -46,6 +48,7 @@ data class Color(
 	
 	// --- Default data class function overriding ---
 	
+	/** Checks whether [other] is a [Color] with exactly the same components as this one. */
 	override fun equals(other: Any?): Boolean {
 		if (this === other) return true
 		if (javaClass != other?.javaClass) return false
@@ -59,6 +62,7 @@ data class Color(
 		return true
 	}
 	
+	/** Computes the hash code from the components of this [Color]. */
 	override fun hashCode(): Int {
 		var result = r.hashCode()
 		result = 31 * result + g.hashCode()
