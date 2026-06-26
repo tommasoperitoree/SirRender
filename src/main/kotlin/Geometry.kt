@@ -1,4 +1,3 @@
-import kotlin.math.sign
 import kotlin.math.sqrt
 
 /**
@@ -220,13 +219,15 @@ data class Vec2d(
  * [normal] has to be normalized!
  */
 fun createOnbFromZ(normal: Normal): Triple<Vec, Vec, Vec> {
-	val sign = sign(normal.z + Float.MIN_VALUE)
 	
-	val a = -1f / (sign + normal.z)
-	val b = normal.x * normal.y * a
+	val n = normal.toVec()
+	val sign = if (n.z >= 0f) 1f else -1f
 	
-	val e1 = Vec(1f + sign * normal.x * normal.x * a, sign * b, -sign * normal.x)
-	val e2 = Vec(b, sign + normal.y * normal.y * a, -normal.y)
+	val a = -1f / (sign + n.z)
+	val b = n.x * n.y * a
 	
-	return Triple(e1, e2, Vec(normal.x, normal.y, normal.z))
+	val e1 = Vec(1f + sign * n.x * n.x * a, sign * b, -sign * n.x)
+	val e2 = Vec(b, sign + n.y * n.y * a, -n.y)
+	
+	return Triple(e1, e2, Vec(n.x, n.y, n.z))
 }
