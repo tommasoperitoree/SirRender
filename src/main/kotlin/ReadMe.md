@@ -1,16 +1,16 @@
-# SirRender — Class & Format Reference
+# cli.SirRender — Class & Format Reference
 
-Internal technical reference for contributors. For usage and CLI documentation see the main [ReadMe](../SirRender/ReadMe.md).
+Internal technical reference for contributors. For usage and CLI documentation see the cli.main [ReadMe](../SirRender/ReadMe.md).
 
 ---
 
-## HDRImage
+## materials.HDRImage
 
-Represents a High Dynamic Range image as a flat array of `Color` values in row-major order.
+Represents a High Dynamic Range image as a flat array of `materials.Color` values in row-major order.
 
 ### PFM Format
 
-PFM (Portable FloatMap) stores HDR pixel data as raw IEEE 754 floats. SirRender uses PFM as its internal format — all rendering writes PFM, and tone mapping converts to LDR formats.
+PFM (Portable FloatMap) stores HDR pixel data as raw IEEE 754 floats. cli.SirRender uses PFM as its internal format — all rendering writes PFM, and tone mapping converts to LDR formats.
 
 **Header structure:**
 
@@ -60,55 +60,55 @@ img.writeLDRImage(...)       // apply gamma + quantize to 8-bit
 
 ### Sealed Interface: `GeoElement`
 
-Common parent for `Vec`, `Point`, and `Normal`. Provides shared `squaredNorm()` and `norm()` implementations.
+Common parent for `math.Vec`, `math.Point`, and `math.Normal`. Provides shared `squaredNorm()` and `norm()` implementations.
 `sealed` means all subtypes are known at compile time — `when` expressions on `GeoElement` are exhaustiveness-checked.
 
-### `Vec` — 3D Vector
+### `math.Vec` — 3D Vector
 
 Represents a direction or displacement in 3D space.
 
 | Operation | Syntax | Returns |
 |---|---|---|
-| Addition | `a + b` | `Vec` |
-| Subtraction | `a - b` | `Vec` |
-| Negation | `-a` | `Vec` |
-| Scalar multiply | `a * s` | `Vec` |
+| Addition | `a + b` | `math.Vec` |
+| Subtraction | `a - b` | `math.Vec` |
+| Negation | `-a` | `math.Vec` |
+| Scalar multiply | `a * s` | `math.Vec` |
 | Dot product | `a dot b` | `Float` |
-| Cross product | `a cross b` | `Normal` |
-| Normalize | `a.normalize()` | `Vec` |
+| Cross product | `a cross b` | `math.Normal` |
+| Normalize | `a.normalize()` | `math.Vec` |
 
-Axis constructors: `vecX()`, `vecY()`, `vecZ()`
+Axis constructors: `math.vecX()`, `math.vecY()`, `math.vecZ()`
 
-### `Point` — 3D Position
+### `math.Point` — 3D Position
 
 Represents a position in space. Arithmetic is restricted to geometrically meaningful operations:
 
 | Operation | Syntax | Returns |
 |---|---|---|
-| Displace by vector | `p + v` | `Point` |
-| Vector between points | `p - q` | `Vec` |
-| Displace negatively | `p - v` | `Point` |
-| Convert to vector | `p.toVec()` | `Vec` |
+| Displace by vector | `p + v` | `math.Point` |
+| Vector between points | `p - q` | `math.Vec` |
+| Displace negatively | `p - v` | `math.Point` |
+| Convert to vector | `p.toVec()` | `math.Vec` |
 
-### `Normal` — Surface Normal
+### `math.Normal` — Surface math.Normal
 
-Normals transform differently from vectors under non-uniform scaling — they use the **inverse transpose** of the transformation matrix. See `Transformation.times(Normal)`.
+Normals transform differently from vectors under non-uniform math.scaling — they use the **inverse transpose** of the transformation matrix. See `math.Transformation.times(math.Normal)`.
 
 | Operation | Syntax | Returns |
 |---|---|---|
-| Negation | `-n` | `Normal` |
-| Scalar multiply | `n * s` | `Normal` |
+| Negation | `-n` | `math.Normal` |
+| Scalar multiply | `n * s` | `math.Normal` |
 | Dot with vector | `n dot v` | `Float` |
-| Cross with normal | `n cross m` | `Vec` |
-| Cross with vector | `n cross v` | `Vec` |
+| Cross with normal | `n cross m` | `math.Vec` |
+| Cross with vector | `n cross v` | `math.Vec` |
 
-### `Vec2d` — 2D Screen Coordinate
+### `math.Vec2d` — 2D Screen Coordinate
 
 Used for UV screen coordinates to avoid confusion with 3D spatial coordinates.
 
 ---
 
-## HomogMatr4x4
+## math.HomogMatr4x4
 
 A 4×4 homogeneous matrix stored as a flat row-major `FloatArray(16)`.
 
@@ -124,17 +124,17 @@ Element access: `m[row, col]` maps to `m.m[row * 4 + col]`.
 | `m.isClose(other)` | Component-wise float comparison |
 | `m.isInverseOf(other)` | Returns true if `m * other ≈ I` |
 | `m.toMatrixString()` | Formatted 4×4 grid for printing |
-| `HomogMatr4x4.identity()` | Returns the 4×4 identity matrix |
+| `math.HomogMatr4x4.identity()` | Returns the 4×4 identity matrix |
 
 ---
 
-## Transformation
+## math.Transformation
 
 An affine transformation stored as a pair of matrices: `m` (the transformation) and `invm` (its inverse).
 Always constructed via factory functions — never build `m` and `invm` by hand without verifying consistency.
 
 ```kotlin
-val t = Transformation.translation(Vec(1f, 2f, 3f))
+val t = math.Transformation.math.translation(math.Vec(1f, 2f, 3f))
 assert(t.isConsistent())  // verifies m * invm ≈ I
 ```
 
@@ -142,21 +142,21 @@ assert(t.isConsistent())  // verifies m * invm ≈ I
 
 | Function | Description |
 |---|---|
-| `Transformation.translation(vec)` | Translation by `vec` |
-| `Transformation.scaling(vec)` | Non-uniform scaling per axis |
-| `Transformation.rotationX(deg)` | Rotation around X axis |
-| `Transformation.rotationY(deg)` | Rotation around Y axis |
-| `Transformation.rotationZ(deg)` | Rotation around Z axis |
+| `math.Transformation.math.translation(vec)` | Translation by `vec` |
+| `math.Transformation.math.scaling(vec)` | Non-uniform math.scaling per axis |
+| `math.Transformation.math.rotationX(deg)` | Rotation around X axis |
+| `math.Transformation.math.rotationY(deg)` | Rotation around Y axis |
+| `math.Transformation.math.rotationZ(deg)` | Rotation around Z axis |
 
 ### Operations
 
 | Operation | Syntax | Returns |
 |---|---|---|
-| Compose | `t1 * t2` | `Transformation` |
-| Apply to point | `t * p` | `Point` |
-| Apply to vector | `t * v` | `Vec` |
-| Apply to normal | `t * n` | `Normal` (uses inverse transpose) |
-| Invert | `t.inverse()` | `Transformation` (swaps `m` and `invm`) |
+| Compose | `t1 * t2` | `math.Transformation` |
+| Apply to point | `t * p` | `math.Point` |
+| Apply to vector | `t * v` | `math.Vec` |
+| Apply to normal | `t * n` | `math.Normal` (uses inverse transpose) |
+| Invert | `t.inverse()` | `math.Transformation` (swaps `m` and `invm`) |
 | Check consistency | `t.isConsistent()` | `Boolean` |
 
 > ⚠️ Composition order matters: `t1 * t2` applies `t2` first, then `t1`. This matches standard mathematical convention.
@@ -168,50 +168,50 @@ assert(t.isConsistent())  // verifies m * invm ≈ I
 To avoid confusion between 3D spatial coordinates (x, y, z) and 2D screen coordinates, screen points use **(u, v)**,
 where `u ∈ [0, 1]` is horizontal and `v ∈ [0, 1]` is vertical.
 
-Both cameras accept a `Transformation` that controls position and orientation in the scene.
+Both cameras accept a `math.Transformation` that controls position and orientation in the scene.
 
-### `OrthogonalCamera`
+### `core.OrthogonalCamera`
 
 Parallel projection — no perspective distortion. All rays are parallel and perpendicular to the image plane.
 Good for technical/architectural views or when you want to avoid foreshortening.
 
-### `PerspectiveCamera`
+### `core.PerspectiveCamera`
 
 Realistic projection with depth foreshortening. Rays converge at a focal point behind the image plane.
 Controlled by a distance parameter that sets the field of view.
 
 ---
 
-## Shapes & World
+## Shapes & core.World
 
-### `Sphere`
+### `geometry.Sphere`
 
-A unit sphere centered at the origin, transformed by an optional `Transformation`.
-Ray intersection uses the analytic solution to the sphere equation in object space.
+A unit sphere centered at the origin, transformed by an optional `math.Transformation`.
+geometry.Ray intersection uses the analytic solution to the sphere equation in object space.
 
-### `World`
+### `core.World`
 
-A container for all shapes in the scene. Provides `rayIntersection(ray)` which returns the closest `HitRecord`
+A container for all shapes in the scene. Provides `rayIntersection(ray)` which returns the closest `geometry.HitRecord`
 or `null` if no shape is hit.
 
 ```kotlin
-val world = World()
-world.addShape(Sphere(Transformation.translation(Vec(0f, 0f, 1f))))
-val hit = world.rayIntersection(ray)  // HitRecord? — null if no intersection
+val world = core.World()
+world.addShape(geometry.Sphere(math.Transformation.math.translation(math.Vec(0f, 0f, 1f))))
+val hit = world.rayIntersection(ray)  // geometry.HitRecord? — null if no intersection
 ```
 
 ---
 
-## ImageTracer
+## core.ImageTracer
 
-Fires rays through every pixel of an `HDRImage` using a given `Camera`.
+Fires rays through every pixel of an `materials.HDRImage` using a given `core.Camera`.
 
 ```kotlin
-val tracer = ImageTracer(img, camera)
+val tracer = core.ImageTracer(img, camera)
 tracer.fireAllRays { ray ->
     world.rayIntersection(ray)?.let { white() } ?: black()
 }
 ```
 
-The lambda receives each ray and returns a `Color`. The tracer maps each pixel's UV coordinates to a ray direction
+The lambda receives each ray and returns a `materials.Color`. The tracer maps each pixel's UV coordinates to a ray direction
 via the camera, then writes the returned color into the image.

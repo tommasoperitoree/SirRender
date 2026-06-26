@@ -4,7 +4,7 @@ plugins {
 	application
 }
 
-group = "org.example"
+group = "sirrender"
 version = "v0.3.0"
 
 // --- SECURITY FIX ---
@@ -35,7 +35,7 @@ kotlin {
 }
 
 application {
-	mainClass.set("MainKt")
+	mainClass.set("cli.MainKt")
 }
 
 tasks.test {
