@@ -98,7 +98,7 @@ data class HDRImage(
 	fun averageLuminosity(delta: Float = 1e-10f): Float {
 		var sum = 0.0
 		for (pix in pixels) {
-			sum += log10(delta + pix.luminosity())
+			sum += log10(delta.toDouble() + pix.luminosity())
 		}
 		return (10.0).pow(sum / pixels.size).toFloat()
 	}
