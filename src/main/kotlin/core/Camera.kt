@@ -11,6 +11,10 @@ import math.Vec
  * specific projection geometries.
  */
 interface Camera {
+	
+	val aspectRatio: Float
+	val transformation: Transformation
+	
 	/**
 	 * Fires a [Ray] through the camera screen at normalized coordinates ([u], [v]).
 	 * The exact projection logic is implemented by derived classes.
@@ -28,8 +32,8 @@ interface Camera {
  * @property transformation Initial orientation and position in the world.
  */
 class OrthogonalCamera(
-	val aspectRatio: Float = 1.7777778f, //16/9
-	val transformation: Transformation = Transformation()
+	override val aspectRatio: Float = 1.7777778f, //16/9
+	override val transformation: Transformation = Transformation()
 ) : Camera {
 	
 	override fun fireRay(u: Float, v: Float): Ray {
@@ -50,8 +54,8 @@ class OrthogonalCamera(
  */
 class PerspectiveCamera(
 	var distance: Float = 1f,
-	var aspectRatio: Float = 1.7777778f,
-	var transformation: Transformation = Transformation()
+	override var aspectRatio: Float = 1.7777778f,
+	override var transformation: Transformation = Transformation()
 ) : Camera {
 	
 	override fun fireRay(u: Float, v: Float): Ray {

@@ -414,7 +414,7 @@ class Render : CliktCommand("render") {
 			"""
         ┌─ SirRender — Render ──────────────────────────────────────┐
         │  Scene       : ${inputFile.path}
-        │  Resolution  : $width × $height  (${totalPixels} px)
+        │  Resolution  : $width × $height  (${totalPixels.toSci()} px)
         │  Camera      : $cameraType  (aspect ${baseCamera.aspectRatio})
         │  Antialiasing: $antialiasing × $antialiasing  (${samplesPerPixel} samples/px)
         │
@@ -424,8 +424,8 @@ class Render : CliktCommand("render") {
         │    RR limit         : $roulette
         │    PCG seed (state) : $initState  seq: $initSeq
         │
-        │  Total samples : $totalSamples
-        │  Total rays    : ~$totalRays  (excl. Russian roulette)
+        │  Total samples : ${totalSamples.toSci()}
+        │  Total rays    : ~${totalRays.toSci()}  (excl. Russian roulette)
         │
         │  Output dir  : $outputDir
         │  Tone-mapping: factor=$factor  gamma=$gamma  → PNG: $renderImage
@@ -467,3 +467,5 @@ class Render : CliktCommand("render") {
 		}
 	}
 }
+
+fun Long.toSci(): String = "%.2e".format(this.toDouble())
