@@ -1,16 +1,18 @@
-# cli.SirRender — Class & Format Reference
+# SirRender — Class & Format Reference
 
-Internal technical reference for contributors. For usage and CLI documentation see the cli.main [ReadMe](../SirRender/ReadMe.md).
+Internal technical reference for contributors. For usage and CLI documentation see the
+main [ReadMe](ReadMe.md).
 
 ---
 
-## materials.HDRImage
+## HDRImage
 
-Represents a High Dynamic Range image as a flat array of `materials.Color` values in row-major order.
+Represents a High Dynamic Range image as a flat array of `Color` values in row-major order.
 
 ### PFM Format
 
-PFM (Portable FloatMap) stores HDR pixel data as raw IEEE 754 floats. cli.SirRender uses PFM as its internal format — all rendering writes PFM, and tone mapping converts to LDR formats.
+PFM (Portable FloatMap) stores HDR pixel data as raw IEEE 754 floats. cli.SirRender uses PFM as its internal format —
+all rendering writes PFM, and tone mapping converts to LDR formats.
 
 **Header structure:**
 
@@ -21,13 +23,13 @@ PF\n
 <binary pixel data...>
 ```
 
-| Field | Value | Meaning |
-|---|---|---|
-| Magic | `PF` | Identifies the file as a colour PFM |
-| Size | e.g. `3 2` | Width × Height |
-| Scale | `-1.0` | Little-endian floats |
-| Scale | `1.0` | Big-endian floats |
-| Pixels | raw bytes | 3 × 32-bit floats per pixel (R, G, B), stored **bottom-to-top** |
+| Field  | Value      | Meaning                                                         |
+|--------|------------|-----------------------------------------------------------------|
+| Magic  | `PF`       | Identifies the file as a colour PFM                             |
+| Size   | e.g. `3 2` | Width × Height                                                  |
+| Scale  | `-1.0`     | Little-endian floats                                            |
+| Scale  | `1.0`      | Big-endian floats                                               |
+| Pixels | raw bytes  | 3 × 32-bit floats per pixel (R, G, B), stored **bottom-to-top** |
 
 **Example — little-endian 3×2 image (`reference_le.pfm`):**
 
@@ -47,7 +49,7 @@ Before converting to LDR (PNG, JPEG, etc.), HDR images go through a two-step pip
 ```kotlin
 img.normalizeImage(factor)   // scale luminosity
 img.clampImage()             // bring values into [0.0, 1.0]  via x → x/(1+x)
-img.writeLDRImage(...)       // apply gamma + quantize to 8-bit
+img.writeLDRImage()       // apply gamma + quantize to 8-bit
 ```
 
 - `normalizeImage(factor)` — scales each pixel by `factor / averageLuminosity()`
@@ -60,22 +62,23 @@ img.writeLDRImage(...)       // apply gamma + quantize to 8-bit
 
 ### Sealed Interface: `GeoElement`
 
-Common parent for `math.Vec`, `math.Point`, and `math.Normal`. Provides shared `squaredNorm()` and `norm()` implementations.
+Common parent for `math.Vec`, `math.Point`, and `math.Normal`. Provides shared `squaredNorm()` and `norm()`
+implementations.
 `sealed` means all subtypes are known at compile time — `when` expressions on `GeoElement` are exhaustiveness-checked.
 
 ### `math.Vec` — 3D Vector
 
 Represents a direction or displacement in 3D space.
 
-| Operation | Syntax | Returns |
-|---|---|---|
-| Addition | `a + b` | `math.Vec` |
-| Subtraction | `a - b` | `math.Vec` |
-| Negation | `-a` | `math.Vec` |
-| Scalar multiply | `a * s` | `math.Vec` |
-| Dot product | `a dot b` | `Float` |
-| Cross product | `a cross b` | `math.Normal` |
-| Normalize | `a.normalize()` | `math.Vec` |
+| Operation       | Syntax          | Returns       |
+|-----------------|-----------------|---------------|
+| Addition        | `a + b`         | `math.Vec`    |
+| Subtraction     | `a - b`         | `math.Vec`    |
+| Negation        | `-a`            | `math.Vec`    |
+| Scalar multiply | `a * s`         | `math.Vec`    |
+| Dot product     | `a dot b`       | `Float`       |
+| Cross product   | `a cross b`     | `math.Normal` |
+| Normalize       | `a.normalize()` | `math.Vec`    |
 
 Axis constructors: `math.vecX()`, `math.vecY()`, `math.vecZ()`
 
@@ -83,24 +86,25 @@ Axis constructors: `math.vecX()`, `math.vecY()`, `math.vecZ()`
 
 Represents a position in space. Arithmetic is restricted to geometrically meaningful operations:
 
-| Operation | Syntax | Returns |
-|---|---|---|
-| Displace by vector | `p + v` | `math.Point` |
-| Vector between points | `p - q` | `math.Vec` |
-| Displace negatively | `p - v` | `math.Point` |
-| Convert to vector | `p.toVec()` | `math.Vec` |
+| Operation             | Syntax      | Returns      |
+|-----------------------|-------------|--------------|
+| Displace by vector    | `p + v`     | `math.Point` |
+| Vector between points | `p - q`     | `math.Vec`   |
+| Displace negatively   | `p - v`     | `math.Point` |
+| Convert to vector     | `p.toVec()` | `math.Vec`   |
 
 ### `math.Normal` — Surface math.Normal
 
-Normals transform differently from vectors under non-uniform math.scaling — they use the **inverse transpose** of the transformation matrix. See `math.Transformation.times(math.Normal)`.
+Normals transform differently from vectors under non-uniform scaling — they use the **inverse transpose** of the
+transformation matrix. See `math.Transformation.times(math.Normal)`.
 
-| Operation | Syntax | Returns |
-|---|---|---|
-| Negation | `-n` | `math.Normal` |
-| Scalar multiply | `n * s` | `math.Normal` |
-| Dot with vector | `n dot v` | `Float` |
-| Cross with normal | `n cross m` | `math.Vec` |
-| Cross with vector | `n cross v` | `math.Vec` |
+| Operation         | Syntax      | Returns       |
+|-------------------|-------------|---------------|
+| Negation          | `-n`        | `math.Normal` |
+| Scalar multiply   | `n * s`     | `math.Normal` |
+| Dot with vector   | `n dot v`   | `Float`       |
+| Cross with normal | `n cross m` | `math.Vec`    |
+| Cross with vector | `n cross v` | `math.Vec`    |
 
 ### `math.Vec2d` — 2D Screen Coordinate
 
@@ -116,14 +120,14 @@ Declared as `@JvmInline value class` — zero heap allocation overhead, the JVM 
 
 Element access: `m[row, col]` maps to `m.m[row * 4 + col]`.
 
-| Operation | Description |
-|---|---|
-| `m[row, col]` | Get element |
-| `m[row, col] = v` | Set element |
-| `m * other` | Matrix multiplication |
-| `m.isClose(other)` | Component-wise float comparison |
-| `m.isInverseOf(other)` | Returns true if `m * other ≈ I` |
-| `m.toMatrixString()` | Formatted 4×4 grid for printing |
+| Operation                      | Description                     |
+|--------------------------------|---------------------------------|
+| `m[row, col]`                  | Get element                     |
+| `m[row, col] = v`              | Set element                     |
+| `m * other`                    | Matrix multiplication           |
+| `m.isClose(other)`             | Component-wise float comparison |
+| `m.isInverseOf(other)`         | Returns true if `m * other ≈ I` |
+| `m.toMatrixString()`           | Formatted 4×4 grid for printing |
 | `math.HomogMatr4x4.identity()` | Returns the 4×4 identity matrix |
 
 ---
@@ -140,24 +144,24 @@ assert(t.isConsistent())  // verifies m * invm ≈ I
 
 ### Factory Functions
 
-| Function | Description |
-|---|---|
-| `math.Transformation.math.translation(vec)` | Translation by `vec` |
-| `math.Transformation.math.scaling(vec)` | Non-uniform math.scaling per axis |
-| `math.Transformation.math.rotationX(deg)` | Rotation around X axis |
-| `math.Transformation.math.rotationY(deg)` | Rotation around Y axis |
-| `math.Transformation.math.rotationZ(deg)` | Rotation around Z axis |
+| Function                                    | Description                       |
+|---------------------------------------------|-----------------------------------|
+| `math.Transformation.math.translation(vec)` | Translation by `vec`              |
+| `math.Transformation.math.scaling(vec)`     | Non-uniform math.scaling per axis |
+| `math.Transformation.math.rotationX(deg)`   | Rotation around X axis            |
+| `math.Transformation.math.rotationY(deg)`   | Rotation around Y axis            |
+| `math.Transformation.math.rotationZ(deg)`   | Rotation around Z axis            |
 
 ### Operations
 
-| Operation | Syntax | Returns |
-|---|---|---|
-| Compose | `t1 * t2` | `math.Transformation` |
-| Apply to point | `t * p` | `math.Point` |
-| Apply to vector | `t * v` | `math.Vec` |
-| Apply to normal | `t * n` | `math.Normal` (uses inverse transpose) |
-| Invert | `t.inverse()` | `math.Transformation` (swaps `m` and `invm`) |
-| Check consistency | `t.isConsistent()` | `Boolean` |
+| Operation         | Syntax             | Returns                                      |
+|-------------------|--------------------|----------------------------------------------|
+| Compose           | `t1 * t2`          | `math.Transformation`                        |
+| Apply to point    | `t * p`            | `math.Point`                                 |
+| Apply to vector   | `t * v`            | `math.Vec`                                   |
+| Apply to normal   | `t * n`            | `math.Normal` (uses inverse transpose)       |
+| Invert            | `t.inverse()`      | `math.Transformation` (swaps `m` and `invm`) |
+| Check consistency | `t.isConsistent()` | `Boolean`                                    |
 
 > ⚠️ Composition order matters: `t1 * t2` applies `t2` first, then `t1`. This matches standard mathematical convention.
 
@@ -209,9 +213,10 @@ Fires rays through every pixel of an `materials.HDRImage` using a given `core.Ca
 ```kotlin
 val tracer = core.ImageTracer(img, camera)
 tracer.fireAllRays { ray ->
-    world.rayIntersection(ray)?.let { white() } ?: black()
+	world.rayIntersection(ray)?.let { white() } ?: black()
 }
 ```
 
-The lambda receives each ray and returns a `materials.Color`. The tracer maps each pixel's UV coordinates to a ray direction
+The lambda receives each ray and returns a `materials.Color`. The tracer maps each pixel's UV coordinates to a ray
+direction
 via the camera, then writes the returned color into the image.

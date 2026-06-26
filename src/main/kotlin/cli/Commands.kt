@@ -112,7 +112,7 @@ class Demo : CliktCommand(
 	).choice("Orthogonal", "Perspective", ignoreCase = true).default("Perspective")
 	val outputDir: String by option(
 		"--output-dir", "-o", help = "Output directory for images"
-	).default("./src/main/resources/frames")
+	).default("./outputs/demo")
 	val observerZAngle: Float by option(
 		"--observer-angle", "-i", help = "Starting observer angle in degrees"
 	).float().default(0f)
