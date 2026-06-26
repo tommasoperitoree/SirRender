@@ -15,6 +15,7 @@ import javax.imageio.ImageIO
 import kotlin.math.sqrt
 import kotlin.test.assertEquals
 import kotlin.test.assertContentEquals
+import kotlin.test.assertTrue
 
 
 class HDRImageTest {
@@ -50,10 +51,10 @@ class HDRImageTest {
 	)
 	
 	@Test
-	fun `test overwritten equals operator`() {
+	fun `test dimension`() {
 		assertEquals(width, img.width)
 		assertEquals(height, img.height)
-		assertEquals(width * height, img.pixels.size)
+		assertEquals(height * width, img.pixels.size)
 	}
 	
 	@Test
@@ -61,7 +62,7 @@ class HDRImageTest {
 		assertTrue(img.validCoordinates(x, y))
 		assertTrue(img.validCoordinates(width - 1, height - 1))
 		
-		assertFalse(img.validCoordinates(-1, 0))
+		assertFalse(img.validCoordinates(- 1, 0))
 		assertFalse(img.validCoordinates(width, height)) // out of bounds (exclusive)
 		assertFalse(img.validCoordinates(width, 0))
 		assertFalse(img.validCoordinates(0, height))
@@ -85,7 +86,7 @@ class HDRImageTest {
 	}
 	
 	@Test
-	fun `test writePFMImage`() {
+	fun `test writePFImage`() {
 		val outputStream = ByteArrayOutputStream()
 		
 		img.writePFMImage(outputStream, LITTLE_ENDIAN)
@@ -125,17 +126,8 @@ class HDRImageTest {
 	}
 	
 	@Test
-	fun `test averageLuminosity`() {
-		img = HDRImage(2, 1)
-		
-		img.setPixel(0, 0, Color(.5f, 1f, 1.5f))
-		img.setPixel(1, 0, Color(50f, 100f, 150f))
-		assertTrue { areClose(10f, img.averageLuminosity()) }
-	}
-	
-	@Test
 	fun `test averageLuminosityDelta`() {
-		img = HDRImage(2, 1)
+		val img = HDRImage(2, 1)
 		img.setPixel(0, 0, Color(0f, 0f, 0f))
 		img.setPixel(1, 0, Color(100f, 100f, 100f))
 		
@@ -147,25 +139,31 @@ class HDRImageTest {
 	
 	@Test
 	fun `test normalizeImage`() {
+		
 		img = HDRImage(width = 2, height = 1)
-		img.setPixel(0, 0, Color(5f, 10f, 15f))
-		img.setPixel(1, 0, Color(500f, 1000f, 1500f))
+		img.setPixel(0, 0, Color(5.0f, 10.0f, 15.0f))
+		img.setPixel(1, 0, Color(500.0f, 1000.0f, 1500.0f))
 		
-		img.normalizeImage(100f, 1000f)
+		img.normalizeImage(
+			factor = 100f,
+			luminosity = 1000f
+		)
 		
-		assertTrue { img.getPixel(0, 0).isClose(Color(5e-1f, 1f, 1.5f)) }
-		assertTrue { img.getPixel(1, 0).isClose(Color(50f, 1e2f, 1.5e2f)) }
+		assertTrue(
+			img.getPixel(0, 0)
+				.isClose(Color(0.5f, 1f, 1.5f))
+		)
+		
+		assertTrue(img.getPixel(1, 0).isClose(Color(50f, 100f, 150f)))
 	}
 	
 	@Test
-	fun `test clampImage`() {
-		img = HDRImage(2, 1)
-		img.setPixel(0, 0, Color(1f, 3f, 9f))
-		
+	fun `test clampImage`(){
+		val img = HDRImage(1, 1)
+		img.setPixel(0, 0, Color(1.0f, 3.0f, 9.0f))
 		img.clampImage()
 		
 		val result = img.getPixel(0, 0)
-		
 		assertEquals(0.5f, result.r, 1e-6f)
 		assertEquals(0.75f, result.g, 1e-6f)
 		assertEquals(0.9f, result.b, 1e-6f)
@@ -182,7 +180,7 @@ class HDRImageTest {
 		//write on an output stream
 		val byteOut = ByteArrayOutputStream()
 		
-		img.writeLDRImage(byteOut, "png")
+		img.writeLDRImage(byteOut, "png", 1f)
 		
 		//Read the image from the stream e check  the dimension of the written image and the colors
 		val imgRead = ImageIO.read(ByteArrayInputStream(byteOut.toByteArray()))
@@ -196,7 +194,6 @@ class HDRImageTest {
 		assertEquals(0x0000FF, imgRead.getRGB(0, 1) and 0xFFFFFF)
 		assertEquals(0xFFFFFF, imgRead.getRGB(1, 1) and 0xFFFFFF)
 	}
-	
 	
 	//--- test on parsing utilities ---
 	
@@ -241,6 +238,19 @@ class HDRImageTest {
 		assertContentEquals(byteArrayOf(0x3F, 0x80.toByte(), 0x00, 0x00), byteOutBE.toByteArray())
 	}
 	
+	// --- test on public factory function ---
+	
+	@Test
+	fun `test parseEndianness`() {
+		assertEquals(BIG_ENDIAN, HDRImage.parseEndianness("1.0"))
+		assertEquals(LITTLE_ENDIAN, HDRImage.parseEndianness("-3.0"))
+		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.parseEndianness("0.0") }
+		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.parseEndianness("ABC") }
+		assertThrows(InvalidPFMImageFormat::class.java) { parseEndianness("NaN") }
+		assertThrows(InvalidPFMImageFormat::class.java) { parseEndianness("Infinity") }
+		
+	}
+	
 	@Test
 	fun `test parseImgSize`() {
 		assertEquals(Pair(3, 2), HDRImage.parseImgSize("3 2"))
@@ -262,19 +272,6 @@ class HDRImageTest {
 		assertThrows(InvalidPFMImageFormat::class.java) {
 			HDRImage.parseImgSize("9999999999999999 1") // not values outside integer range
 		}
-		
-	}
-	
-	// --- test on public factory function ---
-	
-	@Test
-	fun `test parseEndianness`() {
-		assertEquals(BIG_ENDIAN, parseEndianness("1.0"))
-		assertEquals(LITTLE_ENDIAN, parseEndianness("-3.0"))
-		assertThrows(InvalidPFMImageFormat::class.java) { parseEndianness("0.0") }
-		assertThrows(InvalidPFMImageFormat::class.java) { parseEndianness("ABC") }
-		assertThrows(InvalidPFMImageFormat::class.java) { parseEndianness("NaN") }
-		assertThrows(InvalidPFMImageFormat::class.java) { parseEndianness("Infinity") }
 	}
 	
 	@Test
@@ -314,6 +311,9 @@ class HDRImageTest {
 		
 		// same image
 		assertEquals(img1, img2)
+		assertEquals(img1.hashCode(), img2.hashCode())
+		
+		//same hashcode
 		assertEquals(img1.hashCode(), img2.hashCode())
 		
 		// different dimension

@@ -10,6 +10,7 @@ import kotlin.math.log10
 import kotlin.math.pow
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
+import kotlin.compareTo
 
 /**
  * Exception thrown when a file or stream does not perfectly match
@@ -266,6 +267,12 @@ data class HDRImage(
 			
 			if (!value.isFinite()) {
 				throw InvalidPFMImageFormat("Invalid endianness specification: value must be finite")
+			}
+			
+			if (!value.isFinite()) {
+				throw InvalidPFMImageFormat(
+					"Invalid endianness specification: value must be finite"
+				)
 			}
 			
 			return when {
