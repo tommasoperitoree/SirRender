@@ -318,6 +318,7 @@ class HDRImageTest {
 		
 		// same image
 		assertEquals(img1, img2)
+		assertEquals(img1.hashCode(), img2.hashCode())
 		
 		//same hashcode
 		assertEquals(img1.hashCode(), img2.hashCode())
