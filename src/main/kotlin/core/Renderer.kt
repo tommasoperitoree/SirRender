@@ -111,28 +111,21 @@ class PathTracer(
 		var cumRadiance = Color.black
 		
 		// if hitColorLum is 0 it means that the surface is completely black, so MonteCarlo is useless
-		if (hitColorLum > 0f) {
-			repeat(numRays) {
-				var newRay = Ray()
-				val scatterTime = measureTime {
-					newRay = hitMaterial.brdf.scatterRay(
-						pcg,
-						hitRecord.ray.dir,
-						hitRecord.worldPoint,
-						hitRecord.normal.normalize(),
-						ray.depth + 1
-					)
-				}
-				totalScatterTime += scatterTime
-				calls++
-				// depth has to be incremented, otherwise the new ray won't pass the first if
-				cumRadiance += hitColor * this(newRay) // recursive call with this(newRay)
-			}
+		if (hitColorLum > 0f) { //now timing scale like N exploiting antialiasing
+			val newRay = hitMaterial.brdf.scatterRay(
+				pcg,
+				hitRecord.ray.dir,
+				hitRecord.worldPoint,
+				hitRecord.normal.normalize(),
+				ray.depth + 1
+			)
+			cumRadiance += hitColor * this(newRay)
 		}
 		// Rendering equation
-		return emittedRadiance + cumRadiance * (1.0f / numRays)
 		// return the emitted radiance (ex from a light ball) + mean value of radiance reflected
+		return emittedRadiance + cumRadiance
 	}
+	
 	
 	fun printProfiling() {
 		println("=== core.PathTracer Profiling ===")
