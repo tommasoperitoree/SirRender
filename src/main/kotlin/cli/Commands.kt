@@ -14,12 +14,14 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.float
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.ulong
+import core.Camera
 import core.ImageTracer
 import core.OrthogonalCamera
 import core.PathTracer
 import core.PerspectiveCamera
 import core.ProgressBar
 import core.World
+import geometry.Ray
 import geometry.Sphere
 import materials.CheckeredPigment
 import materials.Color
@@ -468,4 +470,209 @@ class Render : CliktCommand("render") {
 	}
 }
 
+
 fun Long.toSci(): String = "%.2e".format(this.toDouble())
+
+class ParallelRender : CliktCommand("parallel-render") {
+	override fun help(context: Context) = "Generate a scene image"
+	
+	// formats: FullHD (1920x1080) ; 720p (1280x720) ; 480p (854x480) ; 360p (640x360)
+	val width: Int by option(
+		"--width", "-w", help = "Image width in pixels"
+	).int().default(640)
+	val height: Int by option(
+		"--height", "-h", help = "Image height in pixels"
+	).int().default(360)
+	val outputDir: String by option(
+		"--output-dir", "-o", help = "Output directory for PFM frames"
+	).default("./src/main/resources/frames")
+	val renderImage: Boolean by option(
+		"--render", "-r", help = "Also convert output to PNG"
+	).flag(default = false)
+	val factor: Float by option(
+		"--factor", "-f", help = "Luminosity scaling factor"
+	).float().default(0.2f)
+	val gamma: Float by option(
+		"--gamma", "-g", help = "Gamma correction value"
+	).float().default(1f)
+	val rays: Int by option(
+		"--num-rays", "-n", help = "Num rays"
+	).int().default(8)
+	val depth: Int by option(
+		"--depth", "-d", help = "Depth scaling factor"
+	).int().default(5)
+	val roulette: Int by option(
+		"--roulette", "-rou", help = "Russian Roulette maximum depth factor"
+	).int().default(3)
+	val initState: ULong by option(
+		"--initState", help = "Initial state number for random generation"
+	).ulong().default(42uL)
+	val initSeq: ULong by option(
+		"--initSeq", help = "Initial sequence number for random generation"
+	).ulong().default(54uL)
+	val antialiasing: Int by option(
+		"--antialiasing", "-a", help = "Antialiasing value"
+	).int().default(1)
+	val inputFile: File by option(
+		"--input-file", "-inp", help = "Input file path"
+	).file(mustExist = true, canBeDir = false, mustBeReadable = true)
+		.default(File("SceneR/sceneFile.txt"))
+	val threads: Int by option(
+		"--threads", "-t", help = "Number of render threads (default: all logical CPUs)"
+	).int().default(Runtime.getRuntime().availableProcessors())
+	
+	override fun run() {
+		
+		File(outputDir).mkdirs()
+		
+		val parsedScene: Scene = inputFile.reader().use { reader ->
+			parseScene(SceneInputStream(reader))
+		}
+		
+		val baseCamera = parsedScene.camera
+			?: throw IllegalArgumentException("No camera found in scene file")
+		val img = HDRImage(width, height)
+		
+		val cameraType = when (baseCamera) {
+			is PerspectiveCamera -> "Perspective (distance=${baseCamera.distance})"
+			is OrthogonalCamera -> "Orthogonal"
+			else -> "Unknown"
+		}
+		
+		val cam = when (baseCamera) {
+			is OrthogonalCamera -> OrthogonalCamera(
+				baseCamera.aspectRatio,
+				transformation = baseCamera.transformation
+			)
+			
+			is PerspectiveCamera -> PerspectiveCamera(
+				baseCamera.distance,
+				baseCamera.aspectRatio,
+				transformation = baseCamera.transformation
+			)
+			
+			else -> throw IllegalStateException("Unsupported camera type: $baseCamera")
+		}
+		
+		// ── startup summary ──────────────────────────────────────────────────────
+		val samplesPerPixel = if (antialiasing > 1) antialiasing * antialiasing else 1
+		val totalPixels = width.toLong() * height.toLong()
+		val totalSamples = totalPixels * samplesPerPixel
+		val totalRays = totalSamples * rays.toLong()
+		
+		println(
+			"""
+        ┌─ SirRender — Render ──────────────────────────────────────┐
+        │  Scene       : ${inputFile.path}
+        │  Resolution  : ${width} × ${height}  (${totalPixels.toSci()} px)
+        │  Camera      : $cameraType  (aspect ${baseCamera.aspectRatio})
+        │  Antialiasing: $antialiasing × $antialiasing  (${samplesPerPixel} samples/px)
+        │
+        │  Path tracer
+        │    Rays/sample      : $rays
+        │    Max depth        : $depth
+        │    RR limit         : $roulette
+        │    PCG seed         : state=$initState  seq=$initSeq
+        │
+        │  Total samples : ${totalSamples.toSci()}
+        │  Total rays    : ~${totalRays.toSci()}  (excl. Russian roulette)
+        │  Threads       : $threads
+        │
+        │  Output dir   : $outputDir
+        │  Tone-mapping : factor=$factor  gamma=$gamma  → PNG: $renderImage
+        └───────────────────────────────────────────────────────────┘
+    """.trimIndent()
+		)
+		// ────────────────────────────────────────────────────────────────────────
+		
+		// ── parallel render ──────────────────────────────────────────────────────
+		//
+		// Strategy: partition rows into threads stripes. Each stripe owns a
+		// contiguous, disjoint slice of img.pixels (pixelOffset = row*width+col),
+		// so setPixel() needs no locking. Each stripe has its own PathTracer (and
+		// therefore its own PCG), seeded deterministically from the user seed plus
+		// the stripe index — same result every run, regardless of thread count.
+		//
+		val progressBar = ProgressBar(totalSamples)
+		val done = java.util.concurrent.atomic.AtomicLong(0L)
+		
+		val stripeSize = (height + threads - 1) / threads   // ceiling division
+		
+		val threads = (0 until threads).map { threadIdx ->
+			val rowStart = threadIdx * stripeSize
+			val rowEnd = minOf(rowStart + stripeSize, height)
+			if (rowStart >= height) return@map null            // fewer rows than threads
+			
+			Thread {
+				// Each thread gets its own PCG instances, seeded from master + stripe index.
+				// This keeps the render deterministic: stripe 0 always produces the same
+				// random sequence regardless of how many threads are running.
+				val tracerPcg = PCG(initState + threadIdx.toULong(), initSeq)
+				val rendererPcg = PCG(initState, initSeq + threadIdx.toULong())
+				
+				val renderer = PathTracer(
+					parsedScene.world,
+					Color(),
+					rendererPcg,
+					numRays = rays,
+					maxRayDepth = depth,
+					russianRouletteLimit = roulette,
+				)
+				
+				for (row in rowStart until rowEnd) {
+					for (col in 0 until width) {
+						var colorSum = Color.black
+						
+						if (antialiasing <= 1) {
+							val ray = fireRay(cam, col, row)
+							colorSum = renderer(ray)
+						} else {
+							for (i in 0 until antialiasing) {
+								for (j in 0 until antialiasing) {
+									val uPixel = (i + tracerPcg.randomFloat()) / antialiasing
+									val vPixel = (j + tracerPcg.randomFloat()) / antialiasing
+									val ray = fireRay(cam, col, row, uPixel, vPixel)
+									colorSum += renderer(ray)
+								}
+							}
+							colorSum *= (1f / (antialiasing * antialiasing))
+						}
+						
+						img.setPixel(col, row, colorSum)
+						
+						val finished = done.incrementAndGet()
+						if (col == 0) progressBar.update(finished) // update once per row
+					}
+				}
+			}.also { it.isDaemon = false }
+		}.filterNotNull()
+		
+		threads.forEach { it.start() }
+		threads.forEach { it.join() }
+		// ────────────────────────────────────────────────────────────────────────
+		
+		val baseName = inputFile.nameWithoutExtension
+		val pfmPath = "$outputDir/$baseName.pfm"
+		img.writePFMFile(pfmPath)
+		println("\nSaved PFM → $pfmPath")
+		
+		if (renderImage) {
+			img.normalizeImage(factor)
+			img.clampImage()
+			val pngPath = "$outputDir/$baseName.png"
+			FileOutputStream(pngPath).use { img.writeLDRImage(it, "png", gamma) }
+			println("Saved PNG → $pngPath")
+		}
+	}
+	
+	
+	// ── helper: replaces ImageTracer.fireRay (camera-level, no shared state) ────
+	private fun fireRay(
+		cam: Camera, col: Int, row: Int,
+		uPixel: Float = 0.5f, vPixel: Float = 0.5f
+	): Ray {
+		val u = (col + uPixel) / width
+		val v = 1f - (row + vPixel) / height
+		return cam.fireRay(u, v)
+	}
+}
