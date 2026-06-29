@@ -7,7 +7,7 @@ SirRender renders scenes defined in a lightweight text format and exports lossle
 **Version:** 0.3.0 &nbsp;·&nbsp;
 [GitHub](https://github.com/tommasoperitoree/SirRender) &nbsp;·&nbsp;
 [CHANGELOG](https://github.com/tommasoperitoree/SirRender/blob/main/CHANGELOG.md) &nbsp;·&nbsp;
-[CLI Reference](https://github.com/tommasoperitoree/SirRender/blob/main/ReadMe.md)
+[CLI Reference](https://github.com/tommasoperitoree/SirRender/blob/main/README.md)
 
 ## Architecture Overview
 
