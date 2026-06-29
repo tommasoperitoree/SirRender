@@ -1,3 +1,5 @@
+// build.gradle.kts
+
 plugins {
 	kotlin("jvm") version "2.3.0"
 	id("org.jetbrains.dokka") version "2.1.0"
@@ -29,7 +31,7 @@ dependencies {
 }
 
 kotlin {
-	jvmToolchain(21)   // ← 25 is non-LTS preview, use 21
+	jvmToolchain(25)
 }
 
 application {
@@ -40,15 +42,27 @@ tasks.test {
 	useJUnitPlatform()
 }
 
-// --- Dokka ---
+// --- Dokka (V2 API) ---
 dokka {
-	moduleName = "SirRender"
+	moduleName.set("SirRender")
+	
 	dokkaSourceSets.main {
-		includes.from("docs/module.md")   // ← landing page
+		// Landing page content
+		includes.from("README-dokka.md")
+		
+		// Clickable source links to GitHub
 		sourceLink {
 			localDirectory.set(file("src/main/kotlin"))
-			remoteUrl.set(uri("https://github.com/tommasoperitoree/SirRender/blob/main/src/main/kotlin"))
-			remoteLineSuffix.set("#L")    // links to specific lines on GitHub
+			remoteUrl("https://github.com/tommasoperitoree/SirRender/blob/main/src/main/kotlin")
+			remoteLineSuffix.set("#L")
 		}
+		
+		// Hide the CLI package — it is an end-user tool, not part of the library API
+		perPackageOption {
+			matchingRegex.set("cli.*")
+			suppress.set(true)
+		}
+		
+		jdkVersion.set(25)
 	}
 }
