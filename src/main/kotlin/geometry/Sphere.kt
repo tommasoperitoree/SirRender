@@ -20,8 +20,6 @@ fun sphereNormal(point: Point, rayDir: Vec): Normal {
 
 /** Calculation of intersection [point] on the geometry.Sphere's surface, in (u,v) coordinates*/
 fun spherePointToUV(point: Point): SurfaceVec {
-	// To understand if 0.5f shift is needed
-	// val u = 0.5f + atan2(point.y, point.x) / (2f * PI.toFloat())
 	val u = atan2(point.y, point.x) / (2f * PI.toFloat())
 	return SurfaceVec(
 		if (u >= 0f) u else u + 1f, acos(point.z.coerceIn(-1f, 1f)) / PI.toFloat()
@@ -47,8 +45,6 @@ class Sphere(
 		val dSq = d.squaredNorm()
 		val oSq = o.squaredNorm()
 		
-		// if (oSq > 1f && od > 0f) return null
-		
 		val deltaRid: Float = od * od - dSq * (oSq - 1f)
 		
 		if (deltaRid <= 0f) return null // negative discriminant: ray misses the sphere
@@ -67,13 +63,12 @@ class Sphere(
 		val worldPoint = transformation * hitPoint
 		val normal = transformation * sphereNormal(hitPoint, rayDir = d)
 		val surfacePoint = spherePointToUV(hitPoint)
-		val t = tFirstHit
 		
 		return HitRecord(
 			worldPoint,
 			normal,
 			surfacePoint,
-			t,
+			tFirstHit,
 			ray,
 			this
 		)

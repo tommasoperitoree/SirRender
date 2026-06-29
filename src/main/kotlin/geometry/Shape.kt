@@ -1,20 +1,7 @@
 package geometry
 
 import materials.Material
-import materials.areClose
-import math.Normal
-import math.Point
 import math.Transformation
-import math.Vec
-import math.SurfaceVec
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.acos
-import kotlin.math.atan2
-import kotlin.math.floor
-
-import kotlin.math.sqrt
-import kotlin.ranges.rangeTo
 
 
 /**

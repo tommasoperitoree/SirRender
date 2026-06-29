@@ -29,13 +29,6 @@ class ImagePigment(
 	val image: HDRImage = HDRImage()
 ) : Pigment {
 	
-	// simple getColor through floor reduction of pixel coordinates from uv vec
-	// override fun getColor(uv: math.Vec2d): materials.Color {
-	// 	val col = (uv.u * image.width).toInt().coerceIn(0, image.width - 1)
-	// 	val row = (uv.v * image.height).toInt().coerceIn(0, image.height - 1)
-	// 	return image.getPixel(col, row)
-	// }
-	
 	/**
 	 * Utilize Bilinear Interpolation as presented in https://en.wikipedia.org/wiki/Bilinear_interpolation
 	 * under the method "on the unit square" to interpolate the 2d coordinate [uv]

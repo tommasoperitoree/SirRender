@@ -14,16 +14,37 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-
+/**
+ * Bidirectional Reflectance Distribution Function — defines how a surface responds to light.
+ *
+ * A BRDF describes the ratio of reflected radiance to incident irradiance as a function
+ * of incoming direction ω' and outgoing direction ω. Two implementations are provided:
+ * - [DiffuseBRDF] — ideal Lambertian diffuse (matte surfaces, ground, walls)
+ * - [SpecularBRDF] — ideal mirror reflection (chrome, perfect mirrors)
+ *
+ * In the path tracer, only [scatterRay] is used directly. [eval] is provided for
+ * direct-light calculations and testing.
+ *
+ * @property pigment The surface color/texture sampled at each hit point.
+ */
 interface BRDF {
 	val pigment: Pigment
 	
-	/** Evaluates the BRDF for the given geometry: returns reflected radiance fraction. */
+	/**
+	 * Evaluates the BRDF for the given geometry: returns reflected radiance fraction.
+	 *
+	 * Returns the fraction of radiance reflected from direction [inDir] toward [outDir]
+	 * at a surface point with UV coordinates [uv] and surface normal [normal].
+	 */
 	fun eval(normal: Normal, inDir: Vec, outDir: Vec, uv: SurfaceVec): Color
 	
 	/**
 	 * Samples a new scattered [Ray] from [intPoint] using Monte Carlo importance sampling.
 	 * The returned ray has [depth] already incremented.
+	 *
+	 * Implementations should sample directions proportional to their contribution to
+	 * the rendering equation to minimize variance. The returned ray's [Ray.depth] is
+	 * set to [depth], which the path tracer uses to enforce the recursion limit.
 	 */
 	fun scatterRay(
 		pcg: PCG,
