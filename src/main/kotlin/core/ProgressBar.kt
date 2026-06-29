@@ -2,6 +2,12 @@ package core
 
 import kotlin.math.max
 
+/**
+ * A thread-safe terminal progress bar with ETA estimation.
+ *
+ * [update] is safe to call from multiple threads concurrently (synchronized).
+ * The bar redraws in-place using a carriage return (`\r`).
+ */
 class ProgressBar(
 	private val total: Long,
 	private val barWidth: Int = 40
@@ -13,7 +19,7 @@ class ProgressBar(
 	fun update(done: Long, force: Boolean = false) {
 		val now = System.nanoTime()
 		
-		// Evita di stampare troppo spesso: aggiorna al massimo ogni 100 ms
+		// Rate-limit output: redraw at most once every 100 ms to avoid terminal spam.
 		if (!force && now - lastPrintTime < 100_000_000L && done < total) {
 			return
 		}

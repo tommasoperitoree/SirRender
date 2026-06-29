@@ -20,7 +20,10 @@ interface Renderer {
 }
 
 
-/** [OnOffRenderer] produce images white&black, useful for debugging purposes. */
+/**
+ * A debugging renderer that colors each pixel white if the ray hits any geometry,
+ * black otherwise. Useful for quickly verifying scene geometry without full shading.
+ */
 class OnOffRenderer(
 	override val world: World = World(),
 	override val backgroundColor: Color = Color(),
@@ -84,7 +87,6 @@ class PathTracer(
 		}
 		
 		if (PROFILING) totalIntersectionTime += intersectionTime
-		// totalIntersectionTime += intersectionTime
 		
 		hitRecord ?: return backgroundColor
 		

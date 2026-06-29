@@ -12,7 +12,6 @@ import kotlin.math.log10
 import kotlin.math.pow
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
-import kotlin.compareTo
 
 /**
  * Exception thrown when a file or stream does not perfectly match
@@ -99,7 +98,7 @@ data class HDRImage(
 	 * default parameter [delta] is to prevent black pixels from appearing in the output image
 	 */
 	fun averageLuminosity(delta: Float = 1e-10f): Float {
-		require(delta.isFinite() && delta > 0f){
+		require(delta.isFinite() && delta > 0f) {
 			"Delta must be finite and positive."
 		}
 		
@@ -169,7 +168,7 @@ data class HDRImage(
 	 * return type BufferedImage in order to create a GIF
 	 * each time an image is saved in bufferedImage, then this array is used in a loop to put together every frame
 	 */
-	fun writeLDRImage(stream: OutputStream, format: String, gamma: Float = 1.0f): BufferedImage {
+	fun writeLDRImage(stream: OutputStream, format: String, gamma: Float = 1f): BufferedImage {
 		val imageLDR = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
 		// TYPE_INT_RGB uses 8 bits per channel
 		

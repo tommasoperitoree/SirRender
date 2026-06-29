@@ -14,12 +14,14 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.float
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.ulong
+import core.Camera
 import core.ImageTracer
 import core.OrthogonalCamera
 import core.PathTracer
 import core.PerspectiveCamera
 import core.ProgressBar
 import core.World
+import geometry.Ray
 import geometry.Sphere
 import materials.CheckeredPigment
 import materials.Color
@@ -112,7 +114,7 @@ class Demo : CliktCommand(
 	).choice("Orthogonal", "Perspective", ignoreCase = true).default("Perspective")
 	val outputDir: String by option(
 		"--output-dir", "-o", help = "Output directory for images"
-	).default("./src/main/resources/frames")
+	).default("./outputs/demo")
 	val observerZAngle: Float by option(
 		"--observer-angle", "-i", help = "Starting observer angle in degrees"
 	).float().default(0f)
@@ -467,5 +469,6 @@ class Render : CliktCommand("render") {
 		}
 	}
 }
+
 
 fun Long.toSci(): String = "%.2e".format(this.toDouble())
