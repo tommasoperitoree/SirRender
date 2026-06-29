@@ -1,5 +1,5 @@
 # 1. Create a safe temporary output folder (OUTSIDE of src/)
-mkdir -p ./src/main/resources/animationBash
+mkdir -p ./outputs/animation/
 
 ./gradlew installDist
 
@@ -12,7 +12,7 @@ build/install/SirRender/bin/SirRender demo \
     -c "$CAMERA" \
     -n 180 \
     --render \
-    -o ./src/main/resources/animationBash
+    -o ./outputs/animation
 
 # 3. Create the video from the Kotlin-generated path
 # Note: Kotlin automatically puts them in a subfolder (e.g., ./src/main/resources/animationBash/perspective/frame_000.png)
