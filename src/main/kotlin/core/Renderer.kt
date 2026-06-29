@@ -21,7 +21,7 @@ interface Renderer {
 
 
 /**
- * A debugging renderer that colors each pixel white if the ray hits any geometry,
+ * A debugging [Renderer] that colors each pixel white if the ray hits any geometry,
  * black otherwise. Useful for quickly verifying scene geometry without full shading.
  */
 class OnOffRenderer(
@@ -38,7 +38,7 @@ class OnOffRenderer(
 
 
 /**
- * [FlatRenderer] estimates the solution of the rendering equation by neglecting any contribution of the light.
+ * A simple [Renderer] that estimates the solution of the rendering equation by neglecting any contribution of the light.
  * It just uses the pigment of each surface to determine how to compute the final radiance.
  */
 class FlatRenderer(
@@ -57,7 +57,7 @@ class FlatRenderer(
 
 
 /**
- * core.Renderer based on path tracing with Monte Carlo integration.
+ * [Renderer] based on path tracing with Monte Carlo integration.
  * Recursively solves the rendering equation by sampling [numRays] rays per intersection point.
  * Recursion is bounded by [maxRayDepth] and optimized via Russian Roulette beyond [russianRouletteLimit].
  */

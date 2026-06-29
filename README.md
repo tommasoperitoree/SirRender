@@ -39,7 +39,6 @@ HDR output (`.pfm`) with optional tone-mapped PNG/JPEG export and animated GIF a
 - **Two cameras**: orthogonal and perspective
 - **Scene file compiler**: declare geometry, materials, and camera in a readable `.txt` file
 - **Antialiasing**: jittered supersampling with `a²` rays per pixel
-- **Parallel rendering**: row-stripe partitioning across all CPU cores, fully deterministic
 - **HDR pipeline**: PFM storage → Reinhard tone mapping → gamma-corrected PNG/JPEG/WebP
 - **GIF animation**: assembles a folder of PFM frames into an animated GIF
 
@@ -120,7 +119,7 @@ SirRender render [options]
 | `--input-file`   | `-inp` | `SceneR/sceneFile.txt` | Path to the scene file                   |
 | `--width`        | `-w`   | `640`                  | Image width in pixels                    |
 | `--height`       | `-h`   | `360`                  | Image height in pixels                   |
-| `--output-dir`   | `-o`   | `./outputs/demo`       | Output directory                         |
+| `--output-dir`   | `-o`   | `./outputs/scenes`     | Output directory                         |
 | `--render`       | `-r`   | off                    | Also save a tone-mapped PNG              |
 | `--antialiasing` | `-a`   | `1`                    | Supersampling factor (`a²` rays/pixel)   |
 | `--num-rays`     | `-n`   | `8`                    | Scattered rays per path tracer bounce    |
@@ -157,18 +156,18 @@ without a scene file.
 SirRender demo [options]
 ```
 
-| Option             | Short | Default                       | Description                               |
-|--------------------|-------|-------------------------------|-------------------------------------------|
-| `--width`          | `-w`  | `1280`                        | Image width in pixels                     |
-| `--height`         | `-h`  | `720`                         | Image height in pixels                    |
-| `--camera`         | `-c`  | `Perspective`                 | `Orthogonal` or `Perspective`             |
-| `--observer-angle` | `-i`  | `0.0`                         | Observer angle around the scene (degrees) |
-| `--output-dir`     | `-o`  | `./src/main/resources/frames` | Output directory                          |
-| `--render`         | `-r`  | off                           | Also save a tone-mapped PNG               |
-| `--factor`         | `-f`  | `0.2`                         | Tone-mapping luminosity scale             |
-| `--gamma`          | `-g`  | `1.0`                         | Gamma correction for PNG output           |
-| `--initState`      |       | `42`                          | PCG seed — state component                |
-| `--initSeq`        |       | `54`                          | PCG seed — sequence component             |
+| Option             | Short | Default          | Description                               |
+|--------------------|-------|------------------|-------------------------------------------|
+| `--width`          | `-w`  | `1280`           | Image width in pixels                     |
+| `--height`         | `-h`  | `720`            | Image height in pixels                    |
+| `--camera`         | `-c`  | `Perspective`    | `Orthogonal` or `Perspective`             |
+| `--observer-angle` | `-i`  | `0.0`            | Observer angle around the scene (degrees) |
+| `--output-dir`     | `-o`  | `./outputs/demo` | Output directory                          |
+| `--render`         | `-r`  | off              | Also save a tone-mapped PNG               |
+| `--factor`         | `-f`  | `0.2`            | Tone-mapping luminosity scale             |
+| `--gamma`          | `-g`  | `1.0`            | Gamma correction for PNG output           |
+| `--initState`      |       | `42`             | PCG seed — state component                |
+| `--initSeq`        |       | `54`             | PCG seed — sequence component             |
 
 **Examples:**
 
