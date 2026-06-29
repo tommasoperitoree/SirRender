@@ -410,9 +410,7 @@ parsing  ──▶  core  ──▶  geometry  ──▶  math
 
 `PathTracer` solves the rendering equation via Monte Carlo integration:
 
-```
-L(x, ω) = Lₑ(x, ω)  +  ∫_Ω f_r(x, ω', ω) · L(x', ω') · |cos θ| · dω'
-```
+$$ L(\mathbf{x}, \omega) = L_e(\mathbf{x}, \omega) + \int_\Omega f_r(\mathbf{x}, \omega', \omega) \cdot L(\mathbf{x}', \omega') \cdot |\cos\theta| \, d\omega' $$
 
 Each surface bounce fires `numRays` cosine-weighted scattered rays, recurses to depth
 `maxRayDepth`, and applies Russian roulette termination beyond `russianRouletteLimit`
