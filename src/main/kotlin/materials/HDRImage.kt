@@ -156,6 +156,23 @@ data class HDRImage(
 	}
 	
 	/**
+	 * Convenience method that applies the full tone-mapping pipeline and saves the result as a PNG.
+	 *
+	 * Equivalent to calling [normalizeImage], [clampImage], and [writeLDRImage] in sequence.
+	 * Should be called on the raw HDR data before any prior tone-mapping has been applied.
+	 *
+	 * @param path     Full output file path (e.g. `"outputs/scene.png"`).
+	 * @param factor   Luminosity scaling factor passed to [normalizeImage].
+	 * @param gamma    Gamma correction exponent passed to [writeLDRImage].
+	 */
+	fun savePng(path: String, factor: Float, gamma: Float) {
+		normalizeImage(factor)
+		clampImage()
+		File(path).outputStream().use { writeLDRImage(it, "png", gamma) }
+		println("Saved PNG → $path")
+	}
+	
+	/**
 	 * Saves the current image to [stream] in LDR [format] (e.g. "png", "jpg")
 	 * applying [gamma] correction through `P_out = P_in^(1/gamma)`.
 	 *

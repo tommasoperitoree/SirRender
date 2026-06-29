@@ -6,9 +6,9 @@ import com.github.ajalt.clikt.core.subcommands
 fun main(args: Array<String>) =
 	SirRender() // tie together all subcommands and prepare CLI
 		.subcommands(
-			Pfm2Png(),
 			Demo(),
-			Animation(),
+			PFMtoPNG(),
+			PFMtoGIF(),
 			Render()
 		).main(args)
 
