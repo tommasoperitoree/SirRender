@@ -85,8 +85,8 @@ Render a scene file to PNG in one command:
 
 ```bash
 SirRender render --input-file scenes/RedSphere-CheckGround.txt --render
-# → src/main/resources/frames/RedSphere-CheckGround.pfm
-# → src/main/resources/frames/RedSphere-CheckGround.png
+# → outputs/scenes/RedSphere-CheckGround.pfm
+# → outputs/scenes/RedSphere-CheckGround.png
 ```
 
 Render the built-in demo at a specific observer angle:
@@ -394,8 +394,8 @@ SirRender is divided into five packages with a strict downward dependency order:
 
 ```
 parsing  ──▶  core  ──▶  geometry  ──▶  math
-                │                         ▲
-                └──▶  materials  ──────────┘
+                │                        ▲
+                └─────▶  materials  ─────┘
 ```
 
 | Package     | Key types                                                       |

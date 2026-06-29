@@ -338,7 +338,7 @@ class Render : CliktCommand("render") {
 	).int().default(360)
 	val outputDir: String by option(
 		"--output-dir", "-o", help = "Output directory for PFM frames"
-	).default("./src/main/resources/frames")
+	).default("./outputs/scenes")
 	val renderImage: Boolean by option(
 		"--render", "-r", help = "Also convert output to PNG"
 	).flag(default = false)
