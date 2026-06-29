@@ -1,4 +1,4 @@
-float clock(150)
+float clock(0)
 
 material skyMaterial(
     diffuse( uniform( (0, 0, 0) ) ) ,
@@ -21,4 +21,4 @@ plane( groundMaterial, identity )
 
 sphere( sphereMaterial, scaling( (2, 2, 2) ) * translation( (0, 0, 0.8) ) )
 
-camera( perspective, translation( (-6, 0, 5) ) * rotationY(30), 1.7777, 3.0 )
+camera( perspective, rotationZ( clock ) * translation( (-6, 0, 5) ) * rotationY(30), 1.7777, 3.0 )

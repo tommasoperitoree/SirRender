@@ -7,6 +7,9 @@ local.properties
 ### Output & Renders ###
 *.log
 outputs/scenes/*.pfm
+/outputs/animations/animateDemo/
+/outputs/animations/*/
+!/outputs/animations/*.mp4
 # Catch any local renders accidentally generated in the root directory
 /*.mp4
 /*.gif

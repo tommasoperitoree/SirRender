@@ -21,8 +21,11 @@ HDR output (`.pfm`) with optional tone-mapped PNG/JPEG export and animated GIF a
 - [Commands](#commands)
     - [render](#render--render-a-scene-file)
     - [demo](#demo--render-the-built-in-demo)
-    - [animation](#animation--assemble-pfm-frames-into-a-gif)
+    - [pfm-to-gif](#pfm-to-gif--assemble-pfm-frames-into-a-gif)
     - [pfm2png](#pfm2png--convert-pfm-to-ldr)
+- [Animation Scripts](#animation-scripts)
+    - [animateDemo.sh](#animatedemosh)
+    - [animateScenes.sh](#animatescenessh)
 - [Scene File Format](#scene-file-format)
 - [Typical Workflows](#typical-workflows)
 - [Architecture](#architecture)
@@ -40,7 +43,9 @@ HDR output (`.pfm`) with optional tone-mapped PNG/JPEG export and animated GIF a
 - **Scene file compiler**: declare geometry, materials, and camera in a readable `.txt` file
 - **Antialiasing**: jittered supersampling with `a²` rays per pixel
 - **HDR pipeline**: PFM storage → Reinhard tone mapping → gamma-corrected PNG/JPEG/WebP
-- **GIF animation**: assembles a folder of PFM frames into an animated GIF
+- **Parallel rendering**: row-stripe partitioning across all CPU cores, fully deterministic
+- **GIF animation**: `pfm-to-gif` assembles a folder of PFM frames into an animated GIF
+- **Animation scripts**: `animateDemo.sh` and `animateScenes.sh` render full 360° MP4 animations
 
 ---
 
@@ -129,6 +134,8 @@ SirRender render [options]
 | `--gamma`        | `-g`   | `1.0`                  | Gamma correction for PNG output          |
 | `--initState`    |        | `42`                   | PCG seed — state component               |
 | `--initSeq`      |        | `54`                   | PCG seed — sequence component            |
+| `--clock`        |        | —                      | Override `clock` variable in scene file  |
+| `--name`         |        | scene file name        | Output file base name                    |
 | `--threads`      | `-t`   | all CPUs               | Number of parallel render threads        |
 
 **Examples:**
@@ -181,32 +188,32 @@ SirRender demo -c Orthogonal -w 1920 -h 1080 --render
 
 ---
 
-### `animation` — Assemble PFM Frames into a GIF
+### `pfm-to-gif` — Assemble PFM Frames into a GIF
 
 Reads all `.pfm` files from a directory (sorted alphabetically), applies tone mapping,
 and assembles them into an animated GIF. Since frames are kept as raw HDR data, you can
 re-assemble with different tone-mapping settings without re-rendering.
 
 ```bash
-SirRender animation [options]
+SirRender pfm-to-gif [options]
 ```
 
-| Option        | Short | Default                              | Description                                |
-|---------------|-------|--------------------------------------|--------------------------------------------|
-| `--input-dir` | `-i`  | `./src/main/resources/frames`        | Directory of PFM files                     |
-| `--output`    | `-o`  | `./src/main/resources/animation.gif` | Output GIF path                            |
-| `--delay`     | `-d`  | `4`                                  | Frame delay in centiseconds (`4` ≈ 25 fps) |
-| `--factor`    | `-f`  | `0.2`                                | Tone-mapping luminosity scale              |
-| `--gamma`     | `-g`  | `1.0`                                | Gamma correction value                     |
+| Option        | Short | Default                                | Description                                |
+|---------------|-------|----------------------------------------|--------------------------------------------|
+| `--input-dir` | `-i`  | `./outputs/animations/animateDemo`     | Directory of PFM files                     |
+| `--output`    | `-o`  | `./outputs/animations/animateDemo.gif` | Output GIF path                            |
+| `--delay`     | `-d`  | `4`                                    | Frame delay in centiseconds (`4` ≈ 25 fps) |
+| `--factor`    | `-f`  | `0.2`                                  | Tone-mapping luminosity scale              |
+| `--gamma`     | `-g`  | `1.0`                                  | Gamma correction value                     |
 
 **Examples:**
 
 ```bash
-# Assemble frames at 25 fps
-SirRender animation -i ./frames -o output.gif
+# Assemble demo frames into a GIF
+SirRender pfm-to-gif -i outputs/animations/animateDemo -o outputs/animations/demo.gif
 
 # Slower animation, custom tone mapping
-SirRender animation -i ./frames -o result.gif --delay 10 --factor 0.4 --gamma 2.2
+SirRender pfm-to-gif -i outputs/animations/RedSphere-CheckGround -o outputs/animations/RedSphere.gif --delay 10 --factor 0.4 --gamma 2.2
 ```
 
 ---
@@ -267,7 +274,8 @@ plane(groundMaterial, identity)
 sphere(sphereMaterial, scaling((2, 2, 2)) * translation((0, 0, 1)))
 
 # Camera: camera(type, transform, aspectRatio, distance)
-camera(perspective, translation((-5, 0, 2)) * rotationY(10), 1.7777, 2.0)
+# rotationZ(clock) orbits the camera — clock is overridden per frame by animateScenes.sh
+camera(perspective, rotationZ(clock) * translation((-5, 0, 2)) * rotationY(10), 1.7777, 2.0)
 ```
 
 ### Shapes
@@ -357,27 +365,67 @@ sphere(skyMaterial, scaling((10, 10, 10)))
 ### Render a scene to PNG
 
 ```bash
-./gradlew installDist
 SirRender render -inp scenes/RedSphere-CheckGround.txt -r -w 1280 -h 720 -a 3
+# → outputs/scenes/RedSphere-CheckGround.pfm
+# → outputs/scenes/RedSphere-CheckGround.png
 ```
 
-### Full 360° animation
+### Render a 360° animation of the built-in demo scene
 
 ```bash
-# Step 1: render 72 frames as PFM (5° steps)
-for i in $(seq 0 5 355); do
-    SirRender demo --observer-angle $i --output-dir ./frames
-done
+bash scripts/animateDemo.sh
+# → outputs/animations/animateDemo.mp4  (36 frames, 12 fps by default)
+# → PFM frames kept in outputs/animations/animateDemo/
+```
 
-# Step 2: assemble into GIF at 25 fps
-SirRender animation -i ./frames -o rotation.gif
+Customize with env vars:
+
+```bash
+NUM_FRAMES=72 WIDTH=1280 HEIGHT=720 FPS=24 bash scripts/animateDemo.sh
+```
+
+### Render a 360° animation from a scene file
+
+The `clock` variable in the scene file controls the camera angle. Add it to your
+camera transform, then the script overrides it per frame:
+
+```
+# in your scene file:
+float clock(0)
+camera(perspective, rotationZ(clock) * translation((-5, 0, 2)) * rotationY(10), 1.7777, 2.0)
+```
+
+```bash
+SCENE_FILE=scenes/RedSphere-CheckGround.txt bash scripts/animateScenes.sh
+# → outputs/animations/RedSphere-CheckGround.mp4
+# → PFM frames kept in outputs/animations/RedSphere-CheckGround/
+```
+
+Customize with env vars:
+
+```bash
+SCENE_FILE=scenes/CornellBox.txt NUM_FRAMES=72 NUM_RAYS=8 WIDTH=1280 HEIGHT=720 bash scripts/animateScenes.sh
+```
+
+### Assemble PFM frames into a GIF
+
+PFM frames are kept after both animation scripts run, so you can assemble a GIF
+at any time without re-rendering:
+
+```bash
+SirRender pfm-to-gif \
+    -i outputs/animations/RedSphere-CheckGround \
+    -o outputs/animations/RedSphere.gif \
+    --delay 6
 ```
 
 ### Re-tone-map without re-rendering
 
 ```bash
-# Frames already rendered; just re-assemble with different settings
-SirRender animation -i ./frames -o darker.gif --factor 0.1 --gamma 2.2
+SirRender pfm-to-gif \
+    -i outputs/animations/RedSphere-CheckGround \
+    -o outputs/animations/RedSphere-bright.gif \
+    --factor 0.5 --gamma 2.2
 ```
 
 ### Convert a raw PFM
@@ -385,6 +433,53 @@ SirRender animation -i ./frames -o darker.gif --factor 0.1 --gamma 2.2
 ```bash
 SirRender pfm2png render.pfm final.png --factor 0.3 --gamma 1.8
 ```
+
+---
+
+## Animation Scripts
+
+Two bash scripts in `scripts/` handle full 360° animation workflows.
+Both require `ffmpeg` to be installed (`brew install ffmpeg` on macOS).
+
+### `animateDemo.sh`
+
+Renders the built-in demo scene by looping `demo` over N angles and stitching frames into an MP4.
+
+```bash
+bash scripts/animateDemo.sh
+```
+
+| Variable     | Default                                | Description                     |
+|--------------|----------------------------------------|---------------------------------|
+| `CAMERA`     | `Perspective`                          | `Perspective` or `Orthogonal`   |
+| `WIDTH`      | `640`                                  | Frame width in pixels           |
+| `HEIGHT`     | `480`                                  | Frame height in pixels          |
+| `NUM_FRAMES` | `36`                                   | Total frames (360°/NUM_FRAMES°) |
+| `FPS`        | `12`                                   | Output video frame rate         |
+| `OUTPUT_DIR` | `./outputs/animations/animateDemo`     | PFM frame storage               |
+| `VIDEO_OUT`  | `./outputs/animations/animateDemo.mp4` | Output MP4 path                 |
+
+### `animateScenes.sh`
+
+Renders any scene file by looping `render` with `--clock` overriding the `clock` variable
+per frame. The scene file must reference `clock` in its camera transform.
+
+```bash
+SCENE_FILE=scenes/RedSphere-CheckGround.txt bash scripts/animateScenes.sh
+```
+
+| Variable       | Default                                 | Description                 |
+|----------------|-----------------------------------------|-----------------------------|
+| `SCENE_FILE`   | `./scenes/RedSphere-CheckGround.txt`    | Scene file to render        |
+| `WIDTH`        | `1280`                                  | Frame width in pixels       |
+| `HEIGHT`       | `720`                                   | Frame height in pixels      |
+| `NUM_FRAMES`   | `36`                                    | Total frames                |
+| `FPS`          | `12`                                    | Output video frame rate     |
+| `NUM_RAYS`     | `4`                                     | Rays per path tracer bounce |
+| `DEPTH`        | `5`                                     | Maximum ray recursion depth |
+| `ANTIALIASING` | `1`                                     | Supersampling factor        |
+| `PFM_DIR`      | `./outputs/animations/<scene-name>`     | PFM frame storage           |
+| `VIDEO_OUT`    | `./outputs/animations/<scene-name>.mp4` | Output MP4 path             |
 
 ---
 
