@@ -4,13 +4,13 @@ import math.Normal
 import math.PCG
 import math.Point
 import math.Vec
-import math.Vec2d
+import math.SurfaceVec
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PigmentTest {
-	val uv: Vec2d = Vec2d()
+	val uv: SurfaceVec = SurfaceVec()
 	
 	@Test
 	fun `getColor UniformPigment test`() {
@@ -26,10 +26,10 @@ class PigmentTest {
 		val step = 2
 		val pigment = CheckeredPigment(color1, color2, step)
 		
-		assertEquals(color1, pigment.getColor(Vec2d(0.25f, 0.25f)))
-		assertEquals(color2, pigment.getColor(Vec2d(0.25f, 0.75f)))
-		assertEquals(color2, pigment.getColor(Vec2d(0.75f, 0.25f)))
-		assertEquals(color1, pigment.getColor(Vec2d(0.75f, 0.75f)))
+		assertEquals(color1, pigment.getColor(SurfaceVec(0.25f, 0.25f)))
+		assertEquals(color2, pigment.getColor(SurfaceVec(0.25f, 0.75f)))
+		assertEquals(color2, pigment.getColor(SurfaceVec(0.75f, 0.25f)))
+		assertEquals(color1, pigment.getColor(SurfaceVec(0.75f, 0.75f)))
 	}
 	
 	@Test
@@ -41,7 +41,7 @@ class PigmentTest {
 		image.setPixel(1, 1, Color(0.0f, 0.0f, 1.0f))
 		
 		val pigment = ImagePigment(image)
-		assertEquals(Color(0.25f, 0.25f, 0.25f), pigment.getColor(Vec2d(0.25f, 0.25f)))
+		assertEquals(Color(0.25f, 0.25f, 0.25f), pigment.getColor(SurfaceVec(0.25f, 0.25f)))
 	}
 }
 

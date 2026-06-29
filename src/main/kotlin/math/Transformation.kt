@@ -10,9 +10,9 @@ import kotlin.math.PI
 /** Converts this angle from degrees to radians. */
 fun Float.toRadians(): Float = (this * PI / 180.0).toFloat()
 
-/** Simple function to return a [Pair] of `(cos(angleDeg), sin(angleDeg))` of the given [angleDeg] in degrees.
- * Converts to radians internally.
- * Used by rotation factory functions to avoid computing [toRadians] twice.
+/**
+ * Returns `(cos θ, sin θ)` for angle [angleDeg] given in degrees.
+ * Used internally by the rotation factory functions.
  */
 fun angleCosSin(angleDeg: Float): Pair<Float, Float> {
 	val rad = angleDeg.toRadians().toDouble()
@@ -42,21 +42,16 @@ data class Transformation(
 	 */
 	fun isConsistent(): Boolean = invm.isInverseOf(m)
 	
+	// Compares only the forward matrix; sufficient for test assertions on geometry.
 	fun isClose(other: Transformation): Boolean {
 		return this.m.isClose(other.m)
 	}
 	
 	companion object {
-		
-		fun identity() = HomogMatr4x4(
-			floatArrayOf(
-				1f, 0f, 0f, 0f,
-				0f, 1f, 0f, 0f,
-				0f, 0f, 1f, 0f,
-				0f, 0f, 0f, 1f
-			)
-		)
+		/** Returns the identity [Transformation] (no translation, rotation, or scaling). */
+		fun identity() = Transformation()
 	}
+	
 	// --- Operations ---
 	
 	/**
