@@ -8,16 +8,14 @@ import materials.areClose
 import math.Normal
 import math.Point
 import math.Vec
-import math.Vec2d
+import math.SurfaceVec
 import math.scaling
 import math.translation
-import math.Transformation
 import math.vecX
 import math.vecZ
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.math.sqrt
 import kotlin.test.assertEquals
 
 class ShapesTest {
@@ -45,9 +43,9 @@ class ShapesTest {
 	@Test
 	fun `test spherePointToUV`() {
 		val point1 = Point(1f, 0f, 0f)
-		val uv1 = Vec2d(0f, 0.5f)
+		val uv1 = SurfaceVec(0f, 0.5f)
 		val point2 = Point(0.577f, 0.577f, 0.577f) // point on diagonal, first quadrant
-		val uv2 = Vec2d(0.125f, 0.30422f)
+		val uv2 = SurfaceVec(0.125f, 0.30422f)
 		
 		Assertions.assertTrue(spherePointToUV(point1).isClose(uv1))
 		Assertions.assertTrue(spherePointToUV(point2).isClose(uv2))
@@ -56,7 +54,7 @@ class ShapesTest {
 	@Test
 	fun `test rayIntersection z direction`() {
 		val ray1 = Ray(Point(0f, 0f, 2f), -vecZ())
-		val uv1 = Vec2d(0f, 0f)
+		val uv1 = SurfaceVec(0f, 0f)
 		val hit1 = sphere.rayIntersection(ray1)
 		
 		Assertions.assertTrue(
@@ -72,7 +70,7 @@ class ShapesTest {
 		
 		val ray2 = Ray(Point(3f, 0f, 0f), -vecX())
 		val hit2 = sphere.rayIntersection(ray2)
-		val uv2 = Vec2d(0f, 1 / 2f)
+		val uv2 = SurfaceVec(0f, 1 / 2f)
 		
 		Assertions.assertTrue(
 			hit2?.worldPoint?.isClose(Point(1f, 0f, 0f)) ?: false &&
@@ -87,7 +85,7 @@ class ShapesTest {
 	fun `test rayIntersection inside sphere`() {
 		val ray3 = Ray(Point(0f, 0f, 0f), vecX())
 		val hit3 = sphere.rayIntersection(ray3)
-		val uv3 = Vec2d(0f, 1 / 2f)
+		val uv3 = SurfaceVec(0f, 1 / 2f)
 		Assertions.assertTrue(
 			hit3?.worldPoint?.isClose(Point(1f, 0f, 0f)) ?: false &&
 					hit3.normal.isClose(-vecX().toNormal()) &&
@@ -104,11 +102,11 @@ class ShapesTest {
 	fun `test rayIntersection with translation`() {
 		val ray = Ray(Point(10f, 0f, 2f), -vecZ())
 		val hit = sphere1.rayIntersection(ray)
-		val uv = Vec2d(0f, 0f)
+		val uv = SurfaceVec(0f, 0f)
 		
 		val ray2 = Ray(Point(13f, 0f, 0f), -vecX())
 		val hit2 = sphere1.rayIntersection(ray2)
-		val uv2 = Vec2d(0f, 1 / 2f)
+		val uv2 = SurfaceVec(0f, 1 / 2f)
 		
 		
 		Assertions.assertTrue(
@@ -130,7 +128,7 @@ class ShapesTest {
 	fun `test scaling rayIntersection`() {
 		val ray = Ray(Point(0f, 0f, 15f), -vecZ())
 		val hit = sphere2.rayIntersection(ray)
-		val uv = Vec2d(0f, 0f)
+		val uv = SurfaceVec(0f, 0f)
 		//if there is a scaling remember always to normalize()
 		Assertions.assertTrue(
 			hit?.worldPoint?.isClose(Point(0f, 0f, 10f)) ?: false &&

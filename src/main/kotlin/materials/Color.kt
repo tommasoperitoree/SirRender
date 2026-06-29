@@ -38,8 +38,11 @@ data class Color(
 	fun isClose(other: Color, epsilon: Float = 1e-5f) =
 		areClose(this.r, other.r, epsilon) && areClose(this.g, other.g, epsilon) && areClose(this.b, other.b, epsilon)
 	
-	/** Computes the luminosity of a color as
-	 * `L = ( max(r,g,b) + min(r,g,b) ) / 2`
+	/**
+	 * Returns the lightness component as `(max(r,g,b) + min(r,g,b)) / 2`.
+	 *
+	 * This is the HSL lightness, not a perceptual luminance formula.
+	 * Used for Russian roulette termination probability in [core.PathTracer].
 	 */
 	fun luminosity(): Float {
 		val max = maxOf(r, g, b)
@@ -73,11 +76,13 @@ data class Color(
 	}
 	
 	companion object {
-		
-		/** Generate white [Color] */
+		/**
+		 * Shared white color constant `(1, 1, 1)`.
+		 * Do not mutate fields directly; use `Color(1f, 1f, 1f)` for a fresh instance.
+		 */
 		val white = Color(1f, 1f, 1f)
 		
-		/** Generate black [Color] */
+		/** Shared black color constant `(0, 0, 0)`. See [white] for mutability note. */
 		val black = Color(0f, 0f, 0f)
 	}
 	
