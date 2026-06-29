@@ -165,7 +165,7 @@ fun findExitAxis(point: Point): Pair<Int, Float> {
 	for (axis in 0..2) if (areClose(abs(coords[axis]), 1f)) {
 		return Pair(axis, if (coords[axis] > 0) 1f else -1f)
 	}
-	return Pair(0, 1f) //fallback
+	return Pair(0, 1f) // fallback
 }
 
 /**
@@ -203,7 +203,7 @@ class Cube(
 			var sign1 = -1f
 			var sign2 = 1f
 			
-			//condition t2 is in enter and t1 in exit, it depends on sign of d
+			// condition t2 is in enter and t1 in exit, it depends on sign of d
 			if (t1 > t2) {
 				val temp = t1
 				t1 = t2
@@ -224,7 +224,7 @@ class Cube(
 			}
 			if (tNear > tFar) return null
 		}
-		//choose first valid t, if tNear>0 is t1 else is tFar
+		// choose first valid t, if tNear>0 is t1 else is tFar
 		val tHit = when {
 			tNear in invRay.tMin..invRay.tMax -> tNear
 			tFar in invRay.tMin..invRay.tMax -> tFar
