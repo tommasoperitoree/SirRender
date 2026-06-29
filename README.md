@@ -115,22 +115,22 @@ result as a `.pfm` file. Pass `--render` to also produce a tone-mapped PNG.
 SirRender render [options]
 ```
 
-| Option           | Short  | Default                       | Description                              |
-|------------------|--------|-------------------------------|------------------------------------------|
-| `--input-file`   | `-inp` | `SceneR/sceneFile.txt`        | Path to the scene file                   |
-| `--width`        | `-w`   | `640`                         | Image width in pixels                    |
-| `--height`       | `-h`   | `360`                         | Image height in pixels                   |
-| `--output-dir`   | `-o`   | `./src/main/resources/frames` | Output directory                         |
-| `--render`       | `-r`   | off                           | Also save a tone-mapped PNG              |
-| `--antialiasing` | `-a`   | `1`                           | Supersampling factor (`a²` rays/pixel)   |
-| `--num-rays`     | `-n`   | `8`                           | Scattered rays per path tracer bounce    |
-| `--depth`        | `-d`   | `5`                           | Maximum ray recursion depth              |
-| `--roulette`     | `-rou` | `3`                           | Depth at which Russian roulette kicks in |
-| `--factor`       | `-f`   | `0.2`                         | Tone-mapping luminosity scale            |
-| `--gamma`        | `-g`   | `1.0`                         | Gamma correction for PNG output          |
-| `--initState`    |        | `42`                          | PCG seed — state component               |
-| `--initSeq`      |        | `54`                          | PCG seed — sequence component            |
-| `--threads`      | `-t`   | all CPUs                      | Number of parallel render threads        |
+| Option           | Short  | Default                | Description                              |
+|------------------|--------|------------------------|------------------------------------------|
+| `--input-file`   | `-inp` | `SceneR/sceneFile.txt` | Path to the scene file                   |
+| `--width`        | `-w`   | `640`                  | Image width in pixels                    |
+| `--height`       | `-h`   | `360`                  | Image height in pixels                   |
+| `--output-dir`   | `-o`   | `./outputs/demo`       | Output directory                         |
+| `--render`       | `-r`   | off                    | Also save a tone-mapped PNG              |
+| `--antialiasing` | `-a`   | `1`                    | Supersampling factor (`a²` rays/pixel)   |
+| `--num-rays`     | `-n`   | `8`                    | Scattered rays per path tracer bounce    |
+| `--depth`        | `-d`   | `5`                    | Maximum ray recursion depth              |
+| `--roulette`     | `-rou` | `3`                    | Depth at which Russian roulette kicks in |
+| `--factor`       | `-f`   | `0.2`                  | Tone-mapping luminosity scale            |
+| `--gamma`        | `-g`   | `1.0`                  | Gamma correction for PNG output          |
+| `--initState`    |        | `42`                   | PCG seed — state component               |
+| `--initSeq`      |        | `54`                   | PCG seed — sequence component            |
+| `--threads`      | `-t`   | all CPUs               | Number of parallel render threads        |
 
 **Examples:**
 
@@ -418,15 +418,6 @@ L(x, ω) = Lₑ(x, ω)  +  ∫_Ω f_r(x, ω', ω) · L(x', ω') · |cos θ| · d
 Each surface bounce fires `numRays` cosine-weighted scattered rays, recurses to depth
 `maxRayDepth`, and applies Russian roulette termination beyond `russianRouletteLimit`
 to keep the estimator unbiased.
-
-### Parallelism
-
-The `render` command partitions image rows across `N` threads (default: all logical CPUs).
-Each thread owns a private `PathTracer` with a deterministically seeded `PCG`,
-so the same `--initState`/`--initSeq` always produces the same image regardless of
-thread count.
-
----
 
 ## API Documentation
 
