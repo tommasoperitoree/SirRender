@@ -9,9 +9,7 @@ SirRender renders scenes defined in a lightweight text format and exports lossle
 [CHANGELOG](https://github.com/tommasoperitoree/SirRender/blob/main/CHANGELOG.md) &nbsp;·&nbsp;
 [CLI Reference](https://github.com/tommasoperitoree/SirRender/blob/main/ReadMe.md)
 
----
-
-## Package Structure
+## Architecture Overview
 
 SirRender is organized into five packages with a strict downward dependency order:
 
@@ -21,18 +19,16 @@ parsing  ──▶  core  ──▶  geometry  ──▶  math
                  └──▶  materials  ──────────┘
 ```
 
-| Package                           | What lives here                                                                            |
-|-----------------------------------|--------------------------------------------------------------------------------------------|
-| [`math`](math/index.md)           | Linear algebra primitives: [Vec], [Point], [Normal], [SurfaceVec], [Transformation], [PCG] |
-| [`geometry`](geometry/index.md)   | Ray–shape intersection: [Ray], [Shape], [Sphere], [Plane], [Cube], [HitRecord]             |
-| [`materials`](materials/index.md) | Surface appearance: [Color], [HDRImage], [Pigment], [BRDF], [Material]                     |
-| [`core`](core/index.md)           | Rendering pipeline: [Camera], [World], [ImageTracer], [PathTracer]                         |
-| [`parsing`](parsing/index.md)     | Scene file compiler: [SceneInputStream], [parseScene]                                      |
+| Package     | What lives here                                                                            |
+|-------------|--------------------------------------------------------------------------------------------|
+| `math`      | Linear algebra primitives: [Vec], [Point], [Normal], [SurfaceVec], [Transformation], [PCG] |
+| `geometry`  | Ray–shape intersection: [Ray], [Shape], [Sphere], [Plane], [Cube], [HitRecord]             |
+| `materials` | Surface appearance: [Color], [HDRImage], [Pigment], [BRDF], [Material]                     |
+| `core`      | Rendering pipeline: [Camera], [World], [ImageTracer], [PathTracer]                         |
+| `parsing`   | Scene file compiler: [SceneInputStream], [parseScene]                                      |
 
 The `cli` package (the command-line interface) is omitted from the API reference — it is an
 end-user tool, not part of the library surface.
-
----
 
 ## Architecture: Five-Layer Pipeline
 
@@ -131,8 +127,6 @@ giving each thread its own [PathTracer] instance with a deterministically seeded
 [parseScene] reads a `.txt` scene file token by token via [SceneInputStream] and
 builds a fully initialized [World] plus a [Camera], ready to hand to [ImageTracer].
 
----
-
 ## Quick Start (Kotlin API)
 
 ```kotlin
@@ -188,8 +182,6 @@ img.clampImage()
 FileOutputStream("output.png").use { img.writeLDRImage(it, "png", gamma = 2.2f) }
 ```
 
----
-
 ## Scene File Format (mini-reference)
 
 Scenes can be described in a plain `.txt` file and rendered with the `render` CLI command.
@@ -211,7 +203,7 @@ sphere(skyMaterial,  scaling((10, 10, 10)))
 plane(groundMaterial, identity)
 
 camera(perspective, translation((-5, 0, 2)) * rotationY(10), 1.7777, 2.0)
-#                    ^transform                                ^aspect  ^distance
+//     type          transform                               aspect  distance
 ```
 
 **Grammar highlights:**
@@ -232,8 +224,6 @@ camera(perspective, translation((-5, 0, 2)) * rotationY(10), 1.7777, 2.0)
 | Transform | `identity`, `translation`, `scaling`, `rotationX`, `rotationY`, `rotationZ` |
 | Camera    | `camera`, `perspective`, `orthogonal`                                       |
 | Variable  | `float`                                                                     |
-
----
 
 ## Tone-Mapping Pipeline
 
