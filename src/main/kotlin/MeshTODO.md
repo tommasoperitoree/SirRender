@@ -1,99 +1,149 @@
-Lesson 8a is foundational sphere/plane review (already implemented). Let me get the mesh-specific lessons.This is still review material — already implemented. Let me get the mesh-specific lessons (09a, 10a, 10b).Good — got the mesh storage model, ray-AABB algorithm, and rationale. Now the lab lessons with implementation specifics.This lesson 10a is path tracing theory (already implemented in `PathTracer`), not mesh-specific. Let me check 10b for the actual mesh implementation lab.Confirmed — lessons 10a and 10b cover PCG, path tracing, and BRDFs/Pigments, all already implemented in SirRender. The mesh-relevant material is entirely in **08a** (sphere/plane review, already done) and **09a** (mesh storage, AABB, ray-AABB intersection — new). The lab counterpart for triangle/mesh implementation specifics isn't in these five pages directly, but 09a gives everything needed structurally. Here's the TODO list and class proposal based on what's confirmed.
+# Mesh Support — Implementation Plan
+
+Based on lesson 09a (mesh storage, AABB, ray-AABB intersection). Lessons 08a, 10a, 10b
+are foundational review already implemented in SirRender (spheres/planes, PCG, path
+tracing, BRDFs/pigments) — no new work needed from those.
+
+## Design decision: no standalone `Triangle` class
+
+The lesson explicitly contrasts meshes with spheres/planes: *"storing a 4×4
+transformation and its inverse requires 32 floating-point numbers (128 bytes)... but we
+can do better!"* — meshes exist precisely to avoid per-element transformation overhead.
+Triangles are therefore stored as **raw index triples into a shared vertex list**, never
+as independent `Shape`s with their own `Transformation`.
+
+The lesson's own `MyComplexShape` example has exactly **one** `transformation` and
+**one** `aabb` — confirming `Mesh` is the sole `Shape`. AABBs *"obviously do not apply to
+the individual elements, but to the mesh as a whole."*
+
+**Conclusion:** `Mesh` is the only new `Shape`. Triangle intersection is a stateless free
+function operating on raw `Point`s, called in a loop from `Mesh.rayIntersection` — no
+per-triangle object allocation, no per-triangle `Transformation`.
 
 ---
 
-## TODO List & Class Structure for Mesh Support
+## New files in `geometry/`
 
-### New files in `geometry/`
+### `AABB.kt`
 
-**`AABB.kt`**
 ```kotlin
 data class AABB(val pMin: Point, val pMax: Point) {
-    fun quickRayIntersection(ray: Ray): Boolean   // slab method, no HitRecord needed
-    companion object {
-        fun fromPoints(points: List<Point>): AABB  // for mesh bounding
-        fun union(a: AABB, b: AABB): AABB           // for future BVH
-    }
+	fun quickRayIntersection(ray: Ray): Boolean   // slab method
+	
+	companion object {
+		fun fromPoints(points: List<Point>): AABB
+		fun union(a: AABB, b: AABB): AABB          // for future BVH, not required now
+	}
 }
 ```
-Implements the slab test from 09a: per-axis `t_min/t_max` intervals via `(f_i - O_i)/d_i`, intersect all three axis intervals, empty intersection ⇒ miss.
 
-**`Triangle.kt`**
+Slab test: per-axis `tMin/tMax` via `(f_i - O_i)/d_i`; ray hits iff `max(all tMins) ≤ min(all tMaxs)`.
+
+### `triangleHitRecord` standalone function
+
 ```kotlin
-class Triangle(
-    val a: Point, val b: Point, val c: Point,
-    override val transformation: Transformation = Transformation(),
-    override val material: Material
-) : Shape {
-    override fun rayIntersection(ray: Ray): HitRecord?
-    // Möller–Trumbore or barycentric-coordinate solve;
-    // UV from barycentric (u,v,w) weights, normal from (B-A)×(C-A)
-}
+/**
+ * Möller–Trumbore intersection of [invRay] (already in object space) against
+ * triangle (a, b, c). Returns a world-space HitRecord, or null if the ray misses.
+ */
+internal fun triangleHitRecord(
+	a: Point, b: Point, c: Point,
+	invRay: Ray, originalRay: Ray, shape: Shape
+): HitRecord?
 ```
-Single triangle as a standalone `Shape`, reusing the existing `Shape` interface — no special-casing needed elsewhere.
 
-**`Mesh.kt`**
+No `Shape` implementation — pure function, used by `Mesh` only.
+
+### `Mesh.kt`
+
 ```kotlin
 class Mesh(
-    val vertices: List<Point>,
-    val triangleIndices: List<Triple<Int, Int, Int>>,  // i1, i2, i3 per triangle
-    val uvCoords: List<SurfaceVec>? = null,             // optional per-vertex UV
-    override val transformation: Transformation = Transformation(),
-    override val material: Material
+	val vertices: List<Point>,
+	val triangleIndices: List<Triple<Int, Int, Int>>,
+	override val transformation: Transformation = Transformation(),
+	override val material: Material
 ) : Shape {
-    private val aabb: AABB by lazy { AABB.fromPoints(vertices) }
-    override fun rayIntersection(ray: Ray): HitRecord?
-    // 1. transform ray to object space
-    // 2. aabb.quickRayIntersection(invRay) early-out
-    // 3. linear scan all triangles, keep closest hit
+	override val aabb: AABB by lazy { AABB.fromPoints(vertices) }
+	
+	override fun rayIntersection(ray: Ray): HitRecord? {
+		val invRay = ray.transform(transformation.inverse())
+		if (!aabb.quickRayIntersection(invRay)) return null
+		
+		var closest: HitRecord? = null
+		for ((i1, i2, i3) in triangleIndices) {
+			val hit = triangleHitRecord(vertices[i1], vertices[i2], vertices[i3], invRay, ray, this) ?: continue
+			if (closest == null || hit.t < closest.t) closest = hit
+		}
+		return closest
+	}
 }
 ```
-Implements the indexed vertex storage from 09a (3×int per triangle vs 3×3×float), with the AABB early-out from the `MyComplexShape` pattern shown in the lesson.
 
 ---
 
-### Modified files
+## Modified files
 
-**`geometry/Shape.kt`** — add optional `aabb` member per the lesson's suggested pattern (nullable, defaults to no early-out for simple shapes like Sphere/Plane where it isn't worth it):
+### `geometry/Shape.kt`
+
+Add optional `aabb` member, `null` by default:
+
 ```kotlin
 interface Shape {
-    val transformation: Transformation
-    val material: Material
-    val aabb: AABB? get() = null   // override in Mesh
-    fun rayIntersection(ray: Ray): HitRecord?
+	val transformation: Transformation
+	val material: Material
+	val aabb: AABB? get() = null   // overridden by Mesh only
+	fun rayIntersection(ray: Ray): HitRecord?
 }
 ```
 
-**`parsing/Lexer.kt`** — add `MESH` keyword and `"file"` parameter keyword for OBJ loading.
+### `parsing/Lexer.kt`
 
-**`parsing/Parser.kt`** — add `parseMesh(s, scene): Mesh`, supporting either inline vertex/triangle lists or a `file("model.obj")` reference.
+Add `MESH` keyword and `"file"` parameter keyword for OBJ loading.
 
-**New file `parsing/ObjLoader.kt`** — minimal Wavefront OBJ parser (`v`, `vt`, `f` lines only) since meshes will realistically be loaded from external files, not hand-written in scene `.txt` syntax.
+### `parsing/Parser.kt`
+
+Add `parseMesh(s, scene): Mesh`, supporting `file("model.obj")` reference.
+
+### `parsing/ObjLoader.kt` (new)
+
+Minimal Wavefront OBJ parser (`v`, `f` lines only — no normals/UV from file initially).
 
 ---
 
-### Tests
+## Tests
 
-- `AABBTest.kt` — slab test hit/miss/edge cases (ray parallel to a face, ray inside box, ray starting on a face)
-- `TriangleTest.kt` — standard hit, edge-on grazing, behind-origin (negative t), degenerate triangle
-- `MeshTest.kt` — AABB early-out correctness, multi-triangle closest-hit selection, indexed-vertex sharing correctness
+- `AABBTest.kt` — hit/miss/edge cases (ray parallel to a face, ray inside box, ray on a face)
+- `TriangleIntersectionTest.kt` — standard hit, edge-on grazing, behind-origin (negative t), degenerate triangle — tests
+  `triangleHitRecord` directly
+- `MeshTest.kt` — AABB early-out correctness, multi-triangle closest-hit selection, shared-vertex correctness
 - `ObjLoaderTest.kt` — round-trip a small fixture `.obj` file
 
 ---
 
-### Documentation
+## Documentation
 
 - `ReadMe.md` — add `mesh` keyword to Shapes table, document OBJ file loading syntax
-- `README-dokka.md` — add `Mesh`, `Triangle`, `AABB` to the geometry package table and architecture overview
+- `README-dokka.md` — add `Mesh`, `AABB` to the geometry package table and architecture overview
 
 ---
 
-### Order of implementation (dependency order)
+## Checklist
 
-1. `AABB.kt` + tests (no dependencies)
-2. `Triangle.kt` + tests (depends on existing `Shape`, `HitRecord`)
-3. `Mesh.kt` + tests (depends on `Triangle`, `AABB`)
-4. `ObjLoader.kt` + tests (depends on `Mesh`)
-5. Parser/Lexer integration for scene file `mesh(...)` keyword
-6. Add a sample mesh scene file to `scenes/`
-7. Documentation updates
+> Split by dependency order — items with no unchecked dependencies above them can be
+> worked on in parallel.
+
+- [ ] `AABB.kt` — `quickRayIntersection`, `fromPoints`, `union`
+- [ ] `AABBTest.kt`
+- [ ] `Shape.kt` — add nullable `aabb` member
+- [ ] `TriangleIntersection.kt` — `triangleHitRecord` (Möller–Trumbore)
+- [ ] `TriangleIntersectionTest.kt`
+- [ ] `Mesh.kt` — `Shape` implementation using `AABB` + `triangleHitRecord`
+- [ ] `MeshTest.kt`
+- [ ] `ObjLoader.kt` — minimal OBJ parser (`v`, `f` lines)
+- [ ] `ObjLoaderTest.kt`
+- [ ] `Lexer.kt` — `MESH` keyword, `file` parameter keyword
+- [ ] `Parser.kt` — `parseMesh`
+- [ ] Sample mesh scene file in `scenes/`
+- [ ] `ReadMe.md` — mesh documentation
+- [ ] `README-dokka.md` — mesh documentation
+- [ ] `CHANGELOG.md` — entry for mesh support
