@@ -88,7 +88,7 @@ data class Vec(
 	fun toNormal(): Normal =
 		Normal(x, y, z)
 	
-	override fun toString(): String = "math.Vec($x, $y, $z)"
+	override fun toString(): String = "Vec($x, $y, $z)"
 	
 }
 

@@ -43,6 +43,6 @@ data class Point(
 		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	
 	
-	override fun toString(): String = "math.Point($x, $y, $z)"
+	override fun toString(): String = "Point($x, $y, $z)"
 	
 }

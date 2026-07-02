@@ -101,7 +101,7 @@ data class Transformation(
 	
 	// --- Default data class function overrides ---
 	
-	override fun toString(): String = "math.Transformation:\n${m.toMatrixString()}"
+	override fun toString(): String = "Transformation:\n${m.toMatrixString()}"
 	
 	override fun equals(other: Any?): Boolean {
 		if (this === other) return true

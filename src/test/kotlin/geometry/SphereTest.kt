@@ -1,14 +1,10 @@
 package geometry
 
-import materials.CheckeredPigment
-import materials.Color
-import materials.DiffuseBRDF
-import materials.Material
 import materials.areClose
 import math.Normal
 import math.Point
-import math.Vec
 import math.SurfaceVec
+import math.Vec
 import math.scaling
 import math.translation
 import math.vecX
@@ -16,11 +12,9 @@ import math.vecZ
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
-class ShapesTest {
+class SphereTest {
 	
-	//Test sphere
 	val sphere = Sphere()
 	val t = Vec(10f, 0f, 0f)
 	val sphere1 = Sphere(translation(t))
@@ -47,8 +41,8 @@ class ShapesTest {
 		val point2 = Point(0.577f, 0.577f, 0.577f) // point on diagonal, first quadrant
 		val uv2 = SurfaceVec(0.125f, 0.30422f)
 		
-		Assertions.assertTrue(spherePointToUV(point1).isClose(uv1))
-		Assertions.assertTrue(spherePointToUV(point2).isClose(uv2))
+		assertTrue(spherePointToUV(point1).isClose(uv1))
+		assertTrue(spherePointToUV(point2).isClose(uv2))
 	}
 	
 	@Test
@@ -57,7 +51,7 @@ class ShapesTest {
 		val uv1 = SurfaceVec(0f, 0f)
 		val hit1 = sphere.rayIntersection(ray1)
 		
-		Assertions.assertTrue(
+		assertTrue(
 			hit1?.worldPoint?.isClose(Point(0f, 0f, 1f)) ?: false &&
 					hit1.normal.isClose(vecZ().toNormal()) &&
 					hit1.surfacePoint.isClose(uv1) &&
@@ -67,18 +61,16 @@ class ShapesTest {
 	
 	@Test
 	fun `test rayIntersection x direction`() {
-		
 		val ray2 = Ray(Point(3f, 0f, 0f), -vecX())
 		val hit2 = sphere.rayIntersection(ray2)
 		val uv2 = SurfaceVec(0f, 1 / 2f)
 		
-		Assertions.assertTrue(
+		assertTrue(
 			hit2?.worldPoint?.isClose(Point(1f, 0f, 0f)) ?: false &&
 					hit2.normal.isClose(vecX().toNormal()) &&
 					hit2.surfacePoint.isClose(uv2) &&
 					areClose(hit2.t, 2f)
 		)
-		
 	}
 	
 	@Test
@@ -86,7 +78,7 @@ class ShapesTest {
 		val ray3 = Ray(Point(0f, 0f, 0f), vecX())
 		val hit3 = sphere.rayIntersection(ray3)
 		val uv3 = SurfaceVec(0f, 1 / 2f)
-		Assertions.assertTrue(
+		assertTrue(
 			hit3?.worldPoint?.isClose(Point(1f, 0f, 0f)) ?: false &&
 					hit3.normal.isClose(-vecX().toNormal()) &&
 					hit3.surfacePoint.isClose(uv3) &&
@@ -108,15 +100,14 @@ class ShapesTest {
 		val hit2 = sphere1.rayIntersection(ray2)
 		val uv2 = SurfaceVec(0f, 1 / 2f)
 		
-		
-		Assertions.assertTrue(
+		assertTrue(
 			hit?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
 					hit.normal.isClose(vecZ().toNormal()) &&
 					hit.surfacePoint.isClose(uv) &&
 					areClose(hit.t, 1f)
 		)
 		
-		Assertions.assertTrue(
+		assertTrue(
 			hit2?.worldPoint?.isClose(Point(11f, 0f, 0f)) ?: false &&
 					hit2.normal.isClose(vecX().toNormal()) &&
 					hit2.surfacePoint.isClose(uv2) &&
@@ -130,7 +121,7 @@ class ShapesTest {
 		val hit = sphere2.rayIntersection(ray)
 		val uv = SurfaceVec(0f, 0f)
 		//if there is a scaling remember always to normalize()
-		Assertions.assertTrue(
+		assertTrue(
 			hit?.worldPoint?.isClose(Point(0f, 0f, 10f)) ?: false &&
 					hit.normal.normalize().isClose(vecZ().toNormal()) &&
 					hit.surfacePoint.isClose(uv) &&
@@ -157,42 +148,5 @@ class ShapesTest {
 			hit2?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
 					hit2.normal.isClose(vecZ().toNormal())
 		)
-	}
-	
-	
-	// test Plane
-	val groundMaterial = Material(
-		brdf = DiffuseBRDF(
-			pigment = CheckeredPigment(
-				color1 = Color.white,
-				color2 = Color.black,
-				numSteps = 2
-			)
-		)
-	)
-	val plane = Plane(material = groundMaterial)
-	
-	@Test
-	fun `test intersection`() {
-		val s = scaling(Vec(-1f, 1f, 1f)) // invert on x-axis
-		val planes = Plane(s, groundMaterial)
-		val point = Point(0.25f, 0.25f)
-		val point1 = Point(0.25f, 0.75f)
-		
-		val uvPlane = planePointToUV(point)
-		val uvPlane1 = planePointToUV(point1)
-		
-		// to the plane with transformation we need to pass the inverse transformation on the point
-		val localPoint = planes.transformation.inverse() * point
-		val localPoint1 = planes.transformation.inverse() * point1
-		val uvPlanes = planePointToUV(localPoint)
-		val uvPlanes1 = planePointToUV(localPoint1)
-		
-		//without scaling
-		assertEquals(plane.material.brdf.pigment.getColor(uvPlane), Color.white)
-		assertEquals(plane.material.brdf.pigment.getColor(uvPlane1), Color.black)
-		//with scaling
-		assertEquals(planes.material.brdf.pigment.getColor(uvPlanes1), Color.white)
-		assertEquals(planes.material.brdf.pigment.getColor(uvPlanes), Color.black)
 	}
 }

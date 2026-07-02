@@ -12,4 +12,6 @@ data class SurfaceVec(
 	var v: Float = 0f,
 ) {
 	fun isClose(other: SurfaceVec) = areClose(u, other.u) && areClose(v, other.v)
+	
+	override fun toString(): String = "SurfaceVec($u, $v)"
 }
