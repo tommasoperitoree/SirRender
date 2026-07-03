@@ -9,9 +9,10 @@ import math.scaling
 import math.translation
 import math.vecX
 import math.vecZ
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class SphereTest {
 	
@@ -51,9 +52,9 @@ class SphereTest {
 		val uv1 = SurfaceVec(0f, 0f)
 		val hit1 = sphere.rayIntersection(ray1)
 		
+		assertNotNull(hit1)
 		assertTrue(
-			hit1?.worldPoint?.isClose(Point(0f, 0f, 1f)) ?: false &&
-					hit1.normal.isClose(vecZ().toNormal()) &&
+			hit1.normal.isClose(vecZ().toNormal()) &&
 					hit1.surfacePoint.isClose(uv1) &&
 					areClose(hit1.t, 1f)
 		)
@@ -65,9 +66,9 @@ class SphereTest {
 		val hit2 = sphere.rayIntersection(ray2)
 		val uv2 = SurfaceVec(0f, 1 / 2f)
 		
+		assertNotNull(hit2)
 		assertTrue(
-			hit2?.worldPoint?.isClose(Point(1f, 0f, 0f)) ?: false &&
-					hit2.normal.isClose(vecX().toNormal()) &&
+			hit2.normal.isClose(vecX().toNormal()) &&
 					hit2.surfacePoint.isClose(uv2) &&
 					areClose(hit2.t, 2f)
 		)
@@ -78,9 +79,10 @@ class SphereTest {
 		val ray3 = Ray(Point(0f, 0f, 0f), vecX())
 		val hit3 = sphere.rayIntersection(ray3)
 		val uv3 = SurfaceVec(0f, 1 / 2f)
+		
+		assertNotNull(hit3)
 		assertTrue(
-			hit3?.worldPoint?.isClose(Point(1f, 0f, 0f)) ?: false &&
-					hit3.normal.isClose(-vecX().toNormal()) &&
+			hit3.normal.isClose(-vecX().toNormal()) &&
 					hit3.surfacePoint.isClose(uv3) &&
 					areClose(hit3.t, 1f)
 		)
@@ -100,16 +102,17 @@ class SphereTest {
 		val hit2 = sphere1.rayIntersection(ray2)
 		val uv2 = SurfaceVec(0f, 1 / 2f)
 		
+		assertNotNull(hit)
+		assertNotNull(hit2)
+		
 		assertTrue(
-			hit?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
-					hit.normal.isClose(vecZ().toNormal()) &&
+			hit.normal.isClose(vecZ().toNormal()) &&
 					hit.surfacePoint.isClose(uv) &&
 					areClose(hit.t, 1f)
 		)
 		
 		assertTrue(
-			hit2?.worldPoint?.isClose(Point(11f, 0f, 0f)) ?: false &&
-					hit2.normal.isClose(vecX().toNormal()) &&
+			hit2.normal.isClose(vecX().toNormal()) &&
 					hit2.surfacePoint.isClose(uv2) &&
 					areClose(hit2.t, 2f)
 		)
@@ -121,9 +124,10 @@ class SphereTest {
 		val hit = sphere2.rayIntersection(ray)
 		val uv = SurfaceVec(0f, 0f)
 		//if there is a scaling remember always to normalize()
+		
+		assertNotNull(hit)
 		assertTrue(
-			hit?.worldPoint?.isClose(Point(0f, 0f, 10f)) ?: false &&
-					hit.normal.normalize().isClose(vecZ().toNormal()) &&
+			hit.normal.normalize().isClose(vecZ().toNormal()) &&
 					hit.surfacePoint.isClose(uv) &&
 					areClose(hit.t, 5f)
 		)
@@ -140,13 +144,7 @@ class SphereTest {
 		val ray2 = Ray(Point(-10f, 0f, 0f), -vecZ())
 		val hit2 = sphere1.rayIntersection(ray2)
 		
-		Assertions.assertFalse(
-			hit1?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
-					hit1.normal.isClose(vecZ().toNormal())
-		)
-		Assertions.assertFalse(
-			hit2?.worldPoint?.isClose(Point(10f, 0f, 1f)) ?: false &&
-					hit2.normal.isClose(vecZ().toNormal())
-		)
+		assertNull(hit1)
+		assertNull(hit2)
 	}
 }
