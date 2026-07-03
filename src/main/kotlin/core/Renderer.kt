@@ -5,7 +5,6 @@ import materials.Color
 import math.PCG
 import kotlin.math.max
 import kotlin.time.measureTimedValue
-import kotlin.time.measureTime
 import kotlin.time.Duration
 
 
@@ -114,15 +113,19 @@ class PathTracer(
 		
 		// if hitColorLum is 0 it means that the surface is completely black, so MonteCarlo is useless
 		if (hitColorLum > 0f) { //now timing scale like N exploiting antialiasing
-			val newRay = hitMaterial.brdf.scatterRay(
-				pcg,
-				hitRecord.ray.dir,
-				hitRecord.worldPoint,
-				hitRecord.normal.normalize(),
-				ray.depth + 1
-			)
-			cumRadiance += hitColor * this(newRay)
+			repeat(numRays) {
+				val newRay = hitMaterial.brdf.scatterRay(
+					pcg,
+					hitRecord.ray.dir,
+					hitRecord.worldPoint,
+					hitRecord.normal.normalize(),
+					ray.depth + 1
+				)
+				cumRadiance += hitColor * this(newRay)
+			}
+			cumRadiance *= 1f / numRays.toFloat()
 		}
+		
 		// Rendering equation
 		// return the emitted radiance (ex from a light ball) + mean value of radiance reflected
 		return emittedRadiance + cumRadiance

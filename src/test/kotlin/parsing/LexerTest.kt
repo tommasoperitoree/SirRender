@@ -3,6 +3,7 @@ package parsing
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertFailsWith
 
 
 class LexerTest {

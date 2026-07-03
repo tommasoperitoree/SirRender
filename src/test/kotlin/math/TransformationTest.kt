@@ -21,10 +21,22 @@ class TransformationTest {
 	}
 	
 	@Test
+	fun `test translation isConsistent`() {
+		val transl = translation(t)
+		Assertions.assertTrue(transl.isConsistent())
+	}
+	
+	@Test
 	fun `scaling test`() {
 		val v1 = Vec(10f, 40f, 90f)
 		val scale = scaling(s)
 		Assertions.assertTrue((scale * v).isClose(v1))
+	}
+	
+	@Test
+	fun `test scaling isConsistent`() {
+		val scale = scaling(s)
+		Assertions.assertTrue(scale.isConsistent())
 	}
 	
 	/**
@@ -44,7 +56,6 @@ class TransformationTest {
 		Assertions.assertTrue((rotB * v).isClose(vx4))
 		Assertions.assertTrue((rotC * v).isClose(vx18))
 	}
-	
 	
 	@Test
 	fun `rotationY test`() {
@@ -74,5 +85,12 @@ class TransformationTest {
 		Assertions.assertTrue((rotA * v).isClose(vz9))
 		Assertions.assertTrue((rotB * v).isClose(vz4))
 		Assertions.assertTrue((rotC * v).isClose(vz18))
+	}
+	
+	@Test
+	fun `test rotation isConsistent`() {
+		Assertions.assertTrue(rotationX(a).isConsistent())
+		Assertions.assertTrue(rotationY(a).isConsistent())
+		Assertions.assertTrue(rotationZ(a).isConsistent())
 	}
 }

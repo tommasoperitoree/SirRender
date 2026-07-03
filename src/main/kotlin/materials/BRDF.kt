@@ -96,8 +96,8 @@ class SpecularBRDF(
 ) : BRDF {
 	
 	override fun eval(normal: Normal, inDir: Vec, outDir: Vec, uv: SurfaceVec): Color {
-		val thetaIn = acos(normal.toVec().dot(inDir))
-		val thetaOut = acos(normal.toVec().dot(outDir))
+		val thetaIn = acos(normal.toVec().dot(inDir)).coerceIn(-1f, 1f)
+		val thetaOut = acos(normal.toVec().dot(outDir)).coerceIn(-1f, 1f)
 		
 		return if (abs(thetaIn - thetaOut) < thresholdAngle) pigment.getColor(uv) else Color.black
 	}

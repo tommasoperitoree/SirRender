@@ -65,7 +65,7 @@ fun expectKeyword(s: SceneInputStream, keywords: List<Keyword>): Keyword {
 }
 
 /**
- * Read a toke from [s] input file and check that it is either a literal number or a variable in [scene].
+ * Read a [Token] from [s] input file and check that it is either a literal number or a variable in [scene].
  * @return the number as a [Float].
  */
 fun expectNumber(s: SceneInputStream, scene: Scene): Float {
@@ -268,36 +268,32 @@ fun parseTransformation(s: SceneInputStream, scene: Scene): Transformation {
 	return result
 }
 
+fun parseMaterialTransformation(s: SceneInputStream, scene: Scene): Pair<Material, Transformation> {
+	expectSymbol(s, '(')
+	
+	val materialName = expectIdentifier(s)
+	val material = scene.materials[materialName] ?:
+	//We raise the exception here because input_file is pointing to the end of the wrong identifier
+	throw GrammarError(s.location, "Unknown material $materialName")
+	
+	expectSymbol(s, ',')
+	val transformation = parseTransformation(s, scene)
+	expectSymbol(s, ')')
+	
+	return Pair(material, transformation)
+}
+
 /** Parse a [parseSphere] with its material and transformation from input stream [s]. */
 fun parseSphere(s: SceneInputStream, scene: Scene): Sphere {
 	
-	expectSymbol(s, '(')
-	
-	val materialName = expectIdentifier(s)
-	val material = scene.materials[materialName] ?:
-	//We raise the exception here because input_file is pointing to the end of the wrong identifier
-	throw GrammarError(s.location, "Unknown material $materialName")
-	
-	expectSymbol(s, ',')
-	val transformation = parseTransformation(s, scene)
-	expectSymbol(s, ')')
-	
+	val (material, transformation) = parseMaterialTransformation(s, scene)
 	return Sphere(transformation = transformation, material = material)
-	
 }
 
+/** Parse a [Cube] with its material and transformation from input stream [s]. */
 fun parseCube(s: SceneInputStream, scene: Scene): Cube {
-	expectSymbol(s, '(')
 	
-	val materialName = expectIdentifier(s)
-	val material = scene.materials[materialName] ?:
-	//We raise the exception here because input_file is pointing to the end of the wrong identifier
-	throw GrammarError(s.location, "Unknown material $materialName")
-	
-	expectSymbol(s, ',')
-	val transformation = parseTransformation(s, scene)
-	expectSymbol(s, ')')
-	
+	val (material, transformation) = parseMaterialTransformation(s, scene)
 	return Cube(transformation = transformation, material = material)
 	
 }
@@ -305,14 +301,7 @@ fun parseCube(s: SceneInputStream, scene: Scene): Cube {
 /** Parse a [Plane] with its material and transformation from input stream [s]. */
 fun parsePlane(s: SceneInputStream, scene: Scene): Plane {
 	
-	expectSymbol(s, '(')
-	val materialName = expectIdentifier(s)
-	val material = scene.materials[materialName] ?: throw GrammarError(s.location, "Unknown material $materialName")
-	
-	expectSymbol(s, ',')
-	val transformation = parseTransformation(s, scene)
-	expectSymbol(s, ')')
-	
+	val (material, transformation) = parseMaterialTransformation(s, scene)
 	return Plane(transformation = transformation, material = material)
 	
 }
@@ -352,12 +341,12 @@ fun parseScene(s: SceneInputStream, variables: Map<String, Float> = emptyMap()):
 		
 		if (what is StopToken) break // check EOF
 		
-		if (what !is KeywordToken) throw GrammarError(what.location, "Expected a parsing.Keyword instead of $what")
+		if (what !is KeywordToken) throw GrammarError(what.location, "Expected a keyword instead of $what")
 		
 		when (what.keyword) {
 			Keyword.FLOAT -> {
 				val variableName = expectIdentifier(s)
-				val variableLoc = s.location // saved for the error message
+				val variableLoc = s.location.copy() // saved for the error message
 				
 				expectSymbol(s, '(')
 				val variableValue = expectNumber(s, scene)
