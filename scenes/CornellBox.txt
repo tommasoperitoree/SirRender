@@ -1,0 +1,48 @@
+
+	float clock(150)
+
+material wallLeftMaterial(
+    diffuse( uniform( (1, 0, 0) ) ) ,
+    uniform( (0, 0, 0) )
+)
+
+material wallRightMaterial(
+    diffuse( uniform( (0, 1, 0) ) ) ,
+    uniform( (0, 0, 0) )
+)
+
+material lampMaterial(
+    diffuse( uniform((1, 1, 1) ) ) ,
+    uniform( (100, 100, 100) )
+)
+
+material cubeMaterial(
+    diffuse( uniform((1, 1, 1) ) ) ,
+    uniform( (0, 0, 0) )
+   )
+material sphereMaterial(
+   diffuse( uniform( (1, 1, 1) ) ) ,
+   uniform( (0, 0, 0) )
+)
+
+material groundMaterial(
+    diffuse( uniform( (1, 1, 1) ) ) ,
+    uniform( (0, 0, 0) )
+)
+
+// side wall
+plane( wallLeftMaterial, translation( (0, 5, 0) ) * rotationZ(90) * rotationY(90) )
+plane( wallRightMaterial, translation( (0, -5, 0) ) * rotationZ(90) * rotationY(-90) )
+
+// ground & back wall
+plane( groundMaterial, identity ) // ground
+plane( groundMaterial, translation( (5, 0, 0) ) * rotationY(90)) // back wall
+
+// lamp
+cube( lampMaterial, translation( (0, 0, 7) ) * scaling((2, 2, 0.5) ) )
+
+// cube & sphere
+cube( cubeMaterial, translation( (1, 1, 1.5) ) *rotationZ( 60 ) * scaling( (1, 0.8, 2) ) )
+sphere( sphereMaterial,  translation( (1, -2, 0.8) ) * scaling( (0.8, 0.8, 0.8) ) )
+
+camera( perspective,  translation( (-3,  0,  2.2) ),  1.77, 1 )

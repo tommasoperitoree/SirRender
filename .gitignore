@@ -6,14 +6,15 @@ local.properties
 
 ### Output & Renders ###
 *.log
-outputs/
+outputs/scenes/*.pfm
+/outputs/animations/animateDemo/
+/outputs/animations/*/
+!/outputs/animations/*.mp4
 # Catch any local renders accidentally generated in the root directory
-/*.pfm
-/*.png
 /*.mp4
 /*.gif
-# Specific local execution folder
-/src/main/resources/frames/
+/*.pfm
+/*.png
 
 ### IntelliJ IDEA ###
 .idea/workspace.xml
