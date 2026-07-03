@@ -35,7 +35,7 @@ class NormalTest {
 	}
 	
 	// ---Utility functions ---
-
+	
 	@Test
 	fun `test dot`() {
 		val sc = nA dot vecB
