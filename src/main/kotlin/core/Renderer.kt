@@ -3,6 +3,7 @@ package core
 import geometry.Ray
 import materials.Color
 import math.PCG
+import math.Point
 import kotlin.math.max
 import kotlin.time.measureTimedValue
 import kotlin.time.measureTime
@@ -139,4 +140,14 @@ class PathTracer(
 			println("media scatterRay:      ${totalScatterTime / calls}")
 		}
 	}
+}
+class PointLightRenderer(
+	override val world: World = World(),
+	override val backgroundColor: Color = Color()
+) : Renderer {
+	
+	override operator fun invoke(ray: Ray): Color {
+		return TODO("Provide the return value")
+	}
+
 }
