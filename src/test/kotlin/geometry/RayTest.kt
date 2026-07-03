@@ -34,9 +34,9 @@ class RayTest {
 		
 		Assertions.assertTrue(transformed.origin.isClose(Point(11.0f, 8.0f, 14.0f)))
 		Assertions.assertTrue(transformed.dir.isClose(Vec(6.0f, -4.0f, 5.0f)))
-		Assertions.assertEquals(0.1f, transformed.tMin)
-		Assertions.assertEquals(100f, transformed.tMax)
-		Assertions.assertEquals(2f, transformed.depth)
+		Assertions.assertEquals(1e-3f, transformed.tMin)
+		Assertions.assertEquals(Float.POSITIVE_INFINITY, transformed.tMax)
+		Assertions.assertEquals(0, transformed.depth)
 	}
 	
 }

@@ -146,7 +146,7 @@ class SceneInputStream(
 		}
 	}
 	
-	/** Read a bew character from the stream. */
+	/** Read a new character from the stream. */
 	fun readChar(): Char? {
 		var ch: Char?
 		if (savedChar != null) { // recover the unread character and return it
@@ -200,11 +200,11 @@ class SceneInputStream(
 	}
 	
 	/** Interprets a series of [Char]s as a [String]. Returns corresponding [Token]. */
-	fun parseStringToken(tokenLoc: SourceLocation): StringToken {
+	fun parseStringToken(delimiter: Char, tokenLoc: SourceLocation): StringToken {
 		val token = buildString {
 			while (true) {
 				val ch = readChar() ?: throw GrammarError(tokenLoc, "Undetermined string")
-				if (ch == '"'|| ch == '\'') break
+				if (ch == delimiter) break
 				append(ch)
 			}
 		}
@@ -279,7 +279,7 @@ class SceneInputStream(
 		
 		val ch = readChar() ?: return StopToken(location = location.copy())  // no more characters in the file, so return a parsing.StopToken
 		
-		val tokenLoc = location.copy() // the position in the stream
+		val tokenLoc = savedLocation.copy() // the position in the stream
 		
 		return when {
 			// one-character symbol, like '(' or ','
@@ -289,7 +289,7 @@ class SceneInputStream(
 			
 			// a literal string (used for file names)
 			ch == '"' || ch == '\'' -> {
-				parseStringToken(tokenLoc)
+				parseStringToken(ch, tokenLoc)
 			}
 			
 			// a floating-point number
