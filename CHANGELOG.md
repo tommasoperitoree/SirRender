@@ -1,8 +1,8 @@
-# Unreleased
+# Version 1.0.0
 
-- Implement cube shape
+- *Breaking change*: Add scene file parser (now scenes are definable via simple scene
+  files) [#14](https://github.com/tommasoperitoree/SirRender/pull/14)
 - Implement antialiasing algorithm
-- Add scene file parser
 - Implement Cube shape with per-face UV mapping
 - Add antialiasing via jittered supersampling
 - Fix PCG `randomFloat()` divisor (was 16× too large)
