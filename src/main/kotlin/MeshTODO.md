@@ -132,7 +132,7 @@ Minimal Wavefront OBJ parser (`v`, `f` lines only — no normals/UV from file in
 > Split by dependency order — items with no unchecked dependencies above them can be
 > worked on in parallel.
 
-- [ ] `AABB.kt` — `quickRayIntersection`, `fromPoints`, `union`
+- [x] `AABB.kt` — `quickRayIntersection`, `fromPoints`
 - [ ] `AABBTest.kt`
 - [X] `Shape.kt` — add nullable `aabb` member
 - [X] `Mesh.kt` — `Shape` implementation using `AABB` + `triangleHitRecord` (Möller–Trumbore) standalone function
