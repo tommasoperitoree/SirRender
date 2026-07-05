@@ -143,6 +143,14 @@ class PathTracer(
 		}
 	}
 }
+
+/**
+ * A point-light [Renderer] which estimates illumination from point light source
+ * For each ray-surface intersection, it checks which lights are visible using
+ * shadow rays and sums their contributions with distance attenuation.
+ *
+ * If it does not intersect anything, [backgroundColor] color is returned
+ * */
 class PointLightRenderer(
 	override val world: World = World(),
 	override val backgroundColor: Color = Color()
@@ -155,24 +163,21 @@ class PointLightRenderer(
 		
 		for (light in world.lights) {
 			val toLight = light.position - hit.worldPoint
-			//Costruisci lo shadow ray
+			// Cast a shadow ray from the hit point toward the light source.
 			val shadowRay = Ray(origin = hit.worldPoint, dir = toLight.normalize(), tMin = 1e-3f, tMax = toLight.norm())
 			
-			// 3. Se il punto è in ombra continua
 			if (world.rayIntersection(shadowRay) != null) continue
 			
-			// 4. Calcola cos(theta)
 			val cosTheta = maxOf(0f, hit.normal.dot(toLight.normalize()))
-			
-			// 5. Valuta la BRDF
 			val brdf = hit.shape.material.brdf.eval(
 				normal = hit.normal,
 				inDir = toLight.normalize(),
 				outDir = -ray.dir,
 				uv = hit.surfacePoint
 			)
-			// 6. Applica attenuazione
-			val attenuation = light.linearRadius.pow(2) / toLight.norm()
+			
+			// Apply inverse-square distance attenuation.
+			val attenuation = light.linearRadius.pow(2) / toLight.norm().pow(2)
 			
 			result += brdf * light.color * cosTheta * attenuation
 		}
