@@ -173,37 +173,13 @@ private fun buildDemoWorld(): World {
 	)
 	
 	// spheres in every vertex of a cube centered in origin with edge 1, scaled 1/10
-	//for (x in coords) for (y in coords) for (z in coords)
-	//	world.addShape(Sphere(translation(Vec(x, y, z)) * scaling, sphereMaterial))
+	for (x in coords) for (y in coords) for (z in coords)
+		world.addShape(Sphere(translation(Vec(x, y, z)) * scaling, sphereMaterial))
 	
-	val sphere = Material(
-		brdf = DiffuseBRDF(UniformPigment(Color(1f, 0f, 0f)))
-	)
-	
-	val sphere2 = Material(
-		brdf = DiffuseBRDF(UniformPigment(Color(0.3f, 0.3f, 0f)))
-	)
-	
-	val floor = Material(
-		brdf = DiffuseBRDF(
-			CheckeredPigment(
-				Color(0f, 1f, 0f),
-				Color(0f, 0f, 1f), 4
-			)
-		)
-	)
 	
 	// two more spheres in middle of two faces, gives asymmetry to scene
-	//world.addShape(Sphere(translation(Vec(0f, 0f, -0.5f)) * scaling, sphereMaterial1))
-	//world.addShape(Sphere(translation(Vec(0f, 0.5f, 0f)) * scaling, sphereMaterial1))
-	
-	world.addShape(Sphere(translation(Vec(0f, 0f, 0f)), sphere))
-	world.addShape(Sphere(translation(Vec(2f, -1f, 0f)), sphere2))
-	world.addShape(Plane(translation(Vec(0f, 0f, -1f)), floor))
-	//add a light-source
-	//world.addLight(PointLight(Point(0f, 4f, 2f), Color.white))
-	world.addLight(PointLight(Point(-4f, 3f, 1f), Color.white))
-	world.addLight(PointLight(Point(0f, 4f, 2f), Color.white))
+	world.addShape(Sphere(translation(Vec(0f, 0f, -0.5f)) * scaling, sphereMaterial1))
+	world.addShape(Sphere(translation(Vec(0f, 0.5f, 0f)) * scaling, sphereMaterial1))
 	
 	return world
 }

@@ -1,0 +1,29 @@
+float clock(0)
+
+material sphere1Material(
+    diffuse( uniform( (1, 0, 0) ) ) ,
+    uniform( (0, 0, 0) )
+)
+
+material sphere2Material(
+     diffuse( uniform( (0.3, 0.3, 0) ) ) ,
+     uniform( (0, 0, 0) )
+)
+
+material floorMaterial(
+    diffuse( checkered( (0, 1, 0), (0, 0, 1), 4) ),
+    uniform( (0, 0, 0) )
+)
+
+// floor
+plane( floorMaterial, translation( (0, 0, -1) ) )
+
+// two spheres
+sphere( sphere1Material, identity )
+sphere( sphere2Material, translation( (2, -1, 0) ) )
+
+// point-light
+pointLight( (-4, 3, 4), (0.5, 0.5, 0.5), 3)
+pointLight( (0, 4, 4), (0.5, 0.5, 0.5), 3)
+
+camera(perspective, rotationZ(clock) * rotationY(50) * translation((-1.5, 0, 0)), 1.77, 1)

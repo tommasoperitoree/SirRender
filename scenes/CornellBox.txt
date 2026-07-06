@@ -1,5 +1,4 @@
-
-	float clock(150)
+float clock(150)
 
 material wallLeftMaterial(
     diffuse( uniform( (1, 0, 0) ) ) ,
@@ -45,4 +44,4 @@ cube( lampMaterial, translation( (0, 0, 7) ) * scaling((2, 2, 0.5) ) )
 cube( cubeMaterial, translation( (1, 1, 1.5) ) *rotationZ( 60 ) * scaling( (1, 0.8, 2) ) )
 sphere( sphereMaterial,  translation( (1, -2, 0.8) ) * scaling( (0.8, 0.8, 0.8) ) )
 
-camera( perspective,  translation( (-3,  0,  2.2) ),  1.77, 1 )
+camera( perspective,  translation( (-4,  0,  0) ),  1.77, 1 )

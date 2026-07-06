@@ -163,12 +163,14 @@ class PointLightRenderer(
 		
 		for (light in world.lights) {
 			val toLight = light.position - hit.worldPoint
+			val dirLight = toLight.normalize()
+			val distance = toLight.norm()
 			// Cast a shadow ray from the hit point toward the light source.
-			val shadowRay = Ray(origin = hit.worldPoint, dir = toLight.normalize(), tMin = 1e-3f, tMax = toLight.norm())
+			val shadowRay = Ray(origin = hit.worldPoint, dir = dirLight, tMin = 1e-3f, tMax = distance)
 			
 			if (world.rayIntersection(shadowRay) != null) continue
 			
-			val cosTheta = maxOf(0f, hit.normal.dot(toLight.normalize()))
+			val cosTheta = maxOf(0f, hit.normal.dot(dirLight))
 			val brdf = hit.shape.material.brdf.eval(
 				normal = hit.normal,
 				inDir = toLight.normalize(),
@@ -177,7 +179,7 @@ class PointLightRenderer(
 			)
 			
 			// Apply inverse-square distance attenuation.
-			val attenuation = light.linearRadius.pow(2) / toLight.norm().pow(2)
+			val attenuation = light.linearRadius.pow(2) / distance.pow(2)
 			
 			result += brdf * light.color * cosTheta * attenuation
 		}
