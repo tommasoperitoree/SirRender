@@ -4,6 +4,7 @@ import core.Camera
 import core.OrthogonalCamera
 import core.PerspectiveCamera
 import core.World
+import core.PointLight
 import geometry.Cube
 import geometry.Plane
 import geometry.Sphere
@@ -18,6 +19,7 @@ import materials.Pigment
 import materials.SpecularBRDF
 import materials.UniformPigment
 import math.Transformation
+import math.Point
 import math.Vec
 import math.rotationX
 import math.rotationY
@@ -283,7 +285,6 @@ fun parseSphere(s: SceneInputStream, scene: Scene): Sphere {
 	expectSymbol(s, ')')
 	
 	return Sphere(transformation = transformation, material = material)
-	
 }
 
 fun parseCube(s: SceneInputStream, scene: Scene): Cube {
@@ -315,6 +316,32 @@ fun parsePlane(s: SceneInputStream, scene: Scene): Plane {
 	
 	return Plane(transformation = transformation, material = material)
 	
+}
+
+/** Parse a [Point] from input file [s]. */
+fun parsePoint(s: SceneInputStream, scene: Scene): Point {
+	val (x, y, z) = parseTriple(s, scene)
+	
+	return Point(x, y, z)
+}
+
+/** Parse a [core.PointLight] from input stream. */
+fun parsePointLight(s: SceneInputStream, scene: Scene): PointLight {
+	expectSymbol(s, '(')
+	val position = parsePoint(s, scene)
+	
+	expectSymbol(s, ',')
+	val color = parseColor(s, scene)
+	
+	expectSymbol(s, ',')
+	val linearRadius = expectNumber(s, scene)
+	expectSymbol(s, ')')
+	
+	return PointLight(
+		position = position,
+		color = color,
+		linearRadius = linearRadius
+	)
 }
 
 /**
@@ -375,6 +402,8 @@ fun parseScene(s: SceneInputStream, variables: Map<String, Float> = emptyMap()):
 			Keyword.CUBE -> scene.world.addShape(parseCube(s, scene))
 			
 			Keyword.PLANE -> scene.world.addShape(parsePlane(s, scene))
+			
+			Keyword.POINT_LIGHT -> scene.world.addLight((parsePointLight(s, scene)))
 			
 			Keyword.CAMERA -> {
 				if (scene.camera != null) throw GrammarError(
