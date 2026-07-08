@@ -5,17 +5,17 @@ import math.Point
 import math.Transformation
 
 class CSG(
-	val first: Shape,
-	val second: Shape,
+	val firstShape: Shape,
+	val secondShape: Shape,
 	val operation: Operation,
 	override val transformation: Transformation = Transformation(),
-	override val material: Material = first.material
+	override val material: Material = firstShape.material
 ) : Shape {
 	
 	/**
 	 * Available CSG operations for shapes.
-	 * - UNION: inside [first] or inside [second] shape
-	 * - DIFFERENCE: inside [first] and outside [second] shape
+	 * - UNION: inside [firstShape] or inside [secondShape] shape
+	 * - DIFFERENCE: inside [firstShape] and outside [secondShape] shape
 	 * - INTERSECTION: inside both shapes.
 	 */
 	enum class Operation {
@@ -27,7 +27,7 @@ class CSG(
 	/**
 	 * Associates a [HitRecord] with the shape that generated it.
 	 *
-	 * [fromFirst] is `true` if the hit comes from [first], else it's `false`.
+	 * [fromFirst] is `true` if the hit comes from [firstShape], else it's `false`.
 	 */
 	private data class TaggedHit(
 		val hit: HitRecord,
@@ -42,15 +42,15 @@ class CSG(
 	/**
 	 * Computes all valid intersections between [ray] and the CSG shape.
 	 *
-	 * All intersections with [first] and [second] are collected and sorted
+	 * All intersections with [firstShape] and [secondShape] are collected and sorted
 	 * along the ray.
 	 *
 	 * Then, depending on [operation], only the intersections that
 	 * represent a real boundary of the final CSG solid are returned.
 	 */
 	override fun rayIntersectionShape(ray: Ray): List<HitRecord> {
-		val allHits = first.rayIntersectionShape(ray).map { hit -> TaggedHit(hit, true) } +
-				second.rayIntersectionShape(ray).map { hit -> TaggedHit(hit, false) }
+		val allHits = firstShape.rayIntersectionShape(ray).map { hit -> TaggedHit(hit, true) } +
+				secondShape.rayIntersectionShape(ray).map { hit -> TaggedHit(hit, false) }
 		
 		val sortedHit = allHits.sortedBy { taggedHit -> taggedHit.hit.t }
 		
@@ -69,9 +69,9 @@ class CSG(
 	/** Returns `true` if [point] lies inside the final CSG solid. */
 	override fun contains(point: Point): Boolean {
 		return when (operation) {
-			Operation.UNION -> first.contains(point) || second.contains(point)
-			Operation.DIFFERENCE -> first.contains(point) && !second.contains(point)
-			Operation.INTERSECTION -> first.contains(point) && second.contains(point)
+			Operation.UNION -> firstShape.contains(point) || secondShape.contains(point)
+			Operation.DIFFERENCE -> firstShape.contains(point) && !secondShape.contains(point)
+			Operation.INTERSECTION -> firstShape.contains(point) && secondShape.contains(point)
 		}
 	}
 	
@@ -106,8 +106,8 @@ class CSG(
 	 * Builds the final [HitRecord] returned by the CSG shape.
 	 *
 	 * The original hit information is preserved, but the shape is replaced with
-	 * this CSG object. In a difference operation, normals coming from [second]
-	 * are flipped because [second] represents the removed volume.
+	 * this CSG object. In a difference operation, normals coming from [secondShape]
+	 * are flipped because [secondShape] represents the removed volume.
 	 */
 	private fun buildHitRecord(taggedHit: TaggedHit): HitRecord {
 		val hit = taggedHit.hit
