@@ -73,4 +73,46 @@ class Sphere(
 			this
 		)
 	}
+	
+	/**
+	 * Checks if the [ray] intersects the [Sphere].
+	 * Returns all valid [HitRecord]s along the ray, sorted from closest to farthest.
+	 */
+	override fun rayIntersectionShape(ray: Ray): List<HitRecord> {
+		
+		val invRay: Ray = ray.transform(transformation.inverse())
+		val o: Vec = invRay.origin.toVec()
+		val d: Vec = invRay.dir
+		
+		val od: Float = o dot d
+		val oSq = o.squaredNorm()
+		val dSq = d.squaredNorm()
+		
+		val deltaRid: Float = od * od - dSq * (oSq - 1f)
+		if (deltaRid <= 0f) return emptyList()
+		val sqr = sqrt(deltaRid)
+		val t1: Float = (-od - sqr) / dSq
+		val t2: Float = (-od + sqr) / dSq
+		
+		val hits = mutableListOf<HitRecord>()
+		
+		for (t in listOf(t1, t2).sorted()) {
+			if (t > invRay.tMin && t < invRay.tMax) {
+				val hitPoint = invRay.at(t)
+				val worldPoint = transformation * hitPoint
+				val normal = transformation * sphereNormal(hitPoint, rayDir = d)
+				val surfacePoint = spherePointToUV(hitPoint)
+				
+				hits.add(HitRecord(worldPoint, normal, surfacePoint, t, ray, this))
+			}
+		}
+		
+		return hits
+	}
+	
+	/** Returns 'true' if [point] lies inside this [Sphere] */
+	override fun contains(point: Point): Boolean {
+		val localPoint = transformation.inverse() * point
+		return localPoint.toVec().squaredNorm() < 1f
+	}
 }
