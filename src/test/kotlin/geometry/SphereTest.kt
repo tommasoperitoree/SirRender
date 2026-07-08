@@ -9,8 +9,10 @@ import math.scaling
 import math.translation
 import math.vecX
 import math.vecZ
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -146,5 +148,37 @@ class SphereTest {
 		
 		assertNull(hit1)
 		assertNull(hit2)
+	}
+	
+	@Test
+	fun `test rayIntersectionShape`() {
+		val sphere = Sphere()
+		val ray = Ray(Point(-2f, 0f, 0f), vecX())
+		val hits = sphere.rayIntersectionShape(ray)
+		
+		assertEquals(2, hits.size)
+		assertEquals(1f, hits[0].t, 1e-5f)
+		assertEquals(3f, hits[1].t, 1e-5f)
+	}
+	
+	@Test
+	fun `test rayIntersectionShape inside sphere`() {
+		val sphere = Sphere()
+		val ray = Ray(Point(0f, 0f, 0f), vecX())
+		
+		val hits = sphere.rayIntersectionShape(ray)
+		
+		assertEquals(1, hits.size)
+		assertEquals(1f, hits[0].t, 1e-5f)
+	}
+	
+	@Test
+	fun `test contains`() {
+		val sphere = Sphere(translation(Vec(2f, 0f, 0f)))
+		
+		assertTrue(sphere.contains(Point(2f, 0f, 0f)))
+		assertTrue(sphere.contains(Point(2.5f, 0f, 0f)))
+		assertFalse(sphere.contains(Point(0f, 0f, 0f)))
+		assertFalse(sphere.contains(Point(3.5f, 0f, 0f)))
 	}
 }
