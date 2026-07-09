@@ -24,10 +24,10 @@ fun cylinderNormal(point: Point, rayDir: Vec): Normal {
 
 /** Calculation of intersection [point] on the geometry. [Cylinder]'s surface, in (u,v) coordinates*/
 fun cylinderPointToUV(point: Point): SurfaceVec {
-	return if (abs(point.z - 1f) < 1e-4f || abs(point.z + 1f) > 1e-4f) {
+	return if (abs(point.z - 1f) < 1e-4f || abs(point.z + 1f) < 1e-4f) {
 		SurfaceVec((point.x + 1f) / 2f, (point.y + 1f) / 2f)
 	} else {
-		val u = atan2(point.y, point.x) / 2*PI.toFloat()
+		val u = atan2(point.y, point.x) / (2f * PI.toFloat())
 		SurfaceVec(if (u >= 0) u else u + 1f, (point.z + 1f) / 2f)
 	}
 }
@@ -58,15 +58,15 @@ class Cylinder(
 		
 		val hits = mutableListOf<HitRecord>()
 		
-		val a = d.x + d.y + d.z
+		val a = d.x * d.x + d.y * d.y //equazione cilindro laterale
 		val b = 2f * (o.x * d.x + o.y * d.y)
 		val c = o.x * o.x + o.y * o.y - 1f
 		
 		val delta = b * b - 4 * a * c
 		
 		if (a != 0f && delta > 0f) {
-			val x1 = (-b - sqrt(delta)) / 2f * a
-			val x2 = (-b + sqrt(delta)) / 2f * a
+			val x1 = (-b - sqrt(delta)) / (2f * a)
+			val x2 = (-b + sqrt(delta)) / (2f * a)
 			
 			for (t in listOf(x1, x2).sorted()) {
 				if (t > invRay.tMin && t < invRay.tMax) {
