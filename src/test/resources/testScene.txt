@@ -19,5 +19,6 @@ material sphereMaterial(
 plane(skyMaterial, translation((0, 0, 100)) * rotationY(clock))
 plane(groundMaterial, identity)
 sphere(sphereMaterial, translation((0, 0, 1)))
+csg(difference, cube(sphereMaterial, identity), sphere(sphereMaterial, translation((0.5, 0, 0))))
 
 camera(perspective, rotationZ(30) * translation((-4, 0, 1)), 1.0, 2.0)
