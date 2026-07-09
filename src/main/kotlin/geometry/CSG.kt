@@ -123,7 +123,7 @@ class CSG(
 			surfacePoint = hit.surfacePoint,
 			t = hit.t,
 			ray = hit.ray,
-			shape = this
+			shape = hit.shape //to preserve the material of the original shape
 		)
 	}
 	

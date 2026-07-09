@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 # ── config (override via env vars) ───────────────────────────────────────────
-SCENE_FILE="${SCENE_FILE:-./scenes/RedSphere-UnifGround.txt}"
+SCENE_FILE="${SCENE_FILE:-./scenes/CSG-Test.txt}"
 WIDTH="${WIDTH:-640}"
 HEIGHT="${HEIGHT:-360}"
 NUM_FRAMES="${NUM_FRAMES:-36}"       # clock will go from 0 to 360 in NUM_FRAMES steps
