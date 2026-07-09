@@ -6,6 +6,8 @@ import core.PerspectiveCamera
 import core.World
 import geometry.Cube
 import geometry.Plane
+import geometry.Shape
+import geometry.CSG
 import geometry.Sphere
 import materials.BRDF
 import materials.CheckeredPigment
@@ -306,6 +308,49 @@ fun parsePlane(s: SceneInputStream, scene: Scene): Plane {
 	
 }
 
+/** Parse any supported [Shape] from input stream [s]. */
+fun parseShape(s: SceneInputStream, scene: Scene, keywordShape: Keyword? = null): Shape {
+	val kwShape = keywordShape ?: expectKeyword(
+		s,
+		listOf(
+			Keyword.SPHERE,
+			Keyword.CUBE,
+			Keyword.PLANE,
+			Keyword.CSG
+		)
+	)
+	return when (kwShape) {
+		Keyword.SPHERE -> parseSphere(s, scene)
+		Keyword.CUBE -> parseCube(s, scene)
+		Keyword.PLANE -> parsePlane(s, scene)
+		Keyword.CSG -> parseCSG(s, scene)
+		else -> throw GrammarError(s.location, "Expected a shape keyword instead of $kwShape")
+	}
+}
+
+/** Parse a [CSG] shape from input stream. */
+fun parseCSG(s: SceneInputStream, scene: Scene): CSG {
+	expectSymbol(s, '(')
+	val operationKeyword = expectKeyword(s, listOf(Keyword.UNION, Keyword.DIFFERENCE, Keyword.INTERSECTION))
+	
+	val operation = when (operationKeyword) {
+		Keyword.UNION -> CSG.Operation.UNION
+		Keyword.DIFFERENCE -> CSG.Operation.DIFFERENCE
+		Keyword.INTERSECTION -> CSG.Operation.INTERSECTION
+		else -> throw GrammarError(s.location, "Invalid CSG operation")
+	}
+	
+	expectSymbol(s, ',')
+	val first = parseShape(s, scene)
+	
+	expectSymbol(s, ',')
+	val second = parseShape(s, scene)
+	
+	expectSymbol(s, ')')
+	
+	return CSG(first, second, operation)
+}
+
 /**
  * Parse either a [PerspectiveCamera] or an [OrthogonalCamera] from [s].
  *
@@ -359,11 +404,12 @@ fun parseScene(s: SceneInputStream, variables: Map<String, Float> = emptyMap()):
 					scene.floatVariables[variableName] = variableValue
 			}
 			
-			Keyword.SPHERE -> scene.world.addShape(parseSphere(s, scene))
-			
-			Keyword.CUBE -> scene.world.addShape(parseCube(s, scene))
-			
-			Keyword.PLANE -> scene.world.addShape(parsePlane(s, scene))
+			Keyword.SPHERE,
+			Keyword.CUBE,
+			Keyword.PLANE,
+			Keyword.CSG -> {
+				scene.world.addShape(parseShape(s, scene, what.keyword))
+			}
 			
 			Keyword.CAMERA -> {
 				if (scene.camera != null) throw GrammarError(

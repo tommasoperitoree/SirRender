@@ -28,6 +28,10 @@ enum class Keyword(val lexeme: String) {
 	PLANE("plane"),
 	CUBE("cube"),
 	SPHERE("sphere"),
+	CSG("csg"),
+	UNION("union"),
+	DIFFERENCE("difference"),
+	INTERSECTION("intersection"),
 	DIFFUSE("diffuse"),
 	SPECULAR("specular"),
 	UNIFORM("uniform"),
@@ -43,6 +47,7 @@ enum class Keyword(val lexeme: String) {
 	ORTHOGONAL("orthogonal"),
 	PERSPECTIVE("perspective"),
 	FLOAT("float");
+	
 	
 	companion object {
 		// Builds the dictionary automatically at startup: {"new": NEW, "material": MATERIAL, ...}
@@ -60,7 +65,7 @@ enum class Keyword(val lexeme: String) {
 
 /** A lexical token, used when parsing a scene file. */
 sealed class Token {
-		abstract val location: SourceLocation
+	abstract val location: SourceLocation
 }
 
 /** A [Token] containing a symbol (i.e., a variable name). */
