@@ -113,17 +113,14 @@ class PathTracer(
 		
 		// if hitColorLum is 0 it means that the surface is completely black, so MonteCarlo is useless
 		if (hitColorLum > 0f) { //now timing scale like N exploiting antialiasing
-			repeat(numRays) {
-				val newRay = hitMaterial.brdf.scatterRay(
-					pcg,
-					hitRecord.ray.dir,
-					hitRecord.worldPoint,
-					hitRecord.normal.normalize(),
-					ray.depth + 1
-				)
-				cumRadiance += hitColor * this(newRay)
-			}
-			cumRadiance *= 1f / numRays.toFloat()
+			val newRay = hitMaterial.brdf.scatterRay(
+				pcg,
+				hitRecord.ray.dir,
+				hitRecord.worldPoint,
+				hitRecord.normal.normalize(),
+				ray.depth + 1
+			)
+			cumRadiance += hitColor * this(newRay)
 		}
 		
 		// Rendering equation

@@ -10,10 +10,19 @@ A physically-based Monte Carlo path tracer written in Kotlin.
 SirRender renders 3D scenes defined in a lightweight text format and produces lossless
 HDR output (`.pfm`) with optional tone-mapped PNG/JPEG export and animated GIF assembly.
 
+Below are some examples of rendered images.
+
+## Galleries
+
+  <img src="outputs/scenes/CornellBox.png" width="150" alt="Cornell box render">
+
+  <img src="outputs/scenes/SceneFile.png" width="150" alt="Cornell box render">
+
 ---
 
 ## Contents
 
+- [Examples Rendered Image](#examples-rendered-image)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Building](#building)

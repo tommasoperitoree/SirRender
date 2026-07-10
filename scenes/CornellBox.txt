@@ -37,6 +37,7 @@ plane( wallRightMaterial, translation( (0, -5, 0) ) * rotationZ(90) * rotationY(
 // ground & back wall
 plane( groundMaterial, identity ) // ground
 plane( groundMaterial, translation( (5, 0, 0) ) * rotationY(90)) // back wall
+plane(groundMaterial, translation( (0, 0, 8) ) )
 
 // lamp
 cube( lampMaterial, translation( (0, 0, 7) ) * scaling((2, 2, 0.5) ) )
