@@ -35,4 +35,4 @@ cube ( cubeMaterial, scaling( (0.5, 0.5, 0.5) ) * translation( ( -2, -4, 1) ) )
 sphere( mirrorMaterial, scaling( (0.6, 0.6, 0.6) ) * translation( (-3, 3, 0.6) ) )
 sphere( sphereMaterial, translation( (0, 0, 1) ) )
 
-camera( perspective, rotationZ(30) * translation( (-4, 0, 1) ), 1.777, 2.0 )
+camera( perspective, rotationZ(clock) * translation( (-4, 0, 1) ), 1.777, 2.0 )

@@ -568,3 +568,7 @@ to keep the estimator unbiased.
 
 Full API reference generated with Dokka:
 👉 [tommasoperitoree.github.io/SirRender/](https://tommasoperitoree.github.io/SirRender/)
+
+
+### Examples 
+

@@ -124,7 +124,6 @@ class PathTracer(
 		}
 		
 		// Rendering equation
-		// return the emitted radiance (ex from a light ball) + mean value of radiance reflected
 		return emittedRadiance + cumRadiance
 	}
 	
