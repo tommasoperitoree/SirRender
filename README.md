@@ -26,7 +26,13 @@ A small selection of scenes rendered with SirRender, showing path-traced lightin
     <td width="50%" align="center">
       <img src="outputs/scenes/SceneCube.png" alt="Rendered scene example"><br>
       <strong>Diffuse and mirror spheres with wooden cube</strong><br>
-A scene featuring a red diffuse sphere, a mirror sphere and a wooden cube on a checkered floor, lit by a fully emissive sky sphere.    </td>
+      A scene featuring a red diffuse sphere, a mirror sphere and a wooden cube on a checkered floor, lit by a fully emissive sky sphere.    
+  </td>
+    <td width="50%" align="center"> 
+      <img src="outputs/scenes/WorldSphere-CheckGround.png" alt="Rendered scene example"><br>
+      <strong>World sphere on checkered ground</strong><br>
+      A sphere mapped with an Earth texture, resting on a checkered floor under soft ambient lighting.
+    </td>
   </tr>
 </table>
 
