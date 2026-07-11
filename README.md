@@ -24,9 +24,9 @@ A small selection of scenes rendered with SirRender, showing path-traced lightin
       A simple interior scene with colored walls, diffuse objects, emissive lighting, and path-traced shadows.
     </td>
     <td width="50%" align="center">
-      <img src="outputs/scenes/SceneFile.png" alt="Rendered scene example"><br>
-      <strong>Diffuse and mirror spheres</strong><br>
-A scene featuring a red diffuse sphere and a mirror sphere on a checkered floor, lit by a fully emissive sky sphere.    </td>
+      <img src="outputs/scenes/SceneCube.png" alt="Rendered scene example"><br>
+      <strong>Diffuse and mirror spheres with wooden cube</strong><br>
+A scene featuring a red diffuse sphere, a mirror sphere and a wooden cube on a checkered floor, lit by a fully emissive sky sphere.    </td>
   </tr>
 </table>
 
