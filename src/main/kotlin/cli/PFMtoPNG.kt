@@ -12,8 +12,12 @@ import materials.HDRImage
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
-
-
+/**
+ * CLI command that converts a `.pfm` HDR image into an LDR image format.
+ *
+ * The output format is determined by the extension of the output file,
+ * such as PNG or JPEG.
+ */
 class PFMtoPNG : CliktCommand(
 	name = "pfm2png",
 ) {

@@ -4,6 +4,15 @@ import math.Point
 import math.Transformation
 import math.Vec
 
+/**
+ * Represents a ray defined by an [origin] and a [dir].
+ *
+ * @property origin The starting point of the ray
+ * @property dir    The direction of the ray
+ * @property tMin   Minimum valid ray parameter. It avoids self-intersection.
+ * @property tMax   Maximum valid ray parameter
+ * @property depth  Current recursion depth of the ray
+ */
 class Ray(
 	var origin: Point = Point(),
 	var dir: Vec = Vec(),

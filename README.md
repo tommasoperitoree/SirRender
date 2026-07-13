@@ -10,10 +10,37 @@ A physically-based Monte Carlo path tracer written in Kotlin.
 SirRender renders 3D scenes defined in a lightweight text format and produces lossless
 HDR output (`.pfm`) with optional tone-mapped PNG/JPEG export and animated GIF assembly.
 
+Below are some examples of rendered images.
+
+## Example renders
+
+A small selection of scenes rendered with SirRender, showing path-traced lighting.
+
+<table>
+  <tr>
+    <td width="33%" align="center">
+      <img src="outputs/scenes/CornellBox.png" alt="Cornell box render"><br>
+      <strong>Cornell box</strong><br>
+      A simple interior scene with colored walls, diffuse objects, emissive lighting, and path-traced shadows.
+    </td>
+    <td width="33%" align="center">
+      <img src="outputs/scenes/SceneCube.png" alt="Diffuse and mirror spheres with wooden cube render"><br>
+      <strong>Diffuse and mirror spheres with wooden cube</strong><br>
+      A scene featuring a red diffuse sphere, a mirror sphere and a wooden cube on a checkered floor, lit by a fully emissive sky sphere.
+    </td>
+    <td width="33%" align="center">
+      <img src="outputs/scenes/WorldSphere-CheckGround.png" alt="World sphere on checkered ground render"><br>
+      <strong>World sphere on checkered ground</strong><br>
+      A sphere mapped with an Earth texture, resting on a checkered floor under soft ambient lighting.
+    </td>
+  </tr>
+</table>
+
 ---
 
 ## Contents
 
+- [Example renders](#example-renders)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Building](#building)
@@ -36,11 +63,11 @@ HDR output (`.pfm`) with optional tone-mapped PNG/JPEG export and animated GIF a
 ## Features
 
 - **Path tracing** with recursive Monte Carlo integration and Russian roulette termination
-- **Three shapes**: sphere, infinite plane, axis-aligned cube — each fully transformable
-- **Two BRDFs**: ideal Lambertian diffuse and perfect specular mirror
-- **Three pigment types**: uniform color, procedural checkerboard, HDR image texture (bilinear interpolation)
+- **Three transformable shapes**: sphere, infinite plane, axis-aligned cube — each fully transformable
+- **Two BRDFs**: ideal Lambertian diffuse and perfect specular reflection
+- **Three pigment types**: uniform color, procedural checkerboard, HDR image texture with bilinear interpolation
 - **Two cameras**: orthogonal and perspective
-- **Scene file compiler**: declare geometry, materials, and camera in a readable `.txt` file
+- **Scene file compiler**: declare geometry, materials and camera in a readable `.txt` file
 - **Antialiasing**: jittered supersampling with `a²` rays per pixel
 - **HDR pipeline**: PFM storage → Reinhard tone mapping → gamma-corrected PNG/JPEG/WebP
 - **Parallel rendering**: row-stripe partitioning across all CPU cores, fully deterministic
@@ -56,14 +83,14 @@ HDR output (`.pfm`) with optional tone-mapped PNG/JPEG export and animated GIF a
 | JDK    | 25 or higher               |
 | Kotlin | 2.3.0 (bundled via Gradle) |
 
-No other runtime dependencies. The only compile-time library is
-[Clikt](https://github.com/ajalt/clikt) for CLI parsing.
+No other runtime dependencies. The only external library is
+[Clikt](https://github.com/ajalt/clikt) for Command-Line (CLI) parsing.
 
 ---
 
 ## Building
 
-Clone and build:
+Clone the repository and build the project with Gradle:
 
 ```bash
 git clone https://github.com/tommasoperitoree/SirRender.git
@@ -71,7 +98,7 @@ cd SirRender
 ./gradlew build
 ```
 
-For repeated use, install a standalone distribution — this avoids Gradle startup
+For repeated use, install a standalone distribution. This avoids Gradle startup
 overhead on every invocation:
 
 ```bash
@@ -79,14 +106,14 @@ overhead on every invocation:
 # Executable: build/install/SirRender/bin/SirRender
 ```
 
-The rest of this guide uses `SirRender` as a shorthand.
-Either add `build/install/SirRender/bin` to your `PATH`, or substitute the full path.
+The rest of this guide uses `SirRender` as a shorthand for the installed executable.
+Either add `build/install/SirRender/bin` to your `PATH`, or replace `SirRender` with the full executable path.
 
 ---
 
 ## Quick Start
 
-Render a scene file to PNG in one command:
+Render a scene file and save both the HDR `.pfm` output and a tone-mapped PNG:
 
 ```bash
 SirRender render --input-file scenes/RedSphere-CheckGround.txt --render
@@ -94,13 +121,13 @@ SirRender render --input-file scenes/RedSphere-CheckGround.txt --render
 # → outputs/scenes/RedSphere-CheckGround.png
 ```
 
-Render the built-in demo at a specific observer angle:
+Render the built-in demo from a specific observer angle:
 
 ```bash
 SirRender demo --observer-angle 45 --render
 ```
 
-Convert an existing PFM to PNG with custom tone mapping:
+Convert an existing PFM to PNG with custom tone-mapping settings:
 
 ```bash
 SirRender pfm2png scene.pfm output.png --factor 0.3 --gamma 2.2
@@ -109,6 +136,24 @@ SirRender pfm2png scene.pfm output.png --factor 0.3 --gamma 2.2
 ---
 
 ## Commands
+
+SirRender provides four main CLI commands:
+
+| Command      | Purpose                                                            |
+|--------------|--------------------------------------------------------------------|
+| `render`     | Render a `.txt` scene file to HDR `.pfm`, with optional PNG export |
+| `demo`       | Render the built-in demo scene                                     |
+| `pfm2png`    | Convert an existing `.pfm` file to a standard image format         |
+| `pfm-to-gif` | Assemble a folder of `.pfm` frames into an animated GIF            |
+
+Use `--help` after any command to see the full list of available options:
+
+```bash
+SirRender render --help
+SirRender demo --help
+SirRender pfm2png --help
+SirRender pfm-to-gif --help
+```
 
 ### `render` — Render a Scene File
 
@@ -155,9 +200,8 @@ SirRender render -inp scenes/RedSphere-CheckGround.txt --initState 123 --initSeq
 
 ### `demo` — Render the Built-in Demo
 
-Renders a hardcoded scene: eight small spheres at the vertices of a unit cube,
-plus two larger emissive spheres on two faces. Useful for testing the renderer
-without a scene file.
+Renders a hardcoded scene, useful for quickly testing the renderer
+without a scene file. An example in [demo](outputs/demo).
 
 ```bash
 SirRender demo [options]
@@ -190,9 +234,8 @@ SirRender demo -c Orthogonal -w 1920 -h 1080 --render
 
 ### `pfm-to-gif` — Assemble PFM Frames into a GIF
 
-Reads all `.pfm` files from a directory (sorted alphabetically), applies tone mapping,
-and assembles them into an animated GIF. Since frames are kept as raw HDR data, you can
-re-assemble with different tone-mapping settings without re-rendering.
+Reads all `.pfm` files from a directory, applies tone mapping
+and assembles them into an animated GIF.
 
 ```bash
 SirRender pfm-to-gif [options]
@@ -249,10 +292,10 @@ in the [`scenes/`](scenes) directory.
 ### Complete Example
 
 ```
-# Float variables — usable inside transform expressions
+// Float variables — usable inside transform expressions
 float clock(0)
 
-# Materials: brdf(pigment), optional_emission
+// Materials: brdf(pigment), optional_emission
 material skyMaterial(
     diffuse(uniform((0, 0, 0))),
     uniform((1.4, 3, 4))
@@ -268,13 +311,13 @@ material sphereMaterial(
     uniform((0, 0, 0))
 )
 
-# Shapes: shape(material, transform)
+// Shapes: shape(material, transform)
 sphere(skyMaterial, scaling((10, 10, 10)))
 plane(groundMaterial, identity)
 sphere(sphereMaterial, scaling((2, 2, 2)) * translation((0, 0, 1)))
 
-# Camera: camera(type, transform, aspectRatio, distance)
-# rotationZ(clock) orbits the camera — clock is overridden per frame by animateScenes.sh
+// Camera: camera(type, transform, aspectRatio, distance)
+// rotationZ(clock) orbits the camera — clock is overridden per frame by animateScenes.sh
 camera(perspective, rotationZ(clock) * translation((-5, 0, 2)) * rotationY(10), 1.7777, 2.0)
 ```
 
@@ -293,7 +336,7 @@ A material binds a BRDF (reflectance model) to an optional emitted radiance:
 ```
 material name(
     brdf(pigment(...)),
-    emission_pigment(...)    ← optional; omit for non-emissive surfaces
+    emission_pigment(...)    // optional; omit for non-emissive surfaces
 )
 ```
 
@@ -318,7 +361,7 @@ Transforms compose left-to-right with `*`. The rightmost transform is applied fi
 
 ```
 scaling((2, 2, 2)) * translation((0, 0, 1))
-# → translates to (0,0,1) first, then scales — center ends up at (0,0,2)
+// translates to (0,0,1) first, then scales — center ends up at (0,0,2)
 ```
 
 | Keyword       | Parameters     | Effect                      |
@@ -348,11 +391,14 @@ surfaces. The standard approach is a large emissive sky sphere:
 
 ```
 material skyMaterial(
-    diffuse(uniform((0, 0, 0))),   ← must be black (non-reflective)
-    uniform((1.4, 3, 4))          ← the actual light color and intensity
+    diffuse(uniform((0, 0, 0))),   // must be black (non-reflective)
+    uniform((1.4, 3, 4))          // the actual light color and intensity
 )
 sphere(skyMaterial, scaling((10, 10, 10)))
 ```
+
+The sky material should use a black diffuse BRDF, so it emits light
+without scattering additional rays.
 
 > ⚠️ The sky sphere BRDF **must** be `diffuse(uniform((0, 0, 0)))`.
 > A non-black sky BRDF causes the sky to scatter additional rays on each hit,
@@ -363,6 +409,8 @@ sphere(skyMaterial, scaling((10, 10, 10)))
 ## Typical Workflows
 
 ### Render a scene to PNG
+
+Render a scene file and save both the HDR `.pfm` output and a tone-mapped PNG:
 
 ```bash
 SirRender render -inp scenes/RedSphere-CheckGround.txt -r -w 1280 -h 720 -a 3
@@ -378,7 +426,7 @@ bash scripts/animateDemo.sh
 # → PFM frames kept in outputs/animations/animateDemo/
 ```
 
-Customize with env vars:
+Customize the animation with environment variables:
 
 ```bash
 NUM_FRAMES=72 WIDTH=1280 HEIGHT=720 FPS=24 bash scripts/animateDemo.sh
@@ -387,7 +435,7 @@ NUM_FRAMES=72 WIDTH=1280 HEIGHT=720 FPS=24 bash scripts/animateDemo.sh
 ### Render a 360° animation from a scene file
 
 The `clock` variable in the scene file controls the camera angle. Add it to your
-camera transform, then the script overrides it per frame:
+camera transform, then the script overrides it for each frame:
 
 ```
 # in your scene file:
@@ -401,7 +449,7 @@ SCENE_FILE=scenes/RedSphere-CheckGround.txt bash scripts/animateScenes.sh
 # → PFM frames kept in outputs/animations/RedSphere-CheckGround/
 ```
 
-Customize with env vars:
+Customize the render quality and frame count:
 
 ```bash
 SCENE_FILE=scenes/CornellBox.txt NUM_FRAMES=72 NUM_RAYS=8 WIDTH=1280 HEIGHT=720 bash scripts/animateScenes.sh
@@ -421,6 +469,9 @@ SirRender pfm-to-gif \
 
 ### Re-tone-map without re-rendering
 
+Because `.pfm` files store HDR data, you can create a brighter or darker output
+without tracing rays again:
+
 ```bash
 SirRender pfm-to-gif \
     -i outputs/animations/RedSphere-CheckGround \
@@ -438,8 +489,14 @@ SirRender pfm2png render.pfm final.png --factor 0.3 --gamma 1.8
 
 ## Animation Scripts
 
-Two bash scripts in `scripts/` handle full 360° animation workflows.
-Both require `ffmpeg` to be installed (`brew install ffmpeg` on macOS).
+The `scripts/` directory contains two helper scripts for rendering full 360° animations.
+Both scripts require `ffmpeg` to assemble the rendered frames into an MP4 file.
+
+On macOS, install it with:
+
+```bash
+brew install ffmpeg
+```
 
 ### `animateDemo.sh`
 
@@ -448,6 +505,8 @@ Renders the built-in demo scene by looping `demo` over N angles and stitching fr
 ```bash
 bash scripts/animateDemo.sh
 ```
+
+Configuration variables:
 
 | Variable     | Default                                | Description                     |
 |--------------|----------------------------------------|---------------------------------|
@@ -467,6 +526,8 @@ per frame. The scene file must reference `clock` in its camera transform.
 ```bash
 SCENE_FILE=scenes/RedSphere-CheckGround.txt bash scripts/animateScenes.sh
 ```
+
+Configuration variables:
 
 | Variable       | Default                                 | Description                 |
 |----------------|-----------------------------------------|-----------------------------|

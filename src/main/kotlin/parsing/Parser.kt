@@ -268,6 +268,7 @@ fun parseTransformation(s: SceneInputStream, scene: Scene): Transformation {
 	return result
 }
 
+/** Parse a [Material] and its associated [Transformation] from input file [s]. */
 fun parseMaterialTransformation(s: SceneInputStream, scene: Scene): Pair<Material, Transformation> {
 	expectSymbol(s, '(')
 	
@@ -283,7 +284,7 @@ fun parseMaterialTransformation(s: SceneInputStream, scene: Scene): Pair<Materia
 	return Pair(material, transformation)
 }
 
-/** Parse a [parseSphere] with its material and transformation from input stream [s]. */
+/** Parse a [Sphere] with its material and transformation from input stream [s]. */
 fun parseSphere(s: SceneInputStream, scene: Scene): Sphere {
 	
 	val (material, transformation) = parseMaterialTransformation(s, scene)

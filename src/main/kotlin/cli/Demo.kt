@@ -32,7 +32,13 @@ import java.io.FileOutputStream
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
+/**
+ * CLI command that renders a predefined demo scene using a path tracer.
+ *
+ * The generated HDR image is saved as a PFM file. Optionally, the command
+ * can also convert and save the result as a PNG image with the command `-r`.
+ *
+ */
 class Demo : CliktCommand(
 	name = "demo"
 ) {

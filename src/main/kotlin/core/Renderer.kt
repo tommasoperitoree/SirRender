@@ -7,17 +7,21 @@ import kotlin.math.max
 import kotlin.time.measureTimedValue
 import kotlin.time.Duration
 
-
+/**
+ * Defines a rendering strategy.
+ *
+ * Implementations may use different techniques, such as [OnOffRenderer],
+ * [FlatRenderer] or [PathTracer].
+ */
 interface Renderer {
 	val world: World
 	val backgroundColor: Color
 	
-	// Estimate the radiance along a ray
+	/** Estimates the radiance arriving along [ray], from the ray's origin toward its direction. */
 	operator fun invoke(ray: Ray): Color {
 		throw NotImplementedError("core.Renderer($ray) is not implemented")
 	}
 }
-
 
 /**
  * A debugging [Renderer] that colors each pixel white if the ray hits any geometry,
@@ -34,7 +38,6 @@ class OnOffRenderer(
 		else backgroundColor
 	}
 }
-
 
 /**
  * A simple [Renderer] that estimates the solution of the rendering equation by neglecting any contribution of the light.
@@ -53,7 +56,6 @@ class FlatRenderer(
 		return (material.brdf.pigment.getColor(hit.surfacePoint) + material.emittedRadiance.getColor(hit.surfacePoint))
 	}
 }
-
 
 /**
  * [Renderer] based on path tracing with Monte Carlo integration.
@@ -112,26 +114,25 @@ class PathTracer(
 		var cumRadiance = Color.black
 		
 		// if hitColorLum is 0 it means that the surface is completely black, so MonteCarlo is useless
-		if (hitColorLum > 0f) { //now timing scale like N exploiting antialiasing
-			repeat(numRays) {
-				val newRay = hitMaterial.brdf.scatterRay(
-					pcg,
-					hitRecord.ray.dir,
-					hitRecord.worldPoint,
-					hitRecord.normal.normalize(),
-					ray.depth + 1
-				)
-				cumRadiance += hitColor * this(newRay)
-			}
-			cumRadiance *= 1f / numRays.toFloat()
+		if (hitColorLum > 0f) { // now timing scale like N exploiting antialiasing
+			val newRay = hitMaterial.brdf.scatterRay(
+				pcg,
+				hitRecord.ray.dir,
+				hitRecord.worldPoint,
+				hitRecord.normal.normalize(),
+				ray.depth + 1
+			)
+			cumRadiance += hitColor * this(newRay)
 		}
 		
 		// Rendering equation
-		// return the emitted radiance (ex from a light ball) + mean value of radiance reflected
 		return emittedRadiance + cumRadiance
 	}
 	
-	
+	/**
+	 * Prints the accumulated path-tracing profiling statistics.
+	 * Profiling data is collected only when [PROFILING] is enabled.
+	 */
 	fun printProfiling() {
 		println("=== core.PathTracer Profiling ===")
 		println("rayIntersection: $totalIntersectionTime")

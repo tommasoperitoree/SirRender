@@ -18,7 +18,7 @@ import kotlin.math.sqrt
  * Bidirectional Reflectance Distribution Function — defines how a surface responds to light.
  *
  * A BRDF describes the ratio of reflected radiance to incident irradiance as a function
- * of incoming direction ω' and outgoing direction ω. Two implementations are provided:
+ * of incoming direction `ω'` and outgoing direction `ω`. Two implementations are provided:
  * - [DiffuseBRDF] — ideal Lambertian diffuse (matte surfaces, ground, walls)
  * - [SpecularBRDF] — ideal mirror reflection (chrome, perfect mirrors)
  *
@@ -55,6 +55,15 @@ interface BRDF {
 	): Ray
 }
 
+/**
+ * Ideal Lambertian [BRDF] — scatters light equally in every direction.
+ *
+ * [scatterRay] samples the outgoing direction via cosine-weighted importance sampling
+ * over the hemisphere around the surface normal, which minimizes Monte Carlo variance
+ * for this BRDF.
+ *
+ * @property reflectance Fraction of incident light reflected, in `[0, 1]`.
+ */
 class DiffuseBRDF(
 	override val pigment: Pigment = UniformPigment(Color.white),
 	val reflectance: Float = 1f
@@ -90,6 +99,13 @@ class DiffuseBRDF(
 	}
 }
 
+/**
+ * Ideal mirror [BRDF] — scatters light in a single reflected direction: `r = d − 2(n·d)n`.
+ *
+ * @property thresholdAngle Angular tolerance (radians) used by [eval] when comparing
+ *                           the incoming and outgoing directions against the surface
+ *                           normal, to account for floating-point imprecision.
+ */
 class SpecularBRDF(
 	override val pigment: Pigment = UniformPigment(Color.white),
 	val thresholdAngle: Float = PI.toFloat() / 1800f,
