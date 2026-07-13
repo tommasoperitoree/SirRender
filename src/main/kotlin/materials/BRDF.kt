@@ -18,7 +18,7 @@ import kotlin.math.sqrt
  * Bidirectional Reflectance Distribution Function — defines how a surface responds to light.
  *
  * A BRDF describes the ratio of reflected radiance to incident irradiance as a function
- * of incoming direction ω' and outgoing direction ω. Two implementations are provided:
+ * of incoming direction `ω'` and outgoing direction `ω`. Two implementations are provided:
  * - [DiffuseBRDF] — ideal Lambertian diffuse (matte surfaces, ground, walls)
  * - [SpecularBRDF] — ideal mirror reflection (chrome, perfect mirrors)
  *

@@ -22,9 +22,15 @@ import parsing.SceneInputStream
 import parsing.parseScene
 import java.io.File
 
-
+/**
+ * CLI command that renders a scene described in an external scene file.
+ *
+ * The command parses the scene, renders it using a path tracer, and saves
+ * the resulting HDR image as a PFM file. It can optionally generate a
+ * tone-mapped PNG version of the rendered image.
+ */
 class Render : CliktCommand("render") {
-	override fun help(context: Context) = "Generate a scene image"
+	override fun help(context: Context) = "Render a scene file to a PFM image, with optional PNG conversion"
 	
 	// formats: FullHD (1920x1080) ; 720p (1280x720) ; 480p (854x480) ; 360p (640x360)
 	val width: Int by option(

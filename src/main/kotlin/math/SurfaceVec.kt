@@ -13,5 +13,6 @@ data class SurfaceVec(
 ) {
 	fun isClose(other: SurfaceVec) = areClose(u, other.u) && areClose(v, other.v)
 	
+	/** Allows to convert [math.SurfaceVec] to a [String] */
 	override fun toString(): String = "SurfaceVec($u, $v)"
 }

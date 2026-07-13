@@ -8,7 +8,7 @@ import math.Transformation
 import math.Vec
 import kotlin.math.abs
 
-
+/** Converts a [point] on a cube face into UV coordinates. */
 fun cubePointToUV(point: Point, axis: Int, sign: Float): SurfaceVec {
 	val u = when (axis) {
 		0 -> if (sign > 0) point.y else -point.y
@@ -27,6 +27,7 @@ fun cubePointToUV(point: Point, axis: Int, sign: Float): SurfaceVec {
 	)
 }
 
+/** Determines the cube face containing [point]. */
 fun findExitAxis(point: Point): Pair<Int, Float> {
 	
 	val coords = floatArrayOf(point.x, point.y, point.z)
