@@ -76,7 +76,7 @@ class ParserTest {
 		assertTrue(sphereMaterial.emittedRadiance.color.isClose(Color.black))
 		
 		//Check shapes
-		assertEquals(4, scene.world.shapes.size)
+		assertEquals(6, scene.world.shapes.size)
 		
 		val plane = scene.world.shapes[0]
 		assertNotNull(plane)
@@ -90,7 +90,15 @@ class ParserTest {
 		assertNotNull(sphere)
 		assertTrue(sphere.transformation.isClose(translation(Vec(0f, 0f, 1f))))
 		
-		val csg = scene.world.shapes[3]
+		val cube = scene.world.shapes[3]
+		assertNotNull(cube)
+		assertTrue(cube.transformation.isClose(translation(Vec(5f, 0f, 1f))))
+		
+		val cylinder = scene.world.shapes[4]
+		assertNotNull(cylinder)
+		assertTrue(cylinder.transformation.isClose(translation(Vec(0f, 3f, 1f))))
+		
+		val csg = scene.world.shapes[5]
 		assertNotNull(csg)
 		assertIs<CSG>(csg)
 		
