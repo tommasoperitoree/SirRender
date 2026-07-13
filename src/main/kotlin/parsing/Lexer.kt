@@ -45,6 +45,7 @@ enum class Keyword(val lexeme: String) {
 	ROTATION_Z("rotationZ"),
 	SCALING("scaling"),
 	CAMERA("camera"),
+	POINT_LIGHT("pointLight"),
 	ORTHOGONAL("orthogonal"),
 	PERSPECTIVE("perspective"),
 	FLOAT("float");

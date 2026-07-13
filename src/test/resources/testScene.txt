@@ -20,4 +20,6 @@ plane(skyMaterial, translation((0, 0, 100)) * rotationY(clock))
 plane(groundMaterial, identity)
 sphere(sphereMaterial, translation((0, 0, 1)))
 
+pointLight((1, 2, 3), (1, 1, 1), 2)
+
 camera(perspective, rotationZ(30) * translation((-4, 0, 1)), 1.0, 2.0)

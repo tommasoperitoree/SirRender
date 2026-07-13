@@ -3,7 +3,10 @@ package core
 import geometry.Ray
 import materials.Color
 import math.PCG
+import math.Point
+import kotlin.math.cos
 import kotlin.math.max
+import kotlin.math.pow
 import kotlin.time.measureTimedValue
 import kotlin.time.Duration
 
@@ -143,4 +146,48 @@ class PathTracer(
 			println("media scatterRay:      ${totalScatterTime / calls}")
 		}
 	}
+}
+
+/**
+ * A point-light [Renderer] which estimates illumination from point light source
+ * For each ray-surface intersection, it checks which lights are visible using
+ * shadow rays and sums their contributions with distance attenuation.
+ *
+ * If it does not intersect anything, [backgroundColor] color is returned
+ * */
+class PointLightRenderer(
+	override val world: World = World(),
+	override val backgroundColor: Color = Color()
+) : Renderer {
+	
+	override operator fun invoke(ray: Ray): Color {
+		val hit = world.rayIntersection(ray) ?: return backgroundColor
+		
+		var result: Color = Color.black
+		
+		for (light in world.lights) {
+			val toLight = light.position - hit.worldPoint
+			val dirLight = toLight.normalize()
+			val distance = toLight.norm()
+			// Cast a shadow ray from the hit point toward the light source.
+			val shadowRay = Ray(origin = hit.worldPoint, dir = dirLight, tMin = 1e-3f, tMax = distance)
+			
+			if (world.rayIntersection(shadowRay) != null) continue
+			
+			val cosTheta = maxOf(0f, hit.normal.dot(dirLight))
+			val brdf = hit.shape.material.brdf.eval(
+				normal = hit.normal,
+				inDir = toLight.normalize(),
+				outDir = -ray.dir,
+				uv = hit.surfacePoint
+			)
+			
+			// Apply inverse-square distance attenuation.
+			val attenuation = light.linearRadius.pow(2) / distance.pow(2)
+			
+			result += brdf * light.color * cosTheta * attenuation
+		}
+		return result
+	}
+
 }
