@@ -1,7 +1,8 @@
 # Version 1.0.0
 
 - Update and reorganize documentation [#18](https://github.com/tommasoperitoree/SirRender/pull/18)
-- Add scene file parser, allowing scenes to be defined through simple text files [#14](https://github.com/tommasoperitoree/SirRender/pull/14)
+- Add scene file parser, allowing scenes to be defined through simple text
+  files [#14](https://github.com/tommasoperitoree/SirRender/pull/14)
 - Add antialiasing via jittered supersampling [#16](https://github.com/tommasoperitoree/SirRender/pull/16)
 - Implement Cube shape with per-face UV mapping  [#15](https://github.com/tommasoperitoree/SirRender/pull/15)
 - Fix PCG `randomFloat()` divisor (was 16× too large)
@@ -18,7 +19,8 @@
 # Version 0.2.0
 
 - Fix an issue with the vertical order of the images [#5](https://github.com/tommasoperitoree/SirRender/pull/5)
-- Add the `demo` command and CLI interface using the Clikt Kotlin library [#4](https://github.com/tommasoperitoree/SirRender/pull/4)
+- Add the `demo` command and CLI interface using the Clikt Kotlin
+  library [#4](https://github.com/tommasoperitoree/SirRender/pull/4)
 - Add camera support [#2](https://github.com/tommasoperitoree/SirRender/pull/2)
 
 # Version 0.1.0

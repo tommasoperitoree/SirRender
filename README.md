@@ -139,12 +139,12 @@ SirRender pfm2png scene.pfm output.png --factor 0.3 --gamma 2.2
 
 SirRender provides four main CLI commands:
 
-| Command      | Purpose |
-|-------------|---------|
-| `render`    | Render a `.txt` scene file to HDR `.pfm`, with optional PNG export |
-| `demo`      | Render the built-in demo scene |
-| `pfm2png`   | Convert an existing `.pfm` file to a standard image format |
-| `pfm-to-gif`| Assemble a folder of `.pfm` frames into an animated GIF |
+| Command      | Purpose                                                            |
+|--------------|--------------------------------------------------------------------|
+| `render`     | Render a `.txt` scene file to HDR `.pfm`, with optional PNG export |
+| `demo`       | Render the built-in demo scene                                     |
+| `pfm2png`    | Convert an existing `.pfm` file to a standard image format         |
+| `pfm-to-gif` | Assemble a folder of `.pfm` frames into an animated GIF            |
 
 Use `--help` after any command to see the full list of available options:
 
@@ -201,7 +201,7 @@ SirRender render -inp scenes/RedSphere-CheckGround.txt --initState 123 --initSeq
 ### `demo` — Render the Built-in Demo
 
 Renders a hardcoded scene, useful for quickly testing the renderer
-without a scene file. An example in [sphereB&W](outputs/sphereB&W).
+without a scene file. An example in [demo](outputs/demo).
 
 ```bash
 SirRender demo [options]
@@ -505,6 +505,7 @@ Renders the built-in demo scene by looping `demo` over N angles and stitching fr
 ```bash
 bash scripts/animateDemo.sh
 ```
+
 Configuration variables:
 
 | Variable     | Default                                | Description                     |
@@ -525,6 +526,7 @@ per frame. The scene file must reference `clock` in its camera transform.
 ```bash
 SCENE_FILE=scenes/RedSphere-CheckGround.txt bash scripts/animateScenes.sh
 ```
+
 Configuration variables:
 
 | Variable       | Default                                 | Description                 |
@@ -574,7 +576,3 @@ to keep the estimator unbiased.
 
 Full API reference generated with Dokka:
 👉 [tommasoperitoree.github.io/SirRender/](https://tommasoperitoree.github.io/SirRender/)
-
-
-### Examples 
-

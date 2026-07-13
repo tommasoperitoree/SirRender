@@ -114,7 +114,7 @@ class PathTracer(
 		var cumRadiance = Color.black
 		
 		// if hitColorLum is 0 it means that the surface is completely black, so MonteCarlo is useless
-		if (hitColorLum > 0f) { //now timing scale like N exploiting antialiasing
+		if (hitColorLum > 0f) { // now timing scale like N exploiting antialiasing
 			val newRay = hitMaterial.brdf.scatterRay(
 				pcg,
 				hitRecord.ray.dir,
