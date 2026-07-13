@@ -42,7 +42,7 @@ data class Point(
 	fun isClose(other: Point) =
 		areClose(x, other.x) && areClose(y, other.y) && areClose(z, other.z)
 	
-	
-	override fun toString(): String = "math.Point($x, $y, $z)"
+	/** Allows to convert [math.Point] to a [String] */
+	override fun toString(): String = "Point($x, $y, $z)"
 	
 }

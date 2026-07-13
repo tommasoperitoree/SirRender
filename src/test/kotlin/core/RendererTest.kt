@@ -30,7 +30,7 @@ class RendererTest {
 			)
 			world.addShape(Sphere(material = enclosureMaterial))
 			
-			val pathTracer = PathTracer(world, Color.black, pcg, 1, 1000, 501)
+			val pathTracer = PathTracer(world, Color.black, pcg, 1, 1000, 1001)
 			
 			val ray = Ray(Point(0f, 0f, 0f), Vec(1f, 0f, 0f))
 			val color = pathTracer(ray)

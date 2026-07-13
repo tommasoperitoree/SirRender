@@ -10,7 +10,7 @@ import math.PCG
 class ImageTracer(
 	val image: HDRImage,
 	val camera: Camera,
-	val antialiasing: Int,
+	val antialiasing: Int = 1,
 	val pcg: PCG
 ) {
 	

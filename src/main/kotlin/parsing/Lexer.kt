@@ -6,6 +6,7 @@ import java.io.Reader
 //  Source Location
 // ------------------------------
 
+/** A 1-indexed line/column position within a scene file, used to report [GrammarError]s. */
 data class SourceLocation(
 	val fileName: String = "",
 	var lineNum: Int = 1,
@@ -17,9 +18,13 @@ data class SourceLocation(
 //  Constants, enum Keywords
 // ------------------------------
 
+/** Characters treated as insignificant whitespace between tokens. */
 const val WHITESPACE = " \t\n\r"
+
+/** Single-character symbols the lexer recognizes as standalone [SymbolToken]s. */
 const val SYMBOLS = "()<>[],*"
 
+/** Reserved words of the scene file DSL, each paired with its literal [lexeme] spelling. */
 enum class Keyword(val lexeme: String) {
 	NEW("new"),
 	SKY("sky"),
@@ -61,7 +66,7 @@ enum class Keyword(val lexeme: String) {
 
 /** A lexical token, used when parsing a scene file. */
 sealed class Token {
-		abstract val location: SourceLocation
+	abstract val location: SourceLocation
 }
 
 /** A [Token] containing a symbol (i.e., a variable name). */
@@ -147,7 +152,7 @@ class SceneInputStream(
 		}
 	}
 	
-	/** Read a bew character from the stream. */
+	/** Read a new character from the stream. */
 	fun readChar(): Char? {
 		var ch: Char?
 		if (savedChar != null) { // recover the unread character and return it
@@ -201,11 +206,11 @@ class SceneInputStream(
 	}
 	
 	/** Interprets a series of [Char]s as a [String]. Returns corresponding [Token]. */
-	fun parseStringToken(tokenLoc: SourceLocation): StringToken {
+	fun parseStringToken(delimiter: Char, tokenLoc: SourceLocation): StringToken {
 		val token = buildString {
 			while (true) {
 				val ch = readChar() ?: throw GrammarError(tokenLoc, "Undetermined string")
-				if (ch == '"'|| ch == '\'') break
+				if (ch == delimiter) break
 				append(ch)
 			}
 		}
@@ -280,7 +285,7 @@ class SceneInputStream(
 		
 		val ch = readChar() ?: return StopToken(location = location.copy())  // no more characters in the file, so return a parsing.StopToken
 		
-		val tokenLoc = location.copy() // the position in the stream
+		val tokenLoc = savedLocation.copy() // the position in the stream
 		
 		return when {
 			// one-character symbol, like '(' or ','
@@ -290,7 +295,7 @@ class SceneInputStream(
 			
 			// a literal string (used for file names)
 			ch == '"' || ch == '\'' -> {
-				parseStringToken(tokenLoc)
+				parseStringToken(ch, tokenLoc)
 			}
 			
 			// a floating-point number

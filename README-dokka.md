@@ -4,7 +4,7 @@ A physically-based Monte Carlo path tracer written in Kotlin.
 SirRender renders scenes defined in a lightweight text format and exports lossless HDR output
 (`.pfm`) with optional tone-mapped PNG/JPEG conversion and animated GIF assembly.
 
-**Version:** 0.3.0 &nbsp;·&nbsp;
+**Version:** 1.0.0 &nbsp;·&nbsp;
 [GitHub](https://github.com/tommasoperitoree/SirRender) &nbsp;·&nbsp;
 [CHANGELOG](https://github.com/tommasoperitoree/SirRender/blob/main/CHANGELOG.md) &nbsp;·&nbsp;
 [CLI Reference](https://github.com/tommasoperitoree/SirRender/blob/main/README.md)
@@ -19,13 +19,13 @@ parsing  ──▶  core  ──▶  geometry  ──▶  math
                  └──▶  materials  ──────────┘
 ```
 
-| Package     | What lives here                                                                            |
-|-------------|--------------------------------------------------------------------------------------------|
-| `math`      | Linear algebra primitives: [Vec], [Point], [Normal], [SurfaceVec], [Transformation], [PCG] |
-| `geometry`  | Ray–shape intersection: [Ray], [Shape], [Sphere], [Plane], [Cube], [HitRecord]             |
-| `materials` | Surface appearance: [Color], [HDRImage], [Pigment], [BRDF], [Material]                     |
-| `core`      | Rendering pipeline: [Camera], [World], [ImageTracer], [PathTracer]                         |
-| `parsing`   | Scene file compiler: [SceneInputStream], [parseScene]                                      |
+| Package     | What lives here                                                                                                                      |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| `math`      | Linear algebra primitives: [math.Vec], [math.Point], [math.Normal], [math.SurfaceVec], [math.Transformation], [math.PCG]             |
+| `geometry`  | Ray–shape intersection: [geometry.Ray], [geometry.Shape], [geometry.Sphere], [geometry.Plane], [geometry.Cube], [geometry.HitRecord] |
+| `materials` | Surface appearance: [materials.Color], [materials.HDRImage], [materials.Pigment], [materials.BRDF], [materials.Material]             |
+| `core`      | Rendering pipeline: [core.Camera], [core.World], [core.ImageTracer], [core.PathTracer]                                               |
+| `parsing`   | Scene file compiler: [parsing.SceneInputStream], [parsing.parseScene]                                                                |
 
 The `cli` package (the command-line interface) is omitted from the API reference — it is an
 end-user tool, not part of the library surface.
@@ -39,79 +39,79 @@ A complete render follows these five steps in order:
 All geometry computation starts here. Three distinct types encode positions and directions
 so the type system prevents mixing them accidentally:
 
-| Type         | Role                              | Key operations                                 |
-|--------------|-----------------------------------|------------------------------------------------|
-| [Vec]        | Direction / displacement          | `+`, `-`, `dot`, `cross`, `normalize()`        |
-| [Point]      | Position in space                 | `+ Vec`, `- Point` → Vec                       |
-| [Normal]     | Surface normal                    | transforms via inverse-transpose of the matrix |
-| [SurfaceVec] | 2D UV coordinate `(u, v) ∈ [0,1)` | used to index pigments/textures                |
+| Type              | Role                              | Key operations                                 |
+|-------------------|-----------------------------------|------------------------------------------------|
+| [math.Vec]        | Direction / displacement          | `+`, `-`, `dot`, `cross`, `normalize()`        |
+| [math.Point]      | Position in space                 | `+ Vec`, `- Point` → Vec                       |
+| [math.Normal]     | Surface normal                    | transforms via inverse-transpose of the matrix |
+| [math.SurfaceVec] | 2D UV coordinate `(u, v) ∈ [0,1)` | used to index pigments/textures                |
 
-[Transformation] wraps a 4×4 homogeneous matrix and its precomputed inverse together,
+[math.Transformation] wraps a 4×4 homogeneous matrix and its precomputed inverse together,
 so composition and inversion are always consistent.
-Factory functions — [translation], [scaling], [rotationX], [rotationY], [rotationZ] —
+Factory functions — [math.translation], [math.scaling], [math.rotationX], [math.rotationY], [math.rotationZ] —
 are the only safe way to construct transformations.
 
-[PCG] is a fast, high-quality pseudo-random generator used for Monte Carlo scatter
+[math.PCG] is a fast, high-quality pseudo-random generator used for Monte Carlo scatter
 direction sampling. Each rendering thread must own its own instance.
 
 ### 2 — Geometry (`geometry`)
 
-[Ray] carries an origin, direction, and a valid `[tMin, tMax]` interval.
+[geometry.Ray] carries an origin, direction, and a valid `[tMin, tMax]` interval.
 `tMin = 1e-3f` by default, preventing self-intersection after a surface bounce.
 
-Each [Shape] implementation transforms the ray into object space (where the shape is
+Each [geometry.Shape] implementation transforms the ray into object space (where the shape is
 canonical), solves the intersection analytically, and transforms the result back to
 world space:
 
-| Shape    | Object-space definition        | UV mapping                                     |
-|----------|--------------------------------|------------------------------------------------|
-| [Sphere] | Unit sphere centered at origin | Spherical: `atan2(y,x)` for u, `acos(z)` for v |
-| [Plane]  | z = 0, infinite extent         | Tiling: fractional part of world x, y          |
-| [Cube]   | `[−1, 1]³` axis-aligned        | Per-face projection                            |
+| Shape             | Object-space definition        | UV mapping                                     |
+|-------------------|--------------------------------|------------------------------------------------|
+| [geometry.Sphere] | Unit sphere centered at origin | Spherical: `atan2(y,x)` for u, `acos(z)` for v |
+| [geometry.Plane]  | z = 0, infinite extent         | Tiling: fractional part of world x, y          |
+| [geometry.Cube]   | `[−1, 1]³` axis-aligned        | Per-face projection                            |
 
-A successful intersection returns a [HitRecord] containing the world-space hit point,
+A successful intersection returns a [geometry.HitRecord] containing the world-space hit point,
 surface normal, UV coordinates, ray parameter `t`, the originating ray, and the shape.
 
 ### 3 — Materials (`materials`)
 
-[Material] pairs a [BRDF] with an optional emitted radiance [Pigment].
+[materials.Material] pairs a [materials.BRDF] with an optional emitted radiance [materials.Pigment].
 
-**Pigments** map a [SurfaceVec] to a [Color]:
+**Pigments** map a [math.SurfaceVec] to a [materials.Color]:
 
-| Pigment            | Description                                    |
-|--------------------|------------------------------------------------|
-| [UniformPigment]   | Solid color — same value everywhere            |
-| [CheckeredPigment] | Procedural N×N checkerboard of two colors      |
-| [ImagePigment]     | HDR texture lookup with bilinear interpolation |
+| Pigment                      | Description                                    |
+|------------------------------|------------------------------------------------|
+| [materials.UniformPigment]   | Solid color — same value everywhere            |
+| [materials.CheckeredPigment] | Procedural N×N checkerboard of two colors      |
+| [materials.ImagePigment]     | HDR texture lookup with bilinear interpolation |
 
 **BRDFs** define how light scatters at a surface:
 
-| BRDF           | Model            | Scatter direction                     |
-|----------------|------------------|---------------------------------------|
-| [DiffuseBRDF]  | Ideal Lambertian | Cosine-weighted importance sampling   |
-| [SpecularBRDF] | Ideal mirror     | Perfect reflection: `r = d − 2(n·d)n` |
+| BRDF                     | Model            | Scatter direction                     |
+|--------------------------|------------------|---------------------------------------|
+| [materials.DiffuseBRDF]  | Ideal Lambertian | Cosine-weighted importance sampling   |
+| [materials.SpecularBRDF] | Ideal mirror     | Perfect reflection: `r = d − 2(n·d)n` |
 
-[HDRImage] stores the rendered pixel buffer as a flat `Array<Color>` in row-major order
+[materials.HDRImage] stores the rendered pixel buffer as a flat `Array<Color>` in row-major order
 and handles PFM I/O and tone mapping (`normalizeImage` → `clampImage` → `writeLDRImage`).
 
 ### 4 — Rendering (`core`)
 
-[World] is the scene container: a flat list of [Shape]s searched linearly for the
+[core.World] is the scene container: a flat list of [geometry.Shape]s searched linearly for the
 closest intersection on each ray call.
 
-[Camera] defines the projection. Both subclasses produce rays through a normalized
+[core.Camera] defines the projection. Both subclasses produce rays through a normalized
 `(u, v) ∈ [0,1)²` screen:
 
-| Camera              | Projection            | Effect                                        |
-|---------------------|-----------------------|-----------------------------------------------|
-| [OrthogonalCamera]  | Parallel rays         | No foreshortening; useful for technical views |
-| [PerspectiveCamera] | Rays from focal point | Realistic depth and perspective               |
+| Camera                   | Projection            | Effect                                        |
+|--------------------------|-----------------------|-----------------------------------------------|
+| [core.OrthogonalCamera]  | Parallel rays         | No foreshortening; useful for technical views |
+| [core.PerspectiveCamera] | Rays from focal point | Realistic depth and perspective               |
 
-[ImageTracer] iterates over every pixel, computes jittered sub-pixel samples when
-antialiasing is enabled (using a private [PCG] for reproducible jitter), and writes
-the averaged color into the [HDRImage].
+[core.ImageTracer] iterates over every pixel, computes jittered sub-pixel samples when
+antialiasing is enabled (using a private [math.PCG] for reproducible jitter), and writes
+the averaged color into the [materials.HDRImage].
 
-[PathTracer] implements the rendering equation via recursive Monte Carlo integration:
+[core.PathTracer] implements the rendering equation via recursive Monte Carlo integration:
 
 ```
 L(x, ω) = Lₑ(x, ω) + ∫ f_r(x, ω', ω) · L(x', ω') · cos θ · dω'
@@ -120,12 +120,12 @@ L(x, ω) = Lₑ(x, ω) + ∫ f_r(x, ω', ω) · L(x', ω') · cos θ · dω'
 Each call fires `numRays` scattered rays, recurses up to `maxRayDepth`, and applies
 Russian roulette termination beyond `russianRouletteLimit` to keep paths unbiased.
 The renderer is **not thread-safe** — the parallel `render` command solves this by
-giving each thread its own [PathTracer] instance with a deterministically seeded [PCG].
+giving each thread its own [core.PathTracer] instance with a deterministically seeded [math.PCG].
 
 ### 5 — Parsing (`parsing`)
 
-[parseScene] reads a `.txt` scene file token by token via [SceneInputStream] and
-builds a fully initialized [World] plus a [Camera], ready to hand to [ImageTracer].
+[parsing.parseScene] reads a `.txt` scene file token by token via [parsing.SceneInputStream] and
+builds a fully initialized [core.World] plus a [core.Camera], ready to hand to [core.ImageTracer].
 
 ## Quick Start (Kotlin API)
 

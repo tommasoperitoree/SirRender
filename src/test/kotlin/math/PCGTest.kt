@@ -25,9 +25,11 @@ class PCGTest {
 	@Test
 	fun `test randomFloat`() {
 		val pcg = PCG()
-		val n = pcg.randomFloat()
-		val boolean = true
-		if (n in 0.0..1.0) boolean==false
-		assertTrue(boolean)
+		
+		repeat(1000) {
+			val n = pcg.randomFloat()
+			assertTrue(n >= 0f)
+			assertTrue(n < 1f)
+		}
 	}
 }

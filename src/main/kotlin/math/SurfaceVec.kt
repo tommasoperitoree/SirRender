@@ -11,5 +11,12 @@ data class SurfaceVec(
 	var u: Float = 0f,
 	var v: Float = 0f,
 ) {
+	/**
+	 * Checks whether two [SurfaceVec]s are equal component-wise
+	 * (within floating point tolerance) through [areClose] fun.
+	 */
 	fun isClose(other: SurfaceVec) = areClose(u, other.u) && areClose(v, other.v)
+	
+	/** Allows to convert [math.SurfaceVec] to a [String] */
+	override fun toString(): String = "SurfaceVec($u, $v)"
 }

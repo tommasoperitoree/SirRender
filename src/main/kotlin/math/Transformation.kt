@@ -101,7 +101,7 @@ data class Transformation(
 	
 	// --- Default data class function overrides ---
 	
-	override fun toString(): String = "math.Transformation:\n${m.toMatrixString()}"
+	override fun toString(): String = "Transformation:\n${m.toMatrixString()}"
 	
 	override fun equals(other: Any?): Boolean {
 		if (this === other) return true
@@ -144,8 +144,12 @@ fun translation(vec: Vec): Transformation =
 	)
 
 /** Returns a [Transformation] encoding scaling of the amount per axis given by [vec]. */
-fun scaling(vec: Vec): Transformation =
-	Transformation(
+fun scaling(vec: Vec): Transformation {
+	require(vec.x != 0f && vec.y != 0f && vec.z != 0f){
+		"Scaling vectors can't be zero!"
+	}
+	
+	return Transformation(
 		HomogMatr4x4(
 			floatArrayOf(
 				vec.x, 0f, 0f, 0f,
@@ -163,6 +167,8 @@ fun scaling(vec: Vec): Transformation =
 			)
 		)
 	)
+}
+
 
 /**
  * Returns a [Transformation] encoding rotation around the X axis by [angleDeg] degrees.
