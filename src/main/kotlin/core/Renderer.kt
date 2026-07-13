@@ -17,7 +17,7 @@ interface Renderer {
 	val world: World
 	val backgroundColor: Color
 	
-	// Estimate the radiance along a ray
+	/** Estimates the radiance arriving along [ray], from the ray's origin toward its direction. */
 	operator fun invoke(ray: Ray): Color {
 		throw NotImplementedError("core.Renderer($ray) is not implemented")
 	}

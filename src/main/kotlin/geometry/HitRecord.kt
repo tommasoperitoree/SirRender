@@ -23,6 +23,10 @@ data class HitRecord(
 	val ray: Ray = Ray(),
 	val shape: Shape
 ) {
+	/**
+	 * Checks whether two [HitRecord]s are equal, comparing every field
+	 * (within floating point tolerance where applicable).
+	 */
 	fun isClose(other: HitRecord) =
 		worldPoint.isClose(other.worldPoint) &&
 				normal.isClose(other.normal) &&

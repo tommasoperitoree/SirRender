@@ -15,6 +15,12 @@ class ProgressBar(
 	private val startTime = System.nanoTime()
 	private var lastPrintTime = 0L
 	
+	/**
+	 * Redraws the progress bar to reflect [done] out of `total` units completed.
+	 *
+	 * Output is rate-limited to at most once every 100 ms unless [force] is `true`
+	 * or the bar has just reached completion.
+	 */
 	@Synchronized
 	fun update(done: Long, force: Boolean = false) {
 		val now = System.nanoTime()

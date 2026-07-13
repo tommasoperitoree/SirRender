@@ -53,8 +53,12 @@ class Cube(
 	override val material: Material = Material()
 ) : Shape {
 	// 0=x, 1=y, 2=z
-	
 	// unitary cube centered in the origin with length 2 [-1,1]
+	
+	/**
+	 * Checks if the [ray] intersect the [Cube], via the slab method.
+	 * Returns a [HitRecord] or `null` if no intersection is found.
+	 */
 	override fun rayIntersection(ray: Ray): HitRecord? {
 		val invRay: Ray = ray.transform(transformation.inverse())
 		var hitAxis = -1
