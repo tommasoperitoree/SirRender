@@ -13,8 +13,11 @@ import core.ImageTracer
 import core.OrthogonalCamera
 import core.PathTracer
 import core.PerspectiveCamera
+import core.PointLight
+import core.PointLightRenderer
 import core.ProgressBar
 import core.World
+import geometry.Plane
 import geometry.Sphere
 import materials.CheckeredPigment
 import materials.Color
@@ -23,6 +26,7 @@ import materials.HDRImage
 import materials.Material
 import materials.UniformPigment
 import math.PCG
+import math.Point
 import math.Vec
 import math.rotationY
 import math.rotationZ
@@ -58,7 +62,7 @@ class Demo : CliktCommand(
 	).choice("Orthogonal", "Perspective", ignoreCase = true).default("Perspective")
 	val outputDir: String by option(
 		"--output-dir", "-o", help = "Output directory for images"
-	).default("./outputs/demo")
+	).default("./outputs/scenes")
 	val observerZAngle: Float by option(
 		"--observer-angle", "-i", help = "Starting observer angle in degrees"
 	).float().default(0f)
@@ -85,7 +89,7 @@ class Demo : CliktCommand(
 		val img = HDRImage(width, height)
 		
 		val screenCenter = Vec(-1f, 0f, 0f)
-		val observerYAngle = 35f // angle to rotate above plane (around y-axis)
+		val observerYAngle = 45f // angle to rotate above plane (around y-axis)
 		
 		// concatenation of transformations: first move away from scene,
 		// then rotate upwards around y-axis, and finally gradually move around the scene (z-axis)
@@ -103,16 +107,20 @@ class Demo : CliktCommand(
 		println("Starting render...\n")
 		val pathTracer = ImageTracer(img, cam, antialiasing = 3, pcg = PCG())
 		
-		print("Using a path tracer")
+		//print("Using a path tracer")
+		print("Using a Point-light tracer")
 		
-		val renderer = PathTracer(
-			world,
-			Color(),
-			PCG(initState, initSeq),
-			numRays = 4,
-			maxRayDepth = 6,
-			russianRouletteLimit = 4
-		)
+		//val renderer = PathTracer(
+		//	world,
+		//	Color(),
+		//	PCG(initState, initSeq),
+		//	numRays = 4,
+		//	maxRayDepth = 6,
+		//	russianRouletteLimit = 4
+		//)
+		
+		val renderer = PointLightRenderer(world, Color.black)
+		
 		
 		// Run the ray-tracer with ProgressBar
 		val samplesPerPixel =
@@ -174,10 +182,10 @@ private fun buildDemoWorld(): World {
 	for (x in coords) for (y in coords) for (z in coords)
 		world.addShape(Sphere(translation(Vec(x, y, z)) * scaling, sphereMaterial))
 	
+	
 	// two more spheres in middle of two faces, gives asymmetry to scene
 	world.addShape(Sphere(translation(Vec(0f, 0f, -0.5f)) * scaling, sphereMaterial1))
 	world.addShape(Sphere(translation(Vec(0f, 0.5f, 0f)) * scaling, sphereMaterial1))
-	
 	
 	return world
 }

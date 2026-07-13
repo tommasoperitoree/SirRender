@@ -2,6 +2,7 @@ package cli
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.Context
+import com.github.ajalt.clikt.core.parse
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -9,11 +10,14 @@ import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.float
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.ulong
+import com.github.ajalt.clikt.parameters.types.choice
 import core.ImageTracer
 import core.OrthogonalCamera
 import core.PathTracer
 import core.PerspectiveCamera
 import core.ProgressBar
+import core.PointLightRenderer
+import core.Renderer
 import materials.Color
 import materials.HDRImage
 import math.PCG
@@ -48,6 +52,9 @@ class Render : CliktCommand("render") {
 	val renderImage: Boolean by option(
 		"--render", "-r", help = "Also convert output to PNG"
 	).flag(default = false)
+	val rendererType: String by option(
+		"--renderer-type", help = "Renderer type: path or point-light"
+	).choice("path", "point-light", ignoreCase = true).default("auto")
 	val factor: Float by option(
 		"--factor", "-f", help = "Luminosity scaling factor"
 	).float().default(0.2f)
@@ -148,14 +155,42 @@ class Render : CliktCommand("render") {
 		
 		val pathTracer = ImageTracer(img, cam, antialiasing = antialiasing, pcg = PCG())
 		
-		val renderer = PathTracer(
-			parsedScene.world,
-			Color(),
-			PCG(initState, initSeq),
-			numRays = rays,
-			maxRayDepth = depth,
-			russianRouletteLimit = roulette,
-		)
+		val renderer: Renderer = when (rendererType.lowercase()) {
+			"auto" -> {
+				if (parsedScene.world.lights.isNotEmpty()) {
+					PointLightRenderer(
+						world = parsedScene.world,
+						backgroundColor = Color.black
+					)
+				} else {
+					PathTracer(
+						parsedScene.world,
+						Color(),
+						PCG(initState, initSeq),
+						numRays = rays,
+						maxRayDepth = depth,
+						russianRouletteLimit = roulette,
+					)
+				}
+			}
+			
+			"path" -> PathTracer(
+				parsedScene.world,
+				Color(),
+				PCG(initState, initSeq),
+				numRays = rays,
+				maxRayDepth = depth,
+				russianRouletteLimit = roulette,
+			)
+			
+			"point-light" -> PointLightRenderer(
+				world = parsedScene.world,
+				backgroundColor = Color.black
+			)
+			
+			else -> throw IllegalArgumentException("Unknown renderer type: $rendererType")
+		}
+		
 		
 		val progressBar = ProgressBar(totalSamples)
 		var done = 0L

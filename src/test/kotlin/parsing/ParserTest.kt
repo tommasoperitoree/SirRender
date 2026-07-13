@@ -1,6 +1,7 @@
 package parsing
 
 import core.PerspectiveCamera
+import core.PointLight
 import materials.CheckeredPigment
 import materials.Color
 import materials.DiffuseBRDF
@@ -9,6 +10,7 @@ import materials.UniformPigment
 import math.HomogMatr4x4
 import math.Transformation
 import math.Vec
+import math.Point
 import math.rotationY
 import math.translation
 import org.junit.jupiter.api.Test
@@ -86,6 +88,14 @@ class ParserTest {
 		val sphere = scene.world.shapes[2]
 		assertNotNull(sphere)
 		assertTrue(sphere.transformation.isClose(translation(Vec(0f, 0f, 1f))))
+		
+		//Check lights
+		assertEquals(1, scene.world.lights.size)
+		
+		val light = scene.world.lights[0]
+		assertTrue(light.position.isClose(Point(1f, 2f, 3f)))
+		assertTrue(light.color.isClose(Color.white))
+		assertEquals(2f, light.linearRadius)
 		
 		//Check camera
 		val cameraP = scene.camera
