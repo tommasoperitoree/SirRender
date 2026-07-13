@@ -9,6 +9,8 @@ import geometry.Plane
 import geometry.Shape
 import geometry.CSG
 import geometry.Sphere
+import geometry.Cylinder
+import jdk.internal.org.jline.keymap.KeyMap.key
 import materials.BRDF
 import materials.CheckeredPigment
 import materials.Color
@@ -297,7 +299,6 @@ fun parseCube(s: SceneInputStream, scene: Scene): Cube {
 	
 	val (material, transformation) = parseMaterialTransformation(s, scene)
 	return Cube(transformation = transformation, material = material)
-	
 }
 
 /** Parse a [Plane] with its material and transformation from input stream [s]. */
@@ -305,8 +306,15 @@ fun parsePlane(s: SceneInputStream, scene: Scene): Plane {
 	
 	val (material, transformation) = parseMaterialTransformation(s, scene)
 	return Plane(transformation = transformation, material = material)
-	
 }
+
+/** Parse a [Cylinder] with its material and transformation from input stream [s]. */
+fun parseCylinder(s: SceneInputStream, scene: Scene): Cylinder {
+	
+	val (material, transformation) = parseMaterialTransformation(s, scene)
+	return Cylinder(transformation = transformation, material = material)
+}
+
 
 /** Parse any supported [Shape] from input stream [s]. */
 fun parseShape(s: SceneInputStream, scene: Scene, keywordShape: Keyword? = null): Shape {
@@ -316,6 +324,7 @@ fun parseShape(s: SceneInputStream, scene: Scene, keywordShape: Keyword? = null)
 			Keyword.SPHERE,
 			Keyword.CUBE,
 			Keyword.PLANE,
+			Keyword.CYLINDER,
 			Keyword.CSG
 		)
 	)
@@ -323,6 +332,7 @@ fun parseShape(s: SceneInputStream, scene: Scene, keywordShape: Keyword? = null)
 		Keyword.SPHERE -> parseSphere(s, scene)
 		Keyword.CUBE -> parseCube(s, scene)
 		Keyword.PLANE -> parsePlane(s, scene)
+		Keyword.CYLINDER -> parseCylinder(s, scene)
 		Keyword.CSG -> parseCSG(s, scene)
 		else -> throw GrammarError(s.location, "Expected a shape keyword instead of $kwShape")
 	}
@@ -407,6 +417,7 @@ fun parseScene(s: SceneInputStream, variables: Map<String, Float> = emptyMap()):
 			Keyword.SPHERE,
 			Keyword.CUBE,
 			Keyword.PLANE,
+			Keyword.CYLINDER,
 			Keyword.CSG -> {
 				scene.world.addShape(parseShape(s, scene, what.keyword))
 			}
