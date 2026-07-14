@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/github/license/tommasoperitoree/SirRender?style=for-the-badge)](LICENSE)
 [![API Docs](https://img.shields.io/badge/Docs-Dokka-0079CC?style=for-the-badge&logo=readthedocs&logoColor=white)](https://tommasoperitoree.github.io/SirRender/)
 
-A physically-based Monte Carlo path tracer written in Kotlin.
+A ray tracer written in Kotlin with Monte Carlo path tracing and direct point-light rendering.
 SirRender renders 3D scenes defined in a lightweight text format and produces lossless
 HDR output (`.pfm`) with optional tone-mapped PNG/JPEG export and animated GIF assembly.
 
@@ -63,6 +63,7 @@ A small selection of scenes rendered with SirRender, showing path-traced lightin
 ## Features
 
 - **Path tracing** with recursive Monte Carlo integration and Russian roulette termination
+- **Point-light rendering** with direct illumination, hard shadows, BRDF evaluation and inverse-square distance attenuation
 - **Three transformable shapes**: sphere, infinite plane, axis-aligned cube — each fully transformable
 - **Two BRDFs**: ideal Lambertian diffuse and perfect specular reflection
 - **Three pigment types**: uniform color, procedural checkerboard, HDR image texture with bilinear interpolation
@@ -157,33 +158,41 @@ SirRender pfm-to-gif --help
 
 ### `render` — Render a Scene File
 
-Loads a `.txt` scene description, traces rays with the path tracer, and writes the
-result as a `.pfm` file. Pass `--render` to also produce a tone-mapped PNG.
+Loads a `.txt` scene description, renders it using either the path tracer or the
+point-light renderer, and writes the result as a `.pfm` file. Pass `--render`
+to also produce a tone-mapped PNG.
 
 ```bash
 SirRender render [options]
 ```
 
-| Option           | Short  | Default                | Description                              |
-|------------------|--------|------------------------|------------------------------------------|
-| `--input-file`   | `-inp` | `SceneR/sceneFile.txt` | Path to the scene file                   |
-| `--width`        | `-w`   | `640`                  | Image width in pixels                    |
-| `--height`       | `-h`   | `360`                  | Image height in pixels                   |
-| `--output-dir`   | `-o`   | `./outputs/scenes`     | Output directory                         |
-| `--render`       | `-r`   | off                    | Also save a tone-mapped PNG              |
-| `--antialiasing` | `-a`   | `1`                    | Supersampling factor (`a²` rays/pixel)   |
-| `--num-rays`     | `-n`   | `8`                    | Scattered rays per path tracer bounce    |
-| `--depth`        | `-d`   | `5`                    | Maximum ray recursion depth              |
-| `--roulette`     | `-rou` | `3`                    | Depth at which Russian roulette kicks in |
-| `--factor`       | `-f`   | `0.2`                  | Tone-mapping luminosity scale            |
-| `--gamma`        | `-g`   | `1.0`                  | Gamma correction for PNG output          |
-| `--initState`    |        | `42`                   | PCG seed — state component               |
-| `--initSeq`      |        | `54`                   | PCG seed — sequence component            |
-| `--clock`        |        | —                      | Override `clock` variable in scene file  |
-| `--name`         |        | scene file name        | Output file base name                    |
-| `--threads`      | `-t`   | all CPUs               | Number of parallel render threads        |
+| Option              | Short   | Default                | Description                                                 |
+|---------------------|---------|------------------------|-------------------------------------------------------------|
+| `--input-file`      | `-inp`  | `SceneR/sceneFile.txt` | Path to the scene file                                      |
+| `--width`           | `-w`    | `640`                  | Image width in pixels                                       |
+| `--height`          | `-h`    | `360`                  | Image height in pixels                                      |
+| `--output-dir`      | `-o`    | `./outputs/scenes`     | Output directory                                            |
+| `--render`          | `-r`    | off                    | Also save a tone-mapped PNG                                 |
+| `--antialiasing`    | `-a`    | `1`                    | Supersampling factor (`a²` rays/pixel)                      |
+| `--num-rays`        | `-n`    | `8`                    | Scattered rays per path tracer bounce                       |
+| `--depth`           | `-d`    | `5`                    | Maximum ray recursion depth                                 |
+| `--roulette`        | `-rou`  | `3`                    | Depth at which Russian roulette kicks in                    |
+| `--factor`          | `-f`    | `0.2`                  | Tone-mapping luminosity scale                               |
+| `--gamma`           | `-g`    | `1.0`                  | Gamma correction for PNG output                             |
+| `--initState`       |         | `42`                   | PCG seed — state component                                  |
+| `--initSeq`         |         | `54`                   | PCG seed — sequence component                               |
+| `--clock`           |         | —                      | Override `clock` variable in scene file                     |
+| `--name`            |         | scene file name        | Output file base name                                       |
+| `--threads`         | `-t`    | all CPUs               | Number of parallel render threads                           |
+| `--renderer-type`   | `-rt`   | `auto`                 | Renderer selection: `auto`, `path-tracer`, or `point-light` |
 
-**Examples:**
+**About `--renderer-type`**
+
+The default value is `auto`, which automatically selects the rendering algorithm.
+If the scene contains one or more `pointLight` objects, SirRender uses the
+`PointLightRenderer`; otherwise, it falls back to the `PathTracer`.
+
+**Path-tracer examples:**
 
 ```bash
 # Standard 720p render with antialiasing
@@ -194,6 +203,19 @@ SirRender render -inp scenes/CornellBox.txt -n 16 -d 8 -rou 4 -w 960 -h 540 -r
 
 # Reproducible render with fixed seed
 SirRender render -inp scenes/RedSphere-CheckGround.txt --initState 123 --initSeq 456 -r
+```
+
+**Renderer selection examples:**
+
+```bash
+# Automatic renderer selection (default)
+SirRender render -inp scenes/Spheres-PointLight.txt -r
+
+# Force the point-light renderer
+SirRender render -inp scenes/Spheres-PointLight.txt -rt point-light -r
+
+# Force the path tracer
+SirRender render -inp scenes/RedSphere-CheckGround.txt -rt path-tracer -r
 ```
 
 ---
@@ -386,8 +408,8 @@ camera(type, transform, aspectRatio, distance)
 
 ### Sky and Emissive Surfaces
 
-SirRender has no concept of a directional light. Lighting comes entirely from emissive
-surfaces. The standard approach is a large emissive sky sphere:
+When using the path tracer, lighting is produced by emissive surfaces. A common
+approach is to use a large emissive sky sphere.
 
 ```
 material skyMaterial(
@@ -403,6 +425,40 @@ without scattering additional rays.
 > ⚠️ The sky sphere BRDF **must** be `diffuse(uniform((0, 0, 0)))`.
 > A non-black sky BRDF causes the sky to scatter additional rays on each hit,
 > producing a systematic directional bias that looks like a shadow from a point light.
+
+### Point Lights
+
+SirRender also provides a direct point-light renderer as a faster alternative
+to recursive path tracing. Point lights emit light from a single position in space
+and produce hard shadows without recursive light transport.
+
+A point light is declared as:
+
+```text
+pointLight((x, y, z), (r, g, b), linearRadius)
+```
+
+where:
+
+| Parameters     | Description                                          |
+|----------------|------------------------------------------------------|
+| `(x, y, z)`    | Light position                                       |
+| `(r, g, b)`    | RGB light color and intensity                        | 
+| `linearRadius` | Reference radius used for inverse-square attenuation |
+
+Examples:
+
+```text
+pointLight((-4, 3, 1), (1, 1, 1), 1)
+pointLight((0, 4, 2), (1, 1, 1), 1)
+```
+
+When rendering with the point-light renderer, the contribution of every visible
+light source is evaluated using the material BRDF, Lambert's cosine law and
+inverse-square distance attenuation.
+
+The `auto` renderer mode selects the point-light renderer whenever at least one
+`pointLight` declaration is found in the scene. Otherwise, it uses the path tracer.
 
 ---
 
@@ -559,7 +615,7 @@ parsing  ──▶  core  ──▶  geometry  ──▶  math
 | `math`      | `Vec`, `Point`, `Normal`, `SurfaceVec`, `Transformation`, `PCG` |
 | `geometry`  | `Ray`, `Shape`, `Sphere`, `Plane`, `Cube`, `HitRecord`          |
 | `materials` | `Color`, `HDRImage`, `Pigment`, `BRDF`, `Material`              |
-| `core`      | `Camera`, `World`, `ImageTracer`, `PathTracer`                  |
+| `core`      | `Camera`, `World`, `ImageTracer`, `Light`, `Renderer`           |
 | `parsing`   | `SceneInputStream`, `parseScene`, `Scene`                       |
 
 ### Rendering Equation
@@ -571,6 +627,17 @@ $$ L(\mathbf{x}, \omega) = L_e(\mathbf{x}, \omega) + \int_\Omega f_r(\mathbf{x},
 Each surface bounce fires `numRays` cosine-weighted scattered rays, recurses to depth
 `maxRayDepth`, and applies Russian roulette termination beyond `russianRouletteLimit`
 to keep the estimator unbiased.
+
+### Point-Light Rendering
+
+`PointLightRenderer` computes direct illumination from the point lights defined
+in the scene. For every surface intersection, it casts a shadow ray toward each
+light and evaluates the visible contribution using the material BRDF, Lambert's
+cosine term, and inverse-square distance attenuation.
+
+Unlike `PathTracer`, it does not simulate indirect illumination or recursive
+light bounces. It is therefore faster, but produces hard shadows and does not
+model global illumination.
 
 ## API Documentation
 
