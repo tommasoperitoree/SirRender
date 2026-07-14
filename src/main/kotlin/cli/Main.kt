@@ -3,6 +3,7 @@ package cli
 import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.core.subcommands
 
+/** CLI entry point: wires up the [SirRender] root command and dispatches to a subcommand. */
 fun main(args: Array<String>) =
 	SirRender() // tie together all subcommands and prepare CLI
 		.subcommands(

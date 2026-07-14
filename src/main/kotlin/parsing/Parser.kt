@@ -4,6 +4,7 @@ import core.Camera
 import core.OrthogonalCamera
 import core.PerspectiveCamera
 import core.World
+import core.PointLight
 import geometry.Cube
 import geometry.Plane
 import geometry.Shape
@@ -22,6 +23,7 @@ import materials.Pigment
 import materials.SpecularBRDF
 import materials.UniformPigment
 import math.Transformation
+import math.Point
 import math.Vec
 import math.rotationX
 import math.rotationY
@@ -69,7 +71,7 @@ fun expectKeyword(s: SceneInputStream, keywords: List<Keyword>): Keyword {
 }
 
 /**
- * Read a [Token] from [s] input file and check that it is either a literal number or a variable in [scene].
+ * Read a toke from [s] input file and check that it is either a literal number or a variable in [scene].
  * @return the number as a [Float].
  */
 fun expectNumber(s: SceneInputStream, scene: Scene): Float {
@@ -272,7 +274,9 @@ fun parseTransformation(s: SceneInputStream, scene: Scene): Transformation {
 	return result
 }
 
+/** Parse a [Material] and its associated [Transformation] from input file [s]. */
 fun parseMaterialTransformation(s: SceneInputStream, scene: Scene): Pair<Material, Transformation> {
+	
 	expectSymbol(s, '(')
 	
 	val materialName = expectIdentifier(s)
@@ -287,7 +291,7 @@ fun parseMaterialTransformation(s: SceneInputStream, scene: Scene): Pair<Materia
 	return Pair(material, transformation)
 }
 
-/** Parse a [parseSphere] with its material and transformation from input stream [s]. */
+/** Parse a [Sphere] with its material and transformation from input stream [s]. */
 fun parseSphere(s: SceneInputStream, scene: Scene): Sphere {
 	
 	val (material, transformation) = parseMaterialTransformation(s, scene)
@@ -361,6 +365,32 @@ fun parseCSG(s: SceneInputStream, scene: Scene): CSG {
 	return CSG(first, second, operation)
 }
 
+/** Parse a [Point] from input file [s]. */
+fun parsePoint(s: SceneInputStream, scene: Scene): Point {
+	val (x, y, z) = parseTriple(s, scene)
+	
+	return Point(x, y, z)
+}
+
+/** Parse a [core.PointLight] from input stream. */
+fun parsePointLight(s: SceneInputStream, scene: Scene): PointLight {
+	expectSymbol(s, '(')
+	val position = parsePoint(s, scene)
+	
+	expectSymbol(s, ',')
+	val color = parseColor(s, scene)
+	
+	expectSymbol(s, ',')
+	val linearRadius = expectNumber(s, scene)
+	expectSymbol(s, ')')
+	
+	return PointLight(
+		position = position,
+		color = color,
+		linearRadius = linearRadius
+	)
+}
+
 /**
  * Parse either a [PerspectiveCamera] or an [OrthogonalCamera] from [s].
  *
@@ -421,6 +451,8 @@ fun parseScene(s: SceneInputStream, variables: Map<String, Float> = emptyMap()):
 			Keyword.CSG -> {
 				scene.world.addShape(parseShape(s, scene, what.keyword))
 			}
+			
+			Keyword.POINT_LIGHT -> scene.world.addLight((parsePointLight(s, scene)))
 			
 			Keyword.CAMERA -> {
 				if (scene.camera != null) throw GrammarError(

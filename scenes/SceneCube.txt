@@ -1,0 +1,38 @@
+float clock(150)
+
+material skyMaterial(
+    diffuse( uniform( (0, 0, 0) ) ) ,
+    uniform( (0.7, 1.5, 2) )
+)
+
+material groundMaterial(
+    diffuse( checkered( (1, 0.2, 0), //orange
+                        (0, 0, 0), 4) ) ,
+    uniform( (0, 0, 0) )
+)
+
+//red sphere
+material sphereMaterial(
+    diffuse( uniform( (0.8, 0, 0) ) ) ,
+    uniform( (0, 0, 0) )
+)
+
+//blue cube
+material cubeMaterial(
+    diffuse( image("scenes/bark1-albedo.pfm") ),
+    uniform ( ( 0, 0, 0) )
+)
+
+//mirror sphere
+material mirrorMaterial(
+    specular( uniform( (0.3, 0.3, 0.3) ) ) ,
+    uniform( (0, 0, 0) )
+)
+
+sphere( skyMaterial, scaling( (50, 50, 50) ) )
+plane( groundMaterial, identity )
+cube ( cubeMaterial, scaling( (0.5, 0.5, 0.5) ) * translation( ( -2, -4, 1) ) )
+sphere( mirrorMaterial, scaling( (0.6, 0.6, 0.6) ) * translation( (-3, 3, 0.6) ) )
+sphere( sphereMaterial, translation( (0, 0, 1) ) )
+
+camera( perspective, rotationZ(clock) * translation( (-4, 0, 1) ), 1.777, 2.0 )

@@ -9,6 +9,7 @@ import kotlin.math.floor
  * point on a surface represented by a [SurfaceVec].
  */
 interface Pigment {
+	/** Returns the [Color] of this pigment at the surface point [uv]. */
 	fun getColor(uv: SurfaceVec): Color {
 		throw NotImplementedError("materials.Pigment.getColor($uv.u,$uv.v) is not implemented")
 	}

@@ -8,7 +8,7 @@ import math.Transformation
 import kotlin.math.abs
 import kotlin.math.floor
 
-
+/** Converts a [point] on a plane into UV coordinates. */
 fun planePointToUV(point: Point): SurfaceVec =
 	SurfaceVec(point.x - floor(point.x), point.y - floor(point.y))
 

@@ -57,11 +57,6 @@ data class HDRImage(
 		assert(validCoordinates(x, y))
 		return pixels[pixelOffset(x, y)] // e.g. pixels[3]
 	}
-	/* example usage
-		val img = materials.HDRImage()
-		val color = img.getPixel(1, 2)
-		val r: Float = color.r
-	*/
 	
 	/** Sets the pixel at ([x], [y]) to [newColor]. */
 	fun setPixel(x: Int, y: Int, newColor: Color) {

@@ -10,6 +10,7 @@ import math.PCG
 import math.Point
 import math.Vec
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class RendererTest {
@@ -44,5 +45,44 @@ class RendererTest {
 				"Furnace test failed! Expected $expectedColor but got $color"
 			)
 		}
+	}
+	
+	@Test
+	fun `no intersection pointLightRenderer test`() {
+		val world = World()
+		val renderer = PointLightRenderer(
+			world = world,
+			backgroundColor = Color(1f, 0f, 0f)
+		)
+		
+		val ray = Ray(
+			origin = Point(0f, 0f, 2f),
+			dir = Vec(0f, 0f, 1f)
+		)
+		
+		val color = renderer(ray)
+		
+		assertEquals(Color(1f, 0f, 0f), color)
+	}
+	
+	@Test
+	fun `intersection pointLightRenderer test`() {
+		val world = World()
+		val sphere = Sphere(
+			material = Material(
+				brdf = DiffuseBRDF(UniformPigment(Color.white))
+			)
+		)
+		
+		world.addShape(sphere)
+		world.addLight(PointLight(position = Point(0f, 0f, 3f), color = Color.white))
+		
+		val renderer = PointLightRenderer(world = world, backgroundColor = Color.black)
+		val ray = Ray(origin = Point(0f, 0f, 2f), dir = Vec(0f, 0f, -1f))
+		val color = renderer(ray)
+		
+		assertTrue(color.r > 0f)
+		assertTrue(color.g > 0f)
+		assertTrue(color.b > 0f)
 	}
 }

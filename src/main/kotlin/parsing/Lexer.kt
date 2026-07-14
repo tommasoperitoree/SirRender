@@ -6,6 +6,7 @@ import java.io.Reader
 //  Source Location
 // ------------------------------
 
+/** A 1-indexed line/column position within a scene file, used to report [GrammarError]s. */
 data class SourceLocation(
 	val fileName: String = "",
 	var lineNum: Int = 1,
@@ -17,9 +18,13 @@ data class SourceLocation(
 //  Constants, enum Keywords
 // ------------------------------
 
+/** Characters treated as insignificant whitespace between tokens. */
 const val WHITESPACE = " \t\n\r"
+
+/** Single-character symbols the lexer recognizes as standalone [SymbolToken]s. */
 const val SYMBOLS = "()<>[],*"
 
+/** Reserved words of the scene file DSL, each paired with its literal [lexeme] spelling. */
 enum class Keyword(val lexeme: String) {
 	NEW("new"),
 	SKY("sky"),
@@ -45,6 +50,7 @@ enum class Keyword(val lexeme: String) {
 	ROTATION_Z("rotationZ"),
 	SCALING("scaling"),
 	CAMERA("camera"),
+	POINT_LIGHT("pointLight"),
 	ORTHOGONAL("orthogonal"),
 	PERSPECTIVE("perspective"),
 	FLOAT("float");

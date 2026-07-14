@@ -7,7 +7,7 @@ import math.Transformation
 
 /**
  * A generic 3D shape.
- * Interface. Each concrete [Shape] should override the [rayIntersection] method.
+ * Each concrete [Shape] should override the [rayIntersection] method.
  */
 interface Shape {
 	

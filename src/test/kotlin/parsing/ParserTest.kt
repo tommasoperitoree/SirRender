@@ -1,6 +1,7 @@
 package parsing
 
 import core.PerspectiveCamera
+import core.PointLight
 import materials.CheckeredPigment
 import materials.Color
 import materials.DiffuseBRDF
@@ -12,6 +13,7 @@ import geometry.CSG
 import math.HomogMatr4x4
 import math.Transformation
 import math.Vec
+import math.Point
 import math.rotationY
 import math.translation
 import org.junit.jupiter.api.Test
@@ -90,6 +92,7 @@ class ParserTest {
 		assertNotNull(sphere)
 		assertTrue(sphere.transformation.isClose(translation(Vec(0f, 0f, 1f))))
 		
+		
 		val cube = scene.world.shapes[3]
 		assertNotNull(cube)
 		assertTrue(cube.transformation.isClose(translation(Vec(5f, 0f, 1f))))
@@ -101,6 +104,14 @@ class ParserTest {
 		val csg = scene.world.shapes[5]
 		assertNotNull(csg)
 		assertIs<CSG>(csg)
+		
+		//Check lights
+		assertEquals(1, scene.world.lights.size)
+		
+		val light = scene.world.lights[0]
+		assertTrue(light.position.isClose(Point(1f, 2f, 3f)))
+		assertTrue(light.color.isClose(Color.white))
+		assertEquals(2f, light.linearRadius)
 		
 		assertEquals(CSG.Operation.DIFFERENCE, csg.operation)
 		assertIs<Cube>(csg.firstShape)
