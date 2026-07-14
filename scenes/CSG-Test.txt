@@ -1,14 +1,5 @@
 float clock(0)
 
-material skyMaterial(
-    diffuse( uniform( (0, 0, 0) ) ),
-    uniform( (10, 10, 10) )
-)
-
-material groundMaterial(
-    diffuse( uniform( (0.3, 0.5, 0.3) ) ),
-    uniform( (0, 0, 0) )
-)
 
 material cubeMaterial(
     diffuse( uniform( (1, 0, 0) ) ),
@@ -19,8 +10,6 @@ material sphereMaterial(
     diffuse( uniform( (0, 0, 1) ) ),
     uniform( (0, 0, 0) )
 )
-
-sphere( skyMaterial, scaling( (15, 15, 15) ) )
 
 csg(
     union,
