@@ -133,10 +133,11 @@ Minimal Wavefront OBJ parser (`v`, `f` lines only — no normals/UV from file in
 > worked on in parallel.
 
 - [x] `AABB.kt` — `quickRayIntersection`, `fromPoints`
-- [ ] `AABBTest.kt`
+- [x] `AABBTest.kt`
 - [X] `Shape.kt` — add nullable `aabb` member
 - [X] `Mesh.kt` — `Shape` implementation using `AABB` + `triangleHitRecord` (Möller–Trumbore) standalone function
-- [ ] `MeshTest.kt`
+- [x] `MeshTest.kt`
+- [x] `TriangleIntersectionTest.kt`
 - [ ] `ObjLoader.kt` — minimal OBJ parser (`v`, `f` lines)
 - [ ] `ObjLoaderTest.kt`
 - [ ] `Lexer.kt` — `MESH` keyword, `file` parameter keyword

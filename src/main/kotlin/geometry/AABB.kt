@@ -44,6 +44,8 @@ data class AABB(
 		val firstHit = if (tMin > ray.tMin) tMin else tMax
 		
 		// Hit must be within valid ray interval
+		if (firstHit < ray.tMin) return false
+		
 		return firstHit <= ray.tMax
 	}
 	

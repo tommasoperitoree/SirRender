@@ -5,6 +5,7 @@ import core.OrthogonalCamera
 import core.PerspectiveCamera
 import core.World
 import geometry.Cube
+import geometry.Mesh
 import geometry.Plane
 import geometry.Sphere
 import materials.BRDF
@@ -270,9 +271,7 @@ fun parseTransformation(s: SceneInputStream, scene: Scene): Transformation {
 
 /** Parse a [parseSphere] with its material and transformation from input stream [s]. */
 fun parseSphere(s: SceneInputStream, scene: Scene): Sphere {
-	
 	expectSymbol(s, '(')
-	
 	val materialName = expectIdentifier(s)
 	val material = scene.materials[materialName] ?:
 	//We raise the exception here because input_file is pointing to the end of the wrong identifier
@@ -288,7 +287,6 @@ fun parseSphere(s: SceneInputStream, scene: Scene): Sphere {
 
 fun parseCube(s: SceneInputStream, scene: Scene): Cube {
 	expectSymbol(s, '(')
-	
 	val materialName = expectIdentifier(s)
 	val material = scene.materials[materialName] ?:
 	//We raise the exception here because input_file is pointing to the end of the wrong identifier
@@ -316,6 +314,11 @@ fun parsePlane(s: SceneInputStream, scene: Scene): Plane {
 	return Plane(transformation = transformation, material = material)
 	
 }
+
+
+
+// fun parseMesh(s: SceneInputStream, scene: Scene): Mesh {
+// }
 
 /**
  * Parse either a [PerspectiveCamera] or an [OrthogonalCamera] from [s].
@@ -375,6 +378,8 @@ fun parseScene(s: SceneInputStream, variables: Map<String, Float> = emptyMap()):
 			Keyword.CUBE -> scene.world.addShape(parseCube(s, scene))
 			
 			Keyword.PLANE -> scene.world.addShape(parsePlane(s, scene))
+			
+			// Keyword.MESH -> scene.world.addShape(parseMesh(s, scene))
 			
 			Keyword.CAMERA -> {
 				if (scene.camera != null) throw GrammarError(
