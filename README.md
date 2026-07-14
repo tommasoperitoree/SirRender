@@ -64,7 +64,8 @@ A small selection of scenes rendered with SirRender, showing path-traced lightin
 
 - **Path tracing** with recursive Monte Carlo integration and Russian roulette termination
 - **Point-light rendering** with direct illumination, hard shadows, BRDF evaluation and inverse-square distance attenuation
-- **Three transformable shapes**: sphere, infinite plane, axis-aligned cube — each fully transformable
+- **Four transformable shapes**: sphere, infinite plane, axis-aligned cube and cylinder — each fully transformable
+- **Constructive Solid Geometry (CSG)**: build complex shapes by combining primitives with union, difference and intersection
 - **Two BRDFs**: ideal Lambertian diffuse and perfect specular reflection
 - **Three pigment types**: uniform color, procedural checkerboard, HDR image texture with bilinear interpolation
 - **Two cameras**: orthogonal and perspective
@@ -345,11 +346,51 @@ camera(perspective, rotationZ(clock) * translation((-5, 0, 2)) * rotationY(10), 
 
 ### Shapes
 
-| Keyword  | Description         | Object-space definition        |
-|----------|---------------------|--------------------------------|
-| `sphere` | Sphere              | Unit sphere centered at origin |
-| `plane`  | Infinite flat plane | z = 0, extends in x and y      |
-| `cube`   | Box                 | Axis-aligned `[−1, 1]³`        |
+| Keyword    | Description                 | Object-space definition                                      |
+|------------|-----------------------------|--------------------------------------------------------------|
+| `sphere`   | Sphere                      | Unit sphere centered at origin                               |
+| `plane`    | Infinite flat plane         | z = 0, extends in x and y                                    |
+| `cube`     | Box                         | Axis-aligned `[−1, 1]³`                                      |
+| `cylinder` | Cylinder                    | r = 1, h = 2, centered at origin and aligned with the z axis |
+| `csg`      | Constructive Solid Geometry | Boolean combination of two shapes                            |
+
+
+### Constructive Solid Geometry (CSG)
+
+Constructive Solid Geometry allows complex objects to be created by combining
+simpler shapes. SirRender supports three CSG operations:
+
+| Operation      | Meaning                                      |
+|----------------|----------------------------------------------|
+| `union`        | Keeps the volume inside either shape         |
+| `difference`   | Keeps the first shape minus the second shape |
+| `intersection` | Keeps only the shared volume                 |
+
+The general syntax is:
+
+```text
+csg(
+    operation,
+    firstShape,
+    secondShape
+)
+```
+
+Both firstShape and secondShape are generic shapes. They can be primitive
+shapes such as sphere, cube and cylinder, or another nested csg expression.
+For example, a cube carved by a sphere can be written as:
+
+```text
+csg(
+difference,
+cube(cubeMaterial, scaling((2, 2, 2))),
+sphere(sphereMaterial, translation((0.8, 0, 0)) * scaling((1.2, 1.2, 1.2)))
+)
+```
+
+CSG expressions can also be nested to build hierarchical shapes.
+An example in []()
+* METTI ESEMPIOOOOOOOOOO
 
 ### Materials
 
@@ -610,13 +651,13 @@ parsing  ──▶  core  ──▶  geometry  ──▶  math
                 └─────▶  materials  ─────┘
 ```
 
-| Package     | Key types                                                       |
-|-------------|-----------------------------------------------------------------|
-| `math`      | `Vec`, `Point`, `Normal`, `SurfaceVec`, `Transformation`, `PCG` |
-| `geometry`  | `Ray`, `Shape`, `Sphere`, `Plane`, `Cube`, `HitRecord`          |
-| `materials` | `Color`, `HDRImage`, `Pigment`, `BRDF`, `Material`              |
-| `core`      | `Camera`, `World`, `ImageTracer`, `Light`, `Renderer`           |
-| `parsing`   | `SceneInputStream`, `parseScene`, `Scene`                       |
+| Package     | Key types                                                                 |
+|-------------|---------------------------------------------------------------------------|
+| `math`      | `Vec`, `Point`, `Normal`, `SurfaceVec`, `Transformation`, `PCG`           |
+| `geometry`  | `Ray`, `Shape`, `Sphere`, `Plane`, `Cube`, `Cylinder`, `CSG`, `HitRecord` |
+| `materials` | `Color`, `HDRImage`, `Pigment`, `BRDF`, `Material`                        |
+| `core`      | `Camera`, `World`, `ImageTracer`, `Light`, `Renderer`                     |
+| `parsing`   | `SceneInputStream`, `parseScene`, `Scene`                                 |
 
 ### Rendering Equation
 
