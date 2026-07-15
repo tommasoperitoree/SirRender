@@ -1,0 +1,67 @@
+float clock(0)
+
+
+material skyMaterial(
+    diffuse( uniform( (0, 0, 0) ) ),
+    uniform( (80, 80, 80) )
+)
+
+material cubeMaterial(
+    diffuse( uniform( (1, 0.2, 0.15) ) ),
+    uniform( (0, 0, 0) )
+)
+
+material sphereMaterial(
+    diffuse( uniform( (0.05, 0.1, 1) ) ),
+    uniform( (0, 0, 0) )
+)
+
+material cylinderMaterial(
+    diffuse( uniform( (0, 1, 0.1) ) ),
+    uniform( (0, 0, 0) )
+)
+
+sphere( skyMaterial, scaling( (20, 20, 20) ) )
+
+csg(
+    intersection,
+    cube( cubeMaterial, translation( (5, 4, 0) ) * scaling( (1.5, 1.5, 1.5) ) ),
+    sphere( sphereMaterial, translation( (5, 4, 0) ) * scaling( (1.75, 1.75, 1.75) ) )
+)
+
+csg(
+    union,
+    cylinder(cylinderMaterial, translation( (5, -6, 0) ) * scaling( (1, 1, 2) )
+    ),
+    csg(
+       union,
+       cylinder(cylinderMaterial, translation( (5, -6, 0) ) * rotationY(90) * scaling( (1, 1, 2) ) ),
+       cylinder(cylinderMaterial, translation( (5, -6, 0) ) * rotationX(90) * scaling( (1, 1, 2) ) )
+    )
+)
+
+csg(
+    difference,
+    csg(
+        intersection,
+        cube( cubeMaterial, translation( (-2, -2, 0) ) * scaling( (1.3, 1.3, 1.3) ) ),
+        sphere( sphereMaterial, translation( (-2, -2, 0) ) * scaling( (1.75, 1.75, 1.75) ) )
+    ),
+    csg(
+        union,
+        cylinder(cylinderMaterial, translation( (-2, -2, 0) ) * scaling( (0.9, 0.9, 2) )
+        ),
+        csg(
+           union,
+           cylinder(cylinderMaterial, translation( (-2, -2, 0) ) * rotationY(90) * scaling( (0.9, 0.9, 2) ) ),
+           cylinder(cylinderMaterial, translation( (-2, -2, 0) ) * rotationX(90) * scaling( (0.9, 0.9, 2) ) )
+        )
+    )
+)
+
+camera(
+    perspective ,
+    rotationZ( clock ) * translation( (-8, 0, 1) ) * rotationY( 10 ) ,
+    1.7777778 ,
+    1.2
+)
