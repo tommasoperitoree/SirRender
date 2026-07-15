@@ -19,6 +19,9 @@ material sphereMaterial(
 plane(skyMaterial, translation((0, 0, 100)) * rotationY(clock))
 plane(groundMaterial, identity)
 sphere(sphereMaterial, translation((0, 0, 1)))
+cube(sphereMaterial, translation((5, 0, 1)))
+cylinder(sphereMaterial, translation((0, 3, 1)))
+csg(difference, cube(sphereMaterial, identity), sphere(sphereMaterial, translation((0.5, 0, 0))))
 
 pointLight((1, 2, 3), (1, 1, 1), 2)
 

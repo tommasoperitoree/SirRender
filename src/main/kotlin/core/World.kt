@@ -40,4 +40,10 @@ class World(
 		}
 		return closest
 	}
+	
+	fun rayIntersectionShape(ray: Ray): List<HitRecord> {
+		return shapes.flatMap { shape -> shape.rayIntersectionShape(ray) }
+			.filter { hit -> hit.t >= ray.tMin && hit.t <= ray.tMax }
+			.sortedBy { hit -> hit.t }
+	}
 }

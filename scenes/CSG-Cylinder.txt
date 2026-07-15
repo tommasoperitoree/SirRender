@@ -1,0 +1,32 @@
+float clock(0)
+
+
+material skyMaterial(
+    diffuse( uniform( (0, 0, 0) ) ),
+    uniform( (80, 80, 80) )
+)
+
+material cylinderMaterial(
+    diffuse( uniform( (0, 1, 0.1) ) ),
+    uniform( (0, 0, 0) )
+)
+
+sphere( skyMaterial, scaling( (20, 20, 20) ) )
+
+csg(
+    union,
+    cylinder(cylinderMaterial, scaling( (1, 1, 2) )
+    ),
+    csg(
+       union,
+       cylinder(cylinderMaterial, rotationY(90) * scaling( (1, 1, 2) ) ),
+       cylinder(cylinderMaterial, rotationX(90) * scaling( (1, 1, 2) ) )
+    )
+)
+
+camera(
+    perspective,
+    rotationZ( clock ) * translation( (-5, 0, 3) ) * rotationY(30),
+    1.7777778,
+    1.2
+)

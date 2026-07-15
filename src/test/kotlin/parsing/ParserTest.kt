@@ -7,6 +7,9 @@ import materials.Color
 import materials.DiffuseBRDF
 import materials.SpecularBRDF
 import materials.UniformPigment
+import geometry.Sphere
+import geometry.Cube
+import geometry.CSG
 import math.HomogMatr4x4
 import math.Transformation
 import math.Vec
@@ -75,7 +78,7 @@ class ParserTest {
 		assertTrue(sphereMaterial.emittedRadiance.color.isClose(Color.black))
 		
 		//Check shapes
-		assertEquals(3, scene.world.shapes.size)
+		assertEquals(6, scene.world.shapes.size)
 		
 		val plane = scene.world.shapes[0]
 		assertNotNull(plane)
@@ -89,6 +92,19 @@ class ParserTest {
 		assertNotNull(sphere)
 		assertTrue(sphere.transformation.isClose(translation(Vec(0f, 0f, 1f))))
 		
+		
+		val cube = scene.world.shapes[3]
+		assertNotNull(cube)
+		assertTrue(cube.transformation.isClose(translation(Vec(5f, 0f, 1f))))
+		
+		val cylinder = scene.world.shapes[4]
+		assertNotNull(cylinder)
+		assertTrue(cylinder.transformation.isClose(translation(Vec(0f, 3f, 1f))))
+		
+		val csg = scene.world.shapes[5]
+		assertNotNull(csg)
+		assertIs<CSG>(csg)
+		
 		//Check lights
 		assertEquals(1, scene.world.lights.size)
 		
@@ -96,6 +112,12 @@ class ParserTest {
 		assertTrue(light.position.isClose(Point(1f, 2f, 3f)))
 		assertTrue(light.color.isClose(Color.white))
 		assertEquals(2f, light.linearRadius)
+		
+		assertEquals(CSG.Operation.DIFFERENCE, csg.operation)
+		assertIs<Cube>(csg.firstShape)
+		assertIs<Sphere>(csg.secondShape)
+		
+		assertTrue(csg.secondShape.transformation.isClose(translation(Vec(0.5f, 0f, 0f))))
 		
 		//Check camera
 		val cameraP = scene.camera
