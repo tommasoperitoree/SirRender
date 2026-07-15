@@ -3,22 +3,28 @@ package core
 import geometry.Ray
 import materials.Color
 import math.PCG
+import math.Point
+import kotlin.math.cos
 import kotlin.math.max
+import kotlin.math.pow
 import kotlin.time.measureTimedValue
-import kotlin.time.measureTime
 import kotlin.time.Duration
 
-
+/**
+ * Defines a rendering strategy.
+ *
+ * Implementations may use different techniques, such as [OnOffRenderer],
+ * [FlatRenderer] or [PathTracer].
+ */
 interface Renderer {
 	val world: World
 	val backgroundColor: Color
 	
-	// Estimate the radiance along a ray
+	/** Estimates the radiance arriving along [ray], from the ray's origin toward its direction. */
 	operator fun invoke(ray: Ray): Color {
 		throw NotImplementedError("core.Renderer($ray) is not implemented")
 	}
 }
-
 
 /**
  * A debugging [Renderer] that colors each pixel white if the ray hits any geometry,
@@ -35,7 +41,6 @@ class OnOffRenderer(
 		else backgroundColor
 	}
 }
-
 
 /**
  * A simple [Renderer] that estimates the solution of the rendering equation by neglecting any contribution of the light.
@@ -54,7 +59,6 @@ class FlatRenderer(
 		return (material.brdf.pigment.getColor(hit.surfacePoint) + material.emittedRadiance.getColor(hit.surfacePoint))
 	}
 }
-
 
 /**
  * [Renderer] based on path tracing with Monte Carlo integration.
@@ -113,7 +117,7 @@ class PathTracer(
 		var cumRadiance = Color.black
 		
 		// if hitColorLum is 0 it means that the surface is completely black, so MonteCarlo is useless
-		if (hitColorLum > 0f) { //now timing scale like N exploiting antialiasing
+		if (hitColorLum > 0f) { // now timing scale like N exploiting antialiasing
 			val newRay = hitMaterial.brdf.scatterRay(
 				pcg,
 				hitRecord.ray.dir,
@@ -123,12 +127,15 @@ class PathTracer(
 			)
 			cumRadiance += hitColor * this(newRay)
 		}
+		
 		// Rendering equation
-		// return the emitted radiance (ex from a light ball) + mean value of radiance reflected
 		return emittedRadiance + cumRadiance
 	}
 	
-	
+	/**
+	 * Prints the accumulated path-tracing profiling statistics.
+	 * Profiling data is collected only when [PROFILING] is enabled.
+	 */
 	fun printProfiling() {
 		println("=== core.PathTracer Profiling ===")
 		println("rayIntersection: $totalIntersectionTime")
@@ -139,4 +146,48 @@ class PathTracer(
 			println("media scatterRay:      ${totalScatterTime / calls}")
 		}
 	}
+}
+
+/**
+ * A point-light [Renderer] which estimates illumination from point light source
+ * For each ray-surface intersection, it checks which lights are visible using
+ * shadow rays and sums their contributions with distance attenuation.
+ *
+ * If it does not intersect anything, [backgroundColor] color is returned
+ * */
+class PointLightRenderer(
+	override val world: World = World(),
+	override val backgroundColor: Color = Color()
+) : Renderer {
+	
+	override operator fun invoke(ray: Ray): Color {
+		val hit = world.rayIntersection(ray) ?: return backgroundColor
+		
+		var result: Color = Color.black
+		
+		for (light in world.lights) {
+			val toLight = light.position - hit.worldPoint
+			val dirLight = toLight.normalize()
+			val distance = toLight.norm()
+			// Cast a shadow ray from the hit point toward the light source.
+			val shadowRay = Ray(origin = hit.worldPoint, dir = dirLight, tMin = 1e-3f, tMax = distance)
+			
+			if (world.rayIntersection(shadowRay) != null) continue
+			
+			val cosTheta = maxOf(0f, hit.normal.dot(dirLight))
+			val brdf = hit.shape.material.brdf.eval(
+				normal = hit.normal,
+				inDir = toLight.normalize(),
+				outDir = -ray.dir,
+				uv = hit.surfacePoint
+			)
+			
+			// Apply inverse-square distance attenuation.
+			val attenuation = light.linearRadius.pow(2) / distance.pow(2)
+			
+			result += brdf * light.color * cosTheta * attenuation
+		}
+		return result
+	}
+
 }

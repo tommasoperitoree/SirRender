@@ -16,8 +16,11 @@ class PCG(
 	initSeq: ULong = 54uL
 ) {
 	
+	/** Current internal generator state, advanced by every call to [random]. */
 	var state: ULong = 0uL
 		private set
+
+	/** Stream selector, derived from `initSeq` and fixed for the lifetime of the instance. */
 	var inc: ULong = 0uL
 		private set
 	

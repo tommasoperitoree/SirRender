@@ -178,18 +178,18 @@ class HDRImageTest {
 		img.setPixel(0, 1, Color(0f, 0f, 1f))
 		img.setPixel(1, 1, Color(1f, 1f, 1f))
 		
-		//write on an output stream
+		// write on an output stream
 		val byteOut = ByteArrayOutputStream()
 		
 		img.writeLDRImage(byteOut, "png", 1f)
 		
-		//Read the image from the stream e check  the dimension of the written image and the colors
+		// Read the image from the stream e check  the dimension of the written image and the colors
 		val imgRead = ImageIO.read(ByteArrayInputStream(byteOut.toByteArray()))
 		
 		assertNotNull(imgRead)
 		assertEquals(img.width, imgRead.width)
 		assertEquals(img.height, imgRead.height)
-		//and is operation bit-bit (1 if they are the same else 0) is useful for getRGB format
+		// and is operation bit-bit (1 if they are the same else 0) is useful for getRGB format
 		assertEquals(0xFF0000, imgRead.getRGB(0, 0) and 0xFFFFFF)
 		assertEquals(0x00FF00, imgRead.getRGB(1, 0) and 0xFFFFFF)
 		assertEquals(0x0000FF, imgRead.getRGB(0, 1) and 0xFFFFFF)
@@ -217,8 +217,8 @@ class HDRImageTest {
 			readFloat(stream, LITTLE_ENDIAN)
 		}
 		// 1.0f in little endian = 0x00 0x00 0x80 0x3F
-		//Kotlin use signed byte so 0x80=128, and it is out of range (-128/127), 0x80.toByte()=-128 that is permitted,
-		//ByteArray doesn't look at the sign so -128 & 128 are equals
+		// Kotlin use signed byte so 0x80=128, and it is out of range (-128/127), 0x80.toByte()=-128 that is permitted,
+		// ByteArray doesn't look at the sign so -128 & 128 are equals
 		val bytesLE = byteArrayOf(0x00, 0x00, 0x80.toByte(), 0x3F)
 		val streamLE = ByteArrayInputStream(bytesLE)
 		assertEquals(1f, readFloat(streamLE, LITTLE_ENDIAN), eps)
@@ -275,57 +275,57 @@ class HDRImageTest {
 		assertThrows(InvalidPFMImageFormat::class.java) {
 			HDRImage.parseImgSize("9999999999999999 1") // not values outside integer range
 		}
-		
-		@Test
-		fun `test constructor fromPFMStream`() {
-			for (referenceBytes in arrayOf(referenceBE, referenceLE)) {
-				img = HDRImage.fromPFMStream(ByteArrayInputStream(referenceBytes))
-				
-				assertEquals(3, img.width)
-				assertEquals(2, img.height)
-				
-				assertTrue(img.getPixel(0, 0).isClose(Color(1.0e1f, 2.0e1f, 3.0e1f)))
-				assertTrue(img.getPixel(1, 0).isClose(Color(4.0e1f, 5.0e1f, 6.0e1f)))
-				assertTrue(img.getPixel(2, 0).isClose(Color(7.0e1f, 8.0e1f, 9.0e1f)))
-				
-				assertTrue(img.getPixel(0, 1).isClose(Color(1.0e2f, 2.0e2f, 3.0e2f)))
-				assertTrue(img.getPixel(1, 1).isClose(Color(4.0e2f, 5.0e2f, 6.0e2f)))
-				assertTrue(img.getPixel(2, 1).isClose(Color(7.0e2f, 8.0e2f, 9.0e2f)))
-			}
-			val p = "PA"
-			assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.fromPFMStream(p.byteInputStream()) }
+	}
+	
+	@Test
+	fun `test constructor fromPFMStream`() {
+		for (referenceBytes in arrayOf(referenceBE, referenceLE)) {
+			img = HDRImage.fromPFMStream(ByteArrayInputStream(referenceBytes))
+			
+			assertEquals(3, img.width)
+			assertEquals(2, img.height)
+			
+			assertTrue(img.getPixel(0, 0).isClose(Color(1.0e1f, 2.0e1f, 3.0e1f)))
+			assertTrue(img.getPixel(1, 0).isClose(Color(4.0e1f, 5.0e1f, 6.0e1f)))
+			assertTrue(img.getPixel(2, 0).isClose(Color(7.0e1f, 8.0e1f, 9.0e1f)))
+			
+			assertTrue(img.getPixel(0, 1).isClose(Color(1.0e2f, 2.0e2f, 3.0e2f)))
+			assertTrue(img.getPixel(1, 1).isClose(Color(4.0e2f, 5.0e2f, 6.0e2f)))
+			assertTrue(img.getPixel(2, 1).isClose(Color(7.0e2f, 8.0e2f, 9.0e2f)))
 		}
+		val p = "PA"
+		assertThrows(InvalidPFMImageFormat::class.java) { HDRImage.fromPFMStream(p.byteInputStream()) }
+	}
+	
+	@Test
+	fun `test equals`() {
+		val img1 = HDRImage(2, 2)
+		val img2 = HDRImage(2, 2)
 		
-		@Test
-		fun `test equals`() {
-			val img1 = HDRImage(2, 2)
-			val img2 = HDRImage(2, 2)
-			
-			img1.setPixel(0, 0, Color(1f, 0f, 0f))
-			img1.setPixel(1, 0, Color(0f, 1f, 0f))
-			img1.setPixel(0, 1, Color(0f, 0f, 1f))
-			img1.setPixel(1, 1, Color(1f, 1f, 1f))
-			
-			img2.setPixel(0, 0, Color(1f, 0f, 0f))
-			img2.setPixel(1, 0, Color(0f, 1f, 0f))
-			img2.setPixel(0, 1, Color(0f, 0f, 1f))
-			img2.setPixel(1, 1, Color(1f, 1f, 1f))
-			
-			// same image
-			assertEquals(img1, img2)
-			assertEquals(img1.hashCode(), img2.hashCode())
-			
-			//same hashcode
-			assertEquals(img1.hashCode(), img2.hashCode())
-			
-			// different dimension
-			assertNotEquals(img1, HDRImage(3, 2))
-			
-			// different pixels
-			val img3 = img2.copy(pixels = img2.pixels.copyOf())
-			img3.setPixel(0, 0, Color(0.5f, 0f, 0f))
-			
-			assertNotEquals(img1, img3)
-		}
+		img1.setPixel(0, 0, Color(1f, 0f, 0f))
+		img1.setPixel(1, 0, Color(0f, 1f, 0f))
+		img1.setPixel(0, 1, Color(0f, 0f, 1f))
+		img1.setPixel(1, 1, Color(1f, 1f, 1f))
+		
+		img2.setPixel(0, 0, Color(1f, 0f, 0f))
+		img2.setPixel(1, 0, Color(0f, 1f, 0f))
+		img2.setPixel(0, 1, Color(0f, 0f, 1f))
+		img2.setPixel(1, 1, Color(1f, 1f, 1f))
+		
+		// same image
+		assertEquals(img1, img2)
+		assertEquals(img1.hashCode(), img2.hashCode())
+		
+		// same hashcode
+		assertEquals(img1.hashCode(), img2.hashCode())
+		
+		// different dimension
+		assertNotEquals(img1, HDRImage(3, 2))
+		
+		// different pixels
+		val img3 = img2.copy(pixels = img2.pixels.copyOf())
+		img3.setPixel(0, 0, Color(0.5f, 0f, 0f))
+		
+		assertNotEquals(img1, img3)
 	}
 }

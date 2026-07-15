@@ -62,7 +62,8 @@ data class Normal(
 	fun toVec(): Vec =
 		Vec(x, y, z)
 	
-	override fun toString(): String = "math.Normal($x, $y, $z)"
+	/** Allows to convert [math.Normal] to a [String] */
+	override fun toString(): String = "Normal($x, $y, $z)"
 	
 }
 

@@ -4,10 +4,15 @@ import core.Camera
 import core.OrthogonalCamera
 import core.PerspectiveCamera
 import core.World
+import core.PointLight
 import geometry.Cube
 import geometry.Mesh
 import geometry.Plane
+import geometry.Shape
+import geometry.CSG
 import geometry.Sphere
+import geometry.Cylinder
+import jdk.internal.org.jline.keymap.KeyMap.key
 import materials.BRDF
 import materials.CheckeredPigment
 import materials.Color
@@ -19,6 +24,7 @@ import materials.Pigment
 import materials.SpecularBRDF
 import materials.UniformPigment
 import math.Transformation
+import math.Point
 import math.Vec
 import math.rotationX
 import math.rotationY
@@ -269,8 +275,9 @@ fun parseTransformation(s: SceneInputStream, scene: Scene): Transformation {
 	return result
 }
 
-/** Parse a [parseSphere] with its material and transformation from input stream [s]. */
-fun parseSphere(s: SceneInputStream, scene: Scene): Sphere {
+/** Parse a [Material] and its associated [Transformation] from input file [s]. */
+fun parseMaterialTransformation(s: SceneInputStream, scene: Scene): Pair<Material, Transformation> {
+	
 	expectSymbol(s, '(')
 	val materialName = expectIdentifier(s)
 	val material = scene.materials[materialName] ?:
@@ -281,38 +288,107 @@ fun parseSphere(s: SceneInputStream, scene: Scene): Sphere {
 	val transformation = parseTransformation(s, scene)
 	expectSymbol(s, ')')
 	
-	return Sphere(transformation = transformation, material = material)
-	
+	return Pair(material, transformation)
 }
 
+/** Parse a [Sphere] with its material and transformation from input stream [s]. */
+fun parseSphere(s: SceneInputStream, scene: Scene): Sphere {
+	
+	val (material, transformation) = parseMaterialTransformation(s, scene)
+	return Sphere(transformation = transformation, material = material)
+}
+
+/** Parse a [Cube] with its material and transformation from input stream [s]. */
 fun parseCube(s: SceneInputStream, scene: Scene): Cube {
-	expectSymbol(s, '(')
-	val materialName = expectIdentifier(s)
-	val material = scene.materials[materialName] ?:
-	//We raise the exception here because input_file is pointing to the end of the wrong identifier
-	throw GrammarError(s.location, "Unknown material $materialName")
 	
-	expectSymbol(s, ',')
-	val transformation = parseTransformation(s, scene)
-	expectSymbol(s, ')')
-	
+	val (material, transformation) = parseMaterialTransformation(s, scene)
 	return Cube(transformation = transformation, material = material)
-	
 }
 
 /** Parse a [Plane] with its material and transformation from input stream [s]. */
 fun parsePlane(s: SceneInputStream, scene: Scene): Plane {
 	
+	val (material, transformation) = parseMaterialTransformation(s, scene)
+	return Plane(transformation = transformation, material = material)
+}
+
+/** Parse a [Cylinder] with its material and transformation from input stream [s]. */
+fun parseCylinder(s: SceneInputStream, scene: Scene): Cylinder {
+	
+	val (material, transformation) = parseMaterialTransformation(s, scene)
+	return Cylinder(transformation = transformation, material = material)
+}
+
+
+/** Parse any supported [Shape] from input stream [s]. */
+fun parseShape(s: SceneInputStream, scene: Scene, keywordShape: Keyword? = null): Shape {
+	val kwShape = keywordShape ?: expectKeyword(
+		s,
+		listOf(
+			Keyword.SPHERE,
+			Keyword.CUBE,
+			Keyword.PLANE,
+			Keyword.CYLINDER,
+			Keyword.CSG
+		)
+	)
+	return when (kwShape) {
+		Keyword.SPHERE -> parseSphere(s, scene)
+		Keyword.CUBE -> parseCube(s, scene)
+		Keyword.PLANE -> parsePlane(s, scene)
+		Keyword.CYLINDER -> parseCylinder(s, scene)
+		Keyword.CSG -> parseCSG(s, scene)
+		else -> throw GrammarError(s.location, "Expected a shape keyword instead of $kwShape")
+	}
+}
+
+/** Parse a [CSG] shape from input stream. */
+fun parseCSG(s: SceneInputStream, scene: Scene): CSG {
 	expectSymbol(s, '(')
-	val materialName = expectIdentifier(s)
-	val material = scene.materials[materialName] ?: throw GrammarError(s.location, "Unknown material $materialName")
+	val operationKeyword = expectKeyword(s, listOf(Keyword.UNION, Keyword.DIFFERENCE, Keyword.INTERSECTION))
+	
+	val operation = when (operationKeyword) {
+		Keyword.UNION -> CSG.Operation.UNION
+		Keyword.DIFFERENCE -> CSG.Operation.DIFFERENCE
+		Keyword.INTERSECTION -> CSG.Operation.INTERSECTION
+		else -> throw GrammarError(s.location, "Invalid CSG operation")
+	}
 	
 	expectSymbol(s, ',')
-	val transformation = parseTransformation(s, scene)
+	val first = parseShape(s, scene)
+	
+	expectSymbol(s, ',')
+	val second = parseShape(s, scene)
+	
 	expectSymbol(s, ')')
 	
-	return Plane(transformation = transformation, material = material)
+	return CSG(first, second, operation)
+}
+
+/** Parse a [Point] from input file [s]. */
+fun parsePoint(s: SceneInputStream, scene: Scene): Point {
+	val (x, y, z) = parseTriple(s, scene)
 	
+	return Point(x, y, z)
+}
+
+/** Parse a [core.PointLight] from input stream. */
+fun parsePointLight(s: SceneInputStream, scene: Scene): PointLight {
+	expectSymbol(s, '(')
+	val position = parsePoint(s, scene)
+	
+	expectSymbol(s, ',')
+	val color = parseColor(s, scene)
+	
+	expectSymbol(s, ',')
+	val linearRadius = expectNumber(s, scene)
+	expectSymbol(s, ')')
+	
+	return PointLight(
+		position = position,
+		color = color,
+		linearRadius = linearRadius
+	)
 }
 
 
@@ -355,12 +431,12 @@ fun parseScene(s: SceneInputStream, variables: Map<String, Float> = emptyMap()):
 		
 		if (what is StopToken) break // check EOF
 		
-		if (what !is KeywordToken) throw GrammarError(what.location, "Expected a parsing.Keyword instead of $what")
+		if (what !is KeywordToken) throw GrammarError(what.location, "Expected a keyword instead of $what")
 		
 		when (what.keyword) {
 			Keyword.FLOAT -> {
 				val variableName = expectIdentifier(s)
-				val variableLoc = s.location // saved for the error message
+				val variableLoc = s.location.copy() // saved for the error message
 				
 				expectSymbol(s, '(')
 				val variableValue = expectNumber(s, scene)
@@ -373,11 +449,15 @@ fun parseScene(s: SceneInputStream, variables: Map<String, Float> = emptyMap()):
 					scene.floatVariables[variableName] = variableValue
 			}
 			
-			Keyword.SPHERE -> scene.world.addShape(parseSphere(s, scene))
+			Keyword.SPHERE,
+			Keyword.CUBE,
+			Keyword.PLANE,
+			Keyword.CYLINDER,
+			Keyword.CSG -> {
+				scene.world.addShape(parseShape(s, scene, what.keyword))
+			}
 			
-			Keyword.CUBE -> scene.world.addShape(parseCube(s, scene))
-			
-			Keyword.PLANE -> scene.world.addShape(parsePlane(s, scene))
+			Keyword.POINT_LIGHT -> scene.world.addLight((parsePointLight(s, scene)))
 			
 			// Keyword.MESH -> scene.world.addShape(parseMesh(s, scene))
 			
