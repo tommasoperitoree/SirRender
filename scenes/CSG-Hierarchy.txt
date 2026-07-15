@@ -33,7 +33,7 @@ csg(
     union,
     cylinder(cylinderMaterial, translation( (5, -6, 0) ) * scaling( (1, 1, 2) )
     ),
-   csg(
+    csg(
        union,
        cylinder(cylinderMaterial, translation( (5, -6, 0) ) * rotationY(90) * scaling( (1, 1, 2) ) ),
        cylinder(cylinderMaterial, translation( (5, -6, 0) ) * rotationX(90) * scaling( (1, 1, 2) ) )
@@ -61,7 +61,7 @@ csg(
 
 camera(
     perspective ,
-    rotationZ( clock ) * translation( (-5, 0, 3) ) * rotationY( 30 ) ,
+    rotationZ( clock ) * translation( (-8, 0, 1) ) * rotationY( 10 ) ,
     1.7777778 ,
     1.2
 )
