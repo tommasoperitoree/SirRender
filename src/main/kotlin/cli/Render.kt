@@ -53,8 +53,8 @@ class Render : CliktCommand("render") {
 		"--render", "-r", help = "Also convert output to PNG"
 	).flag(default = false)
 	val rendererType: String by option(
-		"--renderer-type", help = "Renderer type: path or point-light"
-	).choice("path", "point-light", ignoreCase = true).default("auto")
+		"--renderer-type", "-rt", help = "Renderer type: path or point-light"
+	).choice("path-tracer", "point-light", "auto", ignoreCase = true).default("auto")
 	val factor: Float by option(
 		"--factor", "-f", help = "Luminosity scaling factor"
 	).float().default(0.2f)

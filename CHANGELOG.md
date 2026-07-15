@@ -1,3 +1,9 @@
+# Unreleased
+
+- Add Constructive Solid Geometry `CSG` operations
+- Update the `README` with documentation and example images for the point-light renderer and CSG operations
+- Add the `PointLight` class and implement the PointLight renderer [#27](https://github.com/tommasoperitoree/SirRender/pull/27)
+
 # Version 1.0.0
 
 - Update and reorganize documentation [#18](https://github.com/tommasoperitoree/SirRender/pull/18)
