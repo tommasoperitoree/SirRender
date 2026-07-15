@@ -389,8 +389,16 @@ sphere(sphereMaterial, translation((0.8, 0, 0)) * scaling((1.2, 1.2, 1.2)))
 ```
 
 CSG expressions can also be nested to build hierarchical shapes.
-An example in []()
-* METTI ESEMPIOOOOOOOOOO
+An example is provided in [CSG-Hierarchy.txt](scenes/CSG-Hierarchy.txt),
+which generates the following image:
+
+<img src="outputs/scenes/CSG-hierarchy.png" alt="Hierarchical CSG render" width=250 >
+
+In symbolic form, the construction above can be summarized as:
+
+```text
+(cube ∩ sphere) - (cylinderX ∪ cylinderY ∪ cylinderZ)
+```
 
 ### Materials
 
