@@ -60,8 +60,8 @@ csg(
 )
 
 camera(
-    perspective,
-    rotationZ( clock ) * translation( (-5, -4, 3) ) * rotationY(35),
-    1.7777778,
+    perspective ,
+    rotationZ( clock ) * translation( (-8, 0, 1) ) * rotationY( 10 ) ,
+    1.7777778 ,
     1.2
 )

@@ -3,14 +3,16 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 # ── config (override via env vars) ───────────────────────────────────────────
-SCENE_FILE="${SCENE_FILE:-./scenes/CSG-Test.txt}"
+SCENE_FILE="${SCENE_FILE:-./scenes/CSG-Hierarchy.txt}"
 WIDTH="${WIDTH:-640}"
 HEIGHT="${HEIGHT:-360}"
 NUM_FRAMES="${NUM_FRAMES:-36}"       # clock will go from 0 to 360 in NUM_FRAMES steps
 FPS="${FPS:-12}"
-NUM_RAYS="${NUM_RAYS:-4}"
-DEPTH="${DEPTH:-5}"
-ANTIALIASING="${ANTIALIASING:-1}"
+NUM_RAYS="${NUM_RAYS:-200}"
+DEPTH="${DEPTH:-8}"
+RUSSIAN_ROULETTE="${RUSSIAN_ROULETTE:-5}"
+ANTIALIASING="${ANTIALIASING:-2}"
+FACTOR="${FACTOR:-0.8}"
 # output dirs
 SCENE_NAME=$(basename "$SCENE_FILE" .txt)
 PFM_DIR="${PFM_DIR:-./outputs/animations/$SCENE_NAME}"
@@ -39,8 +41,9 @@ for i in $(seq 0 $((NUM_FRAMES - 1))); do
         --clock "$CLOCK" \
         --name "$(printf 'frame_%03d' "$i")" \
         -w "$WIDTH" -h "$HEIGHT" \
-        -n "$NUM_RAYS" -d "$DEPTH" -a "$ANTIALIASING" \
+        -n "$NUM_RAYS" -d "$DEPTH" -a "$ANTIALIASING" -rou "$RUSSIAN_ROULETTE"\
         --render \
+        -f "$FACTOR" \
         -o "$PFM_DIR" \
         2>/dev/null
 
