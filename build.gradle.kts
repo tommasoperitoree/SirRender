@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "sirrender"
-version = "v1.0.0"
+version = "v1.1.0"
 
 // --- SECURITY FIX ---
 // jackson-databind is a transitive dependency of Dokka 2.2.0.
