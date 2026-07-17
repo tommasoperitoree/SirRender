@@ -54,7 +54,8 @@ enum class Keyword(val lexeme: String) {
 	ORTHOGONAL("orthogonal"),
 	PERSPECTIVE("perspective"),
 	MESH("mesh"),
-	FLOAT("float");
+	FLOAT("float"),
+	FILE("file");
 	
 	
 	companion object {

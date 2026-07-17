@@ -14,7 +14,6 @@ interface Shape {
 	val transformation: Transformation
 	val material: Material
 	
-	/** Compute the intersection between a [ray] and this [Shape]. */
 	/**
 	 * Optional axis-aligned bounding box in object space, used as a cheap pre-filter in [rayIntersection].
 	 * `null` means the shape has no useful AABB (e.g. for [Sphere] and [Plane]) and every ray must be tested directly.

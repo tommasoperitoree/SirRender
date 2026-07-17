@@ -12,7 +12,6 @@ import geometry.Shape
 import geometry.CSG
 import geometry.Sphere
 import geometry.Cylinder
-import jdk.internal.org.jline.keymap.KeyMap.key
 import materials.BRDF
 import materials.CheckeredPigment
 import materials.Color
@@ -391,10 +390,37 @@ fun parsePointLight(s: SceneInputStream, scene: Scene): PointLight {
 	)
 }
 
-
-
-// fun parseMesh(s: SceneInputStream, scene: Scene): Mesh {
-// }
+/** Parse a [Mesh] using the passed file ".obj" and the specified axis ordering (defaults to "xyz"). */
+fun parseMesh(s: SceneInputStream, scene: Scene): Mesh {
+	expectSymbol(s, '(')
+	val materialName = expectIdentifier(s)
+	val material = scene.materials[materialName]
+		?: throw GrammarError(s.location, "Unknown material $materialName")
+	expectSymbol(s, ',')
+	
+	expectKeyword(s, listOf(Keyword.FILE))
+	expectSymbol(s, '(')
+	val fileName = expectString(s)
+	
+	// Optional second argument: file("model.obj", "xzy")
+	val axisOrder = run {
+		val next = s.readToken()
+		if (next is SymbolToken && next.symbol == ',') {
+			expectString(s)
+		} else {
+			s.unreadToken(next)
+			"xyz"
+		}
+	}
+	expectSymbol(s, ')')
+	expectSymbol(s, ',')
+	
+	val transformation = parseTransformation(s, scene)
+	expectSymbol(s, ')')
+	
+	val (vertices, triangleIndices) = loadObj(fileName, axisOrder)
+	return Mesh(vertices, triangleIndices, transformation, material)
+}
 
 /**
  * Parse either a [PerspectiveCamera] or an [OrthogonalCamera] from [s].
@@ -456,6 +482,9 @@ fun parseScene(s: SceneInputStream, variables: Map<String, Float> = emptyMap()):
 			Keyword.CSG -> {
 				scene.world.addShape(parseShape(s, scene, what.keyword))
 			}
+			
+			Keyword.MESH -> scene.world.addShape(parseMesh(s, scene))
+			
 			
 			Keyword.POINT_LIGHT -> scene.world.addLight((parsePointLight(s, scene)))
 			

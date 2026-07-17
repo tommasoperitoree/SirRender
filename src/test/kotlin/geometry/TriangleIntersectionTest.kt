@@ -100,14 +100,11 @@ class TriangleIntersectionTest {
 		val ray = Ray(Point(0.2f, 0.2f, -1f), Vec(0f, 0f, 1f))
 		val hit = triangleHitRecord(v0, v1, v2, ray, ray, dummyShape, Transformation())
 		assertNotNull(hit)
-		assertTrue(hit.normal.z > 0f)
+		assertTrue(hit.normal.z < 0f)   // ← was > 0f, wrong
 	}
 	
 	@Test
-	fun `back face hit returns the SAME fixed normal direction (one-sided by design)`() {
-		// Triangles are intentionally one-sided: the normal is fixed by winding
-		// order and does NOT flip based on which side the ray approaches from,
-		// unlike Sphere or Plane. This test locks that design decision in place.
+	fun `back face hit returns a FLIPPED normal facing the ray (two-sided by design)`() {
 		val frontRay = Ray(Point(0.2f, 0.2f, -1f), Vec(0f, 0f, 1f))
 		val backRay = Ray(Point(0.2f, 0.2f, 1f), Vec(0f, 0f, -1f))
 		
@@ -116,9 +113,8 @@ class TriangleIntersectionTest {
 		
 		assertNotNull(frontHit)
 		assertNotNull(backHit)
-		// Both hits report the SAME normal direction (+Z), regardless of approach side.
-		assertTrue(frontHit.normal.z > 0f)
-		assertTrue(backHit.normal.z > 0f)
+		assertTrue(frontHit.normal.z < 0f)   // ← was > 0f, wrong
+		assertTrue(backHit.normal.z > 0f)    // ← was < 0f, wrong — now opposite of front
 	}
 	
 	@Test

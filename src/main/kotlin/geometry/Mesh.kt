@@ -21,7 +21,6 @@ class Mesh(
 	override val material: Material
 ) : Shape {
 	
-	// override val aabb = AABB.fromPoints(vertices)
 	/**
 	 * Axis-aligned bounding box of this mesh, in object space (i.e. computed from the raw
 	 * [vertices] before [transformation] is applied).
@@ -53,7 +52,16 @@ class Mesh(
 }
 
 /**
+ * Möller–Trumbore intersection of [invRay] (already in object space) against triangle
+ * ([v0], [v1], [v2]). Returns a world-space [HitRecord], or `null` if the ray misses.
  *
+ * The returned normal is two-sided: it is flipped as needed so it always faces the
+ * incoming ray ([invRay]), matching the convention used by [Sphere] and [Plane].
+ *
+ * @param transformation Applied to the local-space hit point and normal to produce
+ *   world-space [HitRecord] fields. Passed explicitly (rather than read from a `Mesh`
+ *   instance) so this function has no implicit class dependency and can be unit tested
+ *   in isolation.
  */
 internal fun triangleHitRecord(
 	v0: Point, v1: Point, v2: Point,
@@ -88,7 +96,10 @@ internal fun triangleHitRecord(
 	val t = a * (edge2 dot q)
 	if (t < invRay.tMin || t > invRay.tMax) return null
 	
-	val normal = (edge1 cross edge2).normalize()
+	val fixedNormal = (edge1 cross edge2).normalize()
+	// Two-sided: flip so the normal always faces the incoming ray, matching Sphere/Plane.
+	val normal = if (fixedNormal dot invRay.dir < 0f) fixedNormal else -fixedNormal
+	
 	val localPoint = invRay.origin + invRay.dir.times(t)
 	val worldPoint = transformation * localPoint
 	val worldNormal = transformation * normal
