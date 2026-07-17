@@ -23,23 +23,27 @@ material cylinderMaterial(
 
 sphere( skyMaterial, scaling( (20, 20, 20) ) )
 
+//full Dice
 csg(
     intersection,
     cube( cubeMaterial, translation( (5, 4, 0) ) * scaling( (1.5, 1.5, 1.5) ) ),
     sphere( sphereMaterial, translation( (5, 4, 0) ) * scaling( (1.75, 1.75, 1.75) ) )
 )
 
+//Cross
+
 csg(
     union,
-    cylinder(cylinderMaterial, translation( (5, -6, 0) ) * scaling( (1, 1, 2) )
+    cylinder(cylinderMaterial, translation( (5, -5, 0) ) * scaling( (1, 1, 2) )
     ),
     csg(
        union,
-       cylinder(cylinderMaterial, translation( (5, -6, 0) ) * rotationY(90) * scaling( (1, 1, 2) ) ),
-       cylinder(cylinderMaterial, translation( (5, -6, 0) ) * rotationX(90) * scaling( (1, 1, 2) ) )
+       cylinder(cylinderMaterial, translation( (5, -5, 0) ) * rotationY(90) * scaling( (1, 1, 2) ) ),
+       cylinder(cylinderMaterial, translation( (5, -5, 0) ) * rotationX(90) * scaling( (1, 1, 2) ) )
     )
 )
 
+//empty Dice
 csg(
     difference,
     csg(
@@ -59,9 +63,11 @@ csg(
     )
 )
 
+
+
 camera(
-    perspective ,
-    rotationZ( clock ) * translation( (-8, 0, 1) ) * rotationY( 10 ) ,
-    1.7777778 ,
-    1.2
-)
+     perspective ,
+     translation( (-2, -2, 2) ) * rotationZ( 30 ) * translation( (-4, 0, 1) ) * rotationY( 30 ) ,
+     1.7777778 ,
+     1.2
+ )

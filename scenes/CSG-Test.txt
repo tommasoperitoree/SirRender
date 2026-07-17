@@ -1,5 +1,9 @@
 float clock(0)
 
+material skyMaterial(
+    diffuse( uniform( (0, 0, 0) ) ),
+    uniform( (80, 80, 80) )
+)
 
 material cubeMaterial(
     diffuse( uniform( (1, 0, 0) ) ),
@@ -11,27 +15,29 @@ material sphereMaterial(
     uniform( (0, 0, 0) )
 )
 
+sphere( skyMaterial, scaling( (20, 20, 20) ) )
+
 csg(
     union,
     cube( cubeMaterial, translation( (3, 3.5, 0) ) * scaling( (2, 2, 2) ) ),
-    sphere( sphereMaterial, translation( (2.5, 3, 0.5) ) * scaling( (1.85, 1.85, 1.85) ) )
+    sphere( sphereMaterial, translation( (3, 3.5, 0) ) * scaling( (2.3, 2.3, 2.3) ) )
 )
 
 csg(
     difference,
     cube( cubeMaterial, translation( (-4, -3, 0) ) * scaling( (1.25, 1.25, 1.25) ) ),
-    sphere( sphereMaterial, translation( (-4, -2.5, 0.5) ) * scaling( (1.25, 1.25, 1.25) ) )
+    sphere( sphereMaterial, translation( (-4, -3, 0) ) * scaling( (1.6, 1.6, 1.6) ) )
 )
 
 csg(
     intersection,
-    cube( cubeMaterial, translation( (-2, -7, 0) ) * scaling( (1.5, 1.5, 1.5) ) ),
-    sphere( sphereMaterial, translation( (-2, -7, 0) ) * scaling( (1.75, 1.75, 1.75) ) )
+    cube( cubeMaterial, translation( (-2, -7, 0) ) * scaling( (1.25, 1.25, 1.25) ) ),
+    sphere( sphereMaterial, translation( (-2, -7, 0) ) * scaling( (1.6, 1.6, 1.6) ) )
 )
 
 camera(
     perspective,
-    rotationZ( clock ) * translation( (-6, -4, 3) ) * rotationY(35),
+    rotationZ( clock ) * translation( (-6, -4, 2) ) * rotationY(25),
     1.7777778,
     1.2
 )
