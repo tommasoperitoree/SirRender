@@ -53,7 +53,9 @@ enum class Keyword(val lexeme: String) {
 	POINT_LIGHT("pointLight"),
 	ORTHOGONAL("orthogonal"),
 	PERSPECTIVE("perspective"),
-	FLOAT("float");
+	MESH("mesh"),
+	FLOAT("float"),
+	FILE("file");
 	
 	
 	companion object {

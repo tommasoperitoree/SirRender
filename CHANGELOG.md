@@ -1,3 +1,12 @@
+# Unreleased (v1.1.0)
+
+- Add triangle mesh support: `Mesh` shape, Möller–Trumbore intersection, AABB early-out,
+  Wavefront OBJ file loading (`.obj`, `v`/`f` lines, all four face syntaxes, n-gons
+  triangulation, configurable axis remapping)
+- Add `mesh(...)` scene file keyword with `file("path.obj")` sub-syntax
+- Mesh triangles are two-sided: surface normal always faces the incoming ray, matching
+  the existing `Sphere`/`Plane` convention
+
 # Version 1.0.0
 
 - Update and reorganize documentation [#18](https://github.com/tommasoperitoree/SirRender/pull/18)
