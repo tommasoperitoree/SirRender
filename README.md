@@ -63,8 +63,9 @@ A small selection of scenes rendered with SirRender, showing path-traced lightin
 ## Features
 
 - **Path tracing** with recursive Monte Carlo integration and Russian roulette termination
-- **Three transformable shapes**: sphere, infinite plane, axis-aligned cube — each fully transformable
-- **Two BRDFs**: ideal Lambertian diffuse and perfect specular reflection
+- **Four transformable shapes**: sphere, infinite plane, axis-aligned cube, and triangle
+  mesh (loaded from Wavefront `.obj` files) — all two-sided, all fully transformable- **Two BRDFs**: ideal Lambertian
+  diffuse and perfect specular reflection
 - **Three pigment types**: uniform color, procedural checkerboard, HDR image texture with bilinear interpolation
 - **Two cameras**: orthogonal and perspective
 - **Scene file compiler**: declare geometry, materials and camera in a readable `.txt` file
@@ -323,11 +324,36 @@ camera(perspective, rotationZ(clock) * translation((-5, 0, 2)) * rotationY(10), 
 
 ### Shapes
 
-| Keyword  | Description         | Object-space definition        |
-|----------|---------------------|--------------------------------|
-| `sphere` | Sphere              | Unit sphere centered at origin |
-| `plane`  | Infinite flat plane | z = 0, extends in x and y      |
-| `cube`   | Box                 | Axis-aligned `[−1, 1]³`        |
+| Keyword  | Description         | Object-space definition                         |
+|----------|---------------------|-------------------------------------------------|
+| `sphere` | Sphere              | Unit sphere centered at origin                  |
+| `plane`  | Infinite flat plane | z = 0, extends in x and y                       |
+| `cube`   | Box                 | Axis-aligned `[−1, 1]³`                         |
+| `mesh`   | Triangle mesh       | Indexed vertex list, loaded from an `.obj` file |
+
+> `cylinder` and `csg` shapes also exist in this branch but are documented separately by
+> their respective authors — see the keyword table at the end of this section.
+
+#### Meshes
+
+A `mesh` loads geometry from an external Wavefront `.obj` file rather than being defined
+inline in the scene syntax:
+
+```
+mesh(pawnMaterial, file("scenes/pawn.obj"), identity)
+//   material       obj file path         transform
+```
+
+- Only `v` (vertex) and `f` (face) lines are read; texture/normal data in the file is
+  parsed but currently ignored.
+- All four standard OBJ face syntaxes are supported (`f 1 2 3`, `f 1/1 2/2 3/3`,
+  `f 1//1 2//2 3//3`, `f 1/1/1 2/2/2 3/3/3`) — only the vertex index is used.
+- Faces with more than 3 vertices are automatically triangulated (fan triangulation).
+- **Mesh triangles are two-sided**: the surface normal always faces the incoming ray,
+  matching `sphere`/`plane`/`cube`. Winding order in the `.obj` file affects UV
+  orientation but not which side is "visible."
+- A mesh cannot currently be used as an operand inside a `csg(...)` shape — only
+  `sphere`, `cube`, `plane`, `cylinder`, and nested `csg` are accepted there.
 
 ### Materials
 
@@ -386,8 +412,8 @@ camera(type, transform, aspectRatio, distance)
 
 ### Sky and Emissive Surfaces
 
-SirRender has no concept of a directional light. Lighting comes entirely from emissive
-surfaces. The standard approach is a large emissive sky sphere:
+Lighting in SirRender comes primarily from emissive surfaces. The standard approach is
+a large emissive sky sphere:
 
 ```
 material skyMaterial(
@@ -403,6 +429,10 @@ without scattering additional rays.
 > ⚠️ The sky sphere BRDF **must** be `diffuse(uniform((0, 0, 0)))`.
 > A non-black sky BRDF causes the sky to scatter additional rays on each hit,
 > producing a systematic directional bias that looks like a shadow from a point light.
+
+> 📝 **Note:** a `pointLight` keyword also exists in this branch for classic point-light
+> illumination alongside emissive surfaces. Documentation for that feature is maintained
+> separately by its author — this section covers the emissive-surface approach only.
 
 ---
 
@@ -554,13 +584,13 @@ parsing  ──▶  core  ──▶  geometry  ──▶  math
                 └─────▶  materials  ─────┘
 ```
 
-| Package     | Key types                                                       |
-|-------------|-----------------------------------------------------------------|
-| `math`      | `Vec`, `Point`, `Normal`, `SurfaceVec`, `Transformation`, `PCG` |
-| `geometry`  | `Ray`, `Shape`, `Sphere`, `Plane`, `Cube`, `HitRecord`          |
-| `materials` | `Color`, `HDRImage`, `Pigment`, `BRDF`, `Material`              |
-| `core`      | `Camera`, `World`, `ImageTracer`, `PathTracer`                  |
-| `parsing`   | `SceneInputStream`, `parseScene`, `Scene`                       |
+| Package     | Key types                                                              |
+|-------------|------------------------------------------------------------------------|
+| `math`      | `Vec`, `Point`, `Normal`, `SurfaceVec`, `Transformation`, `PCG`        |
+| `geometry`  | `Ray`, `Shape`, `Sphere`, `Plane`, `Cube`, `Mesh`, `AABB`, `HitRecord` |
+| `materials` | `Color`, `HDRImage`, `Pigment`, `BRDF`, `Material`                     |
+| `core`      | `Camera`, `World`, `ImageTracer`, `PathTracer`                         |
+| `parsing`   | `SceneInputStream`, `parseScene`, `Scene`                              |
 
 ### Rendering Equation
 

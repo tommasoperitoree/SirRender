@@ -4,7 +4,7 @@ A physically-based Monte Carlo path tracer written in Kotlin.
 SirRender renders scenes defined in a lightweight text format and exports lossless HDR output
 (`.pfm`) with optional tone-mapped PNG/JPEG conversion and animated GIF assembly.
 
-**Version:** 1.0.0 &nbsp;·&nbsp;
+**Version:** 1.1.0 &nbsp;·&nbsp;
 [GitHub](https://github.com/tommasoperitoree/SirRender) &nbsp;·&nbsp;
 [CHANGELOG](https://github.com/tommasoperitoree/SirRender/blob/main/CHANGELOG.md) &nbsp;·&nbsp;
 [CLI Reference](https://github.com/tommasoperitoree/SirRender/blob/main/README.md)
@@ -15,17 +15,17 @@ SirRender is organized into five packages with a strict downward dependency orde
 
 ```
 parsing  ──▶  core  ──▶  geometry  ──▶  math
-                 │                         ▲
-                 └──▶  materials  ──────────┘
+                 │                       ▲
+                 └──▶  materials  ───────┘
 ```
 
-| Package     | What lives here                                                                                                                      |
-|-------------|--------------------------------------------------------------------------------------------------------------------------------------|
-| `math`      | Linear algebra primitives: [math.Vec], [math.Point], [math.Normal], [math.SurfaceVec], [math.Transformation], [math.PCG]             |
-| `geometry`  | Ray–shape intersection: [geometry.Ray], [geometry.Shape], [geometry.Sphere], [geometry.Plane], [geometry.Cube], [geometry.HitRecord] |
-| `materials` | Surface appearance: [materials.Color], [materials.HDRImage], [materials.Pigment], [materials.BRDF], [materials.Material]             |
-| `core`      | Rendering pipeline: [core.Camera], [core.World], [core.ImageTracer], [core.PathTracer]                                               |
-| `parsing`   | Scene file compiler: [parsing.SceneInputStream], [parsing.parseScene]                                                                |
+| Package     | What lives here                                                                                                                                                        |
+|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `math`      | Linear algebra primitives: [math.Vec], [math.Point], [math.Normal], [math.SurfaceVec], [math.Transformation], [math.PCG]                                               |
+| `geometry`  | Ray–shape intersection: [geometry.Ray], [geometry.Shape], [geometry.Sphere], [geometry.Plane], [geometry.Cube], [geometry.Mesh], [geometry.AABB], [geometry.HitRecord] |
+| `materials` | Surface appearance: [materials.Color], [materials.HDRImage], [materials.Pigment], [materials.BRDF], [materials.Material]                                               |
+| `core`      | Rendering pipeline: [core.Camera], [core.World], [core.ImageTracer], [core.PathTracer]                                                                                 |
+| `parsing`   | Scene file compiler: [parsing.SceneInputStream], [parsing.parseScene], [parsing.loadObj]                                                                               |
 
 The `cli` package (the command-line interface) is omitted from the API reference — it is an
 end-user tool, not part of the library surface.
@@ -63,14 +63,36 @@ Each [geometry.Shape] implementation transforms the ray into object space (where
 canonical), solves the intersection analytically, and transforms the result back to
 world space:
 
-| Shape             | Object-space definition        | UV mapping                                     |
-|-------------------|--------------------------------|------------------------------------------------|
-| [geometry.Sphere] | Unit sphere centered at origin | Spherical: `atan2(y,x)` for u, `acos(z)` for v |
-| [geometry.Plane]  | z = 0, infinite extent         | Tiling: fractional part of world x, y          |
-| [geometry.Cube]   | `[−1, 1]³` axis-aligned        | Per-face projection                            |
+| Shape             | Object-space definition                      | UV mapping                                     |
+|-------------------|----------------------------------------------|------------------------------------------------|
+| [geometry.Sphere] | Unit sphere centered at origin               | Spherical: `atan2(y,x)` for u, `acos(z)` for v |
+| [geometry.Plane]  | z = 0, infinite extent                       | Tiling: fractional part of world x, y          |
+| [geometry.Cube]   | `[−1, 1]³` axis-aligned                      | Per-face projection                            |
+| [geometry.Mesh]   | Indexed vertex list + triangle index triples | Barycentric `(u, v)` per triangle              |
 
 A successful intersection returns a [geometry.HitRecord] containing the world-space hit point,
 surface normal, UV coordinates, ray parameter `t`, the originating ray, and the shape.
+
+**All shapes in SirRender are two-sided**: the surface normal always flips to face the
+incoming ray, regardless of geometric winding order or which side is approached. This
+applies uniformly to [geometry.Sphere], [geometry.Plane], and [geometry.Mesh] alike, so
+any code reading `HitRecord.normal` can rely on it being outward-facing relative to the
+ray without a per-shape special case.
+
+#### Meshes
+
+[geometry.Mesh] stores a shared `vertices: List<Point>` and `triangleIndices:
+List<Triple<Int, Int, Int>>` — index triples into that list — rather than one
+independent shape per triangle. This avoids duplicating shared-vertex data between
+adjacent triangles. An [geometry.AABB] bounding box is computed once (lazily, on first
+use) from the raw vertex positions and used as a cheap early-out: rays that miss the
+whole mesh are rejected before any per-triangle intersection math runs. Triangle
+intersection itself (`triangleHitRecord`, internal) is a stateless free function using
+the Möller–Trumbore algorithm — not a `Shape` in its own right — called in a loop from
+`Mesh.rayIntersection`.
+
+[geometry.AABB] implements the slab method: each axis defines a pair of parallel planes,
+and the ray's intersection interval with each slab is intersected across all three axes.
 
 ### 3 — Materials (`materials`)
 
@@ -126,6 +148,14 @@ giving each thread its own [core.PathTracer] instance with a deterministically s
 
 [parsing.parseScene] reads a `.txt` scene file token by token via [parsing.SceneInputStream] and
 builds a fully initialized [core.World] plus a [core.Camera], ready to hand to [core.ImageTracer].
+
+[parsing.loadObj] loads a Wavefront `.obj` file's `v` (vertex) and `f` (face) lines into
+raw `(vertices, triangleIndices)` data, ready to construct a [geometry.Mesh]. It supports
+all four standard OBJ face syntaxes (bare, vertex/texture, vertex//normal,
+vertex/texture/normal — only the vertex index is used), fan-triangulates faces with more
+than 3 vertices, and accepts an optional `order` parameter to remap the file's axis
+columns to SirRender's `(x, y, z)` convention for files exported with a different
+up-axis.
 
 ## Quick Start (Kotlin API)
 
@@ -187,16 +217,16 @@ FileOutputStream("output.png").use { img.writeLDRImage(it, "png", gamma = 2.2f) 
 Scenes can be described in a plain `.txt` file and rendered with the `render` CLI command.
 
 ```
-float clock(0)                         # float variable (usable in transforms)
+float clock(0)                         // float variable (usable in transforms)
 
 material groundMaterial(
     diffuse(checkered((0.9, 0.96, 0.96), (0.12, 0.2, 0.2), 4)),
-    uniform((0, 0, 0))                 # emitted radiance: black = no emission
+    uniform((0, 0, 0))                 // emitted radiance: black = no emission
 )
 
 material skyMaterial(
-    diffuse(uniform((0, 0, 0))),       # non-reflective sky
-    uniform((1.4, 3, 4))              # emitted: blue-white light
+    diffuse(uniform((0, 0, 0))),       // non-reflective sky
+    uniform((1.4, 3, 4))              // emitted: blue-white light
 )
 
 sphere(skyMaterial,  scaling((10, 10, 10)))
@@ -213,17 +243,29 @@ camera(perspective, translation((-5, 0, 2)) * rotationY(10), 1.7777, 2.0)
 - Transforms compose left-to-right with `*`: `scaling * translation` translates first, then scales.
 - `identity` is a valid no-op transform.
 - Camera: `camera(type, transform, aspectRatio, distance)` — `distance` only applies to `perspective`.
+- Comments: `//` to end of line — matches the lexer's `skipWhitespacesAndComments`.
+
+**Meshes**, loaded from an external Wavefront `.obj` file:
+
+```
+mesh(pawnMaterial, file("scenes/pawn.obj, "xyz"), identity)
+//   material      obj file path   opt. axis-order   transform
+```
+
+Meshes are two-sided (see [geometry.Mesh]). Vertex/face parsing accepts any of the four
+standard OBJ face syntaxes; texture and normal indices in the file are currently ignored.
 
 **All supported keywords:**
 
 | Category  | Keywords                                                                    |
 |-----------|-----------------------------------------------------------------------------|
-| Shapes    | `sphere`, `plane`, `cube`                                                   |
+| Shapes    | `sphere`, `plane`, `cube`, `mesh`                                           |
 | BRDF      | `diffuse`, `specular`                                                       |
 | Pigment   | `uniform`, `checkered`, `image`                                             |
 | Transform | `identity`, `translation`, `scaling`, `rotationX`, `rotationY`, `rotationZ` |
 | Camera    | `camera`, `perspective`, `orthogonal`                                       |
 | Variable  | `float`                                                                     |
+| Mesh      | `file` — sub-keyword inside `mesh(...)`, wraps the `.obj` file path string  |
 
 ## Tone-Mapping Pipeline
 
